@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-model href="../../Organization/knxprod-support/knx_project_14/knx-editor.xsd" type="application/xml" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<KNX xmlns:op="http://github.com/OpenKNX/OpenKNXproducer" xmlns="http://knx.org/xml/project/14" CreatedBy="KNX MT" ToolVersion="5.1.255.16695">
+  <ManufacturerData>
+    <Manufacturer RefId="M-00FA">
+      <ApplicationPrograms>
+        <ApplicationProgram Id="%AID%" ApplicationNumber="200" ApplicationVersion="1" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="SOM" LoadProcedureStyle="MergedProcedure" PeiType="0" DefaultLanguage="de" DynamicTableManagement="false" Linkable="false" MinEtsVersion="4.0">
+          <Static>
+            <ParameterTypes>
+              <ParameterType Id="%AID%_PT-BTNInputs" Name="BTNInputs">
+                <TypeRestriction Base="Value" SizeInBit="16">
+                  <Enumeration Text="Externes KO" Value="0" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+            </ParameterTypes>
+            <Parameters>
+            </Parameters>
+            <ParameterRefs>
+            </ParameterRefs>
+            <ComObjectTable>
+              <ComObject Id="%AID%_O-%T%000001" Name="Touched"          Number="101" ObjectSize="1 Bit"   Text="Ausgang Berührung" FunctionText="Schalten/Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="%AID%_O-%T%000011" Name="ScanSuccess"      Number="111" ObjectSize="1 Bit"   Text="Ausgang Scan erfolgreich" FunctionText="Schalten/Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="%AID%_O-%T%000012" Name="ScanSuccessData"  Number="112" ObjectSize="4 Bytes" Text="Ausgang Scan erfolgreich (Zutrittsdaten)" FunctionText="Wert/Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-15-0" />
+              <ComObject Id="%AID%_O-%T%000013" Name="ScanFailed"       Number="113" ObjectSize="1 Bit"   Text="Ausgang Scan fehlgeschlagen" FunctionText="Schalten/Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="%AID%_O-%T%000014" Name="ScanFailedData"   Number="114" ObjectSize="4 Bytes" Text="Ausgang Scan fehlgeschlagen (Zutrittsdaten)" FunctionText="Wert/Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-15-0" />
+              <ComObject Id="%AID%_O-%T%000021" Name="EnrollReqest"     Number="121" ObjectSize="1 Bit"   Text="Eingang Anlernung (nächster freier Slot)" FunctionText="Trigger" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="%AID%_O-%T%000022" Name="EnrollReqestSlot" Number="122" ObjectSize="4 Bytes" Text="Eingang Anlernung (verfügbare Slots: R503S: 0-149, R503: 0-199. R503Pro: 0-1499)" FunctionText="Trigger" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-15-0" />
+              <ComObject Id="%AID%_O-%T%000023" Name="EnrollSuccess"    Number="123" ObjectSize="4 Bytes" Text="Anlernung erfolgreich" FunctionText="Wert/Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-15-0" />
+              <ComObject Id="%AID%_O-%T%000024" Name="EnrollFailed"     Number="124" ObjectSize="4 Bytes" Text="Anlernung fehlgeschlagen" FunctionText="Wert/Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-15-0" />
+              <ComObject Id="%AID%_O-%T%000031" Name="DeleteReqestSlot" Number="131" ObjectSize="4 Bytes" Text="Eingang Löschung" FunctionText="Trigger" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-15-0" />
+              <ComObject Id="%AID%_O-%T%000032" Name="DeleteSuccess"    Number="132" ObjectSize="4 Bytes" Text="Löschung erfolgreich" FunctionText="Wert/Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-15-0" />
+              <ComObject Id="%AID%_O-%T%000033" Name="DeleteFailed"     Number="133" ObjectSize="4 Bytes" Text="Löschung fehlgeschlagen" FunctionText="Wert/Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-15-0" />
+              <ComObject Id="%AID%_O-%T%000041" Name="Lock"             Number="141" ObjectSize="1 Bit"   Text="Schalten" FunctionText="Schalten" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="%AID%_O-%T%000042" Name="LockStatus"       Number="142" ObjectSize="1 Bit"   Text="Schalten/Status" FunctionText="Status" ReadFlag="Enabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+            </ComObjectTable>
+            <ComObjectRefs>
+              <ComObjectRef Id="%AID%_O-%T%000001_R-%T%00000101" RefId="%AID%_O-%T%000001" />
+              <ComObjectRef Id="%AID%_O-%T%000011_R-%T%00001101" RefId="%AID%_O-%T%000011" />
+              <ComObjectRef Id="%AID%_O-%T%000012_R-%T%00001201" RefId="%AID%_O-%T%000012" />
+              <ComObjectRef Id="%AID%_O-%T%000013_R-%T%00001301" RefId="%AID%_O-%T%000013" />
+              <ComObjectRef Id="%AID%_O-%T%000014_R-%T%00001401" RefId="%AID%_O-%T%000014" />
+              <ComObjectRef Id="%AID%_O-%T%000021_R-%T%00002101" RefId="%AID%_O-%T%000021" />
+              <ComObjectRef Id="%AID%_O-%T%000022_R-%T%00002201" RefId="%AID%_O-%T%000022" />
+              <ComObjectRef Id="%AID%_O-%T%000023_R-%T%00002301" RefId="%AID%_O-%T%000023" />
+              <ComObjectRef Id="%AID%_O-%T%000024_R-%T%00002401" RefId="%AID%_O-%T%000024" />
+              <ComObjectRef Id="%AID%_O-%T%000031_R-%T%00003101" RefId="%AID%_O-%T%000031" />
+              <ComObjectRef Id="%AID%_O-%T%000032_R-%T%00003201" RefId="%AID%_O-%T%000032" />
+              <ComObjectRef Id="%AID%_O-%T%000033_R-%T%00003301" RefId="%AID%_O-%T%000033" />
+              <ComObjectRef Id="%AID%_O-%T%000041_R-%T%00004101" RefId="%AID%_O-%T%000041" />
+              <ComObjectRef Id="%AID%_O-%T%000042_R-%T%00004201" RefId="%AID%_O-%T%000042" />
+            </ComObjectRefs>
+            <Extension>
+              <Baggage RefId="%FILE-HELP-de%" />
+              <Baggage RefId="%FILE-ICONS%" />
+              <Baggage RefId="%FILE-openknx%" />
+              <Baggage RefId="%FILE-pics-and%" />
+              <Baggage RefId="%FILE-pics-or%" />
+            </Extension>
+          </Static>
+          <Dynamic>
+            <ChannelIndependentBlock>
+              <Channel Id="%AID%_CH-Basic" Name="BasicChannel" Number="1" Text="Fingerabdruckleser">
+                <ParameterBlock Id="%AID%_PB-5" Name="Basic" Text="Grundeinstellung" Icon="cog-outline" HelpContext="Empty">
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Noch keine Einstellungen vorhanden." UIHint="Headline" />
+                  <ComObjectRefRef RefId="%AID%_O-%T%000001_R-%T%00000101" />
+                  <ComObjectRefRef RefId="%AID%_O-%T%000011_R-%T%00001101" />
+                  <ComObjectRefRef RefId="%AID%_O-%T%000012_R-%T%00001201" />
+                  <ComObjectRefRef RefId="%AID%_O-%T%000013_R-%T%00001301" />
+                  <ComObjectRefRef RefId="%AID%_O-%T%000014_R-%T%00001401" />
+                  <ComObjectRefRef RefId="%AID%_O-%T%000021_R-%T%00002101" />
+                  <ComObjectRefRef RefId="%AID%_O-%T%000022_R-%T%00002201" />
+                  <ComObjectRefRef RefId="%AID%_O-%T%000023_R-%T%00002301" />
+                  <ComObjectRefRef RefId="%AID%_O-%T%000024_R-%T%00002401" />
+                  <ComObjectRefRef RefId="%AID%_O-%T%000031_R-%T%00003101" />
+                  <ComObjectRefRef RefId="%AID%_O-%T%000032_R-%T%00003201" />
+                  <ComObjectRefRef RefId="%AID%_O-%T%000033_R-%T%00003301" />
+                  <ComObjectRefRef RefId="%AID%_O-%T%000041_R-%T%00004101" />
+                  <ComObjectRefRef RefId="%AID%_O-%T%000042_R-%T%00004201" />
+                </ParameterBlock>
+              </Channel>
+            </ChannelIndependentBlock>
+          </Dynamic>
+        </ApplicationProgram>
+      </ApplicationPrograms>
+      <Baggages>
+        <Baggage TargetPath="FF\01" Name="Help_de.zip" Id="%FILE-HELP-de%">
+          <FileInfo TimeInfo="%DATETIME%" />
+        </Baggage>
+        <Baggage TargetPath="FF\01" Name="Icons.zip" Id="%FILE-ICONS%">
+          <FileInfo TimeInfo="%DATETIME%" />
+        </Baggage>
+      </Baggages>
+    </Manufacturer>
+  </ManufacturerData>
+</KNX>
