@@ -10,7 +10,7 @@
                 "--Debug",
                 "-h",
                 "include/knxprod.h",
-                "src/DummyModule"
+                "src/FingerprintModule"
             ],
             "problemMatcher": [],
             "group": "test"
@@ -23,27 +23,6 @@
             ],
             "problemMatcher": [],
             "group": "test"
-        },
-        {
-            "label": "Develop: ESP32",
-            "type": "shell",
-            "command": "scripts/OpenKNX-Build.ps1",
-            "args": [
-                "develop_ESP32"
-            ],
-            "group": "build",
-            "problemMatcher": []
-        },
-        {
-            "label": "Develop: ESP32 (USB)",
-            "type": "shell",
-            "command": "scripts/OpenKNX-Build.ps1",
-            "args": [
-                "develop_ESP32_USB",
-                "upload"
-            ],
-            "group": "build",
-            "problemMatcher": []
         },
         {
             "label": "Develop: RP2040",
@@ -104,38 +83,6 @@
             "command": "scripts/OpenKNX-Build.ps1",
             "args": [
                 "develop_RP2040_DUALCORE_JLINK",
-                "upload"
-            ],
-            "group": "build",
-            "problemMatcher": []
-        },
-        {
-            "label": "Develop: SAMD",
-            "type": "shell",
-            "command": "scripts/OpenKNX-Build.ps1",
-            "args": [
-                "develop_SAMD"
-            ],
-            "group": "build",
-            "problemMatcher": []
-        },
-        {
-            "label": "Develop: SAMD (USB)",
-            "type": "shell",
-            "command": "scripts/OpenKNX-Build.ps1",
-            "args": [
-                "develop_SAMD_USB",
-                "upload"
-            ],
-            "group": "build",
-            "problemMatcher": []
-        },
-        {
-            "label": "Develop: SAMD (JLINK)",
-            "type": "shell",
-            "command": "scripts/OpenKNX-Build.ps1",
-            "args": [
-                "develop_SAMD_JLINK",
                 "upload"
             ],
             "group": "build",

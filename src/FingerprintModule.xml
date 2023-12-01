@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-model href="../../Organization/knxprod-support/knx_project_20/knx-editor.xsd" type="application/xml" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<KNX xmlns="http://knx.org/xml/project/20" xmlns:op="http://github.com/OpenKNX/OpenKNXproducer">
+
+  <op:ETS OpenKnxId="0xA6"
+            ApplicationNumber="0x01"
+            ApplicationVersion="0.0"
+            ReplacesVersions="0.0"
+            ApplicationRevision="0"
+            ProductName="Fingerabdruckleser"
+            ApplicationName="AB-Finger-Logic-Button"
+            BuildSuffix="-dev"
+            BuildSuffixText=" (dev)"
+            OrderNumber="OpenKnxFingerprint"
+    />
+
+    <op:define prefix="BASE" ModuleType="10"
+              share="../lib/OGM-Common/src/Common.share.xml"
+    />
+
+    <op:define prefix="FIN"
+              share="FingerprintModule.share.xml"
+              template="FingerprintModule.templ.xml"
+              ModuleType="20" />
+
+    <op:define prefix="LOG"
+              share="../lib/OFM-LogicModule/src/Logikmodul.share.xml"
+              template="../lib/OFM-LogicModule/src/Logikmodul.templ.xml"
+              NumChannels="20"
+              KoOffset="440"
+              ModuleType="10" >
+      <op:verify File="../lib/OFM-LogicModule/library.json" ModuleVersion="2.0" />
+    </op:define>
+
+    <op:define prefix="BTN"
+              share="../lib/OFM-VirtualButton/src/VirtualButton.share.xml"
+              template="../lib/OFM-VirtualButton/src/VirtualButton.templ.xml"
+              NumChannels="20"
+              KoOffset="200"
+              ModuleType="3" >
+      <op:verify File="../lib/OFM-VirtualButton/library.json" ModuleVersion="0.3" />
+    </op:define>
+
+    <generate />
+</KNX>
