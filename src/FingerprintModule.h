@@ -6,8 +6,8 @@
 #define PWR_PIN 1
 #define TOUCH_PIN 2
 
-#define LOCK_PIN 26
-#define UNLOCK_PIN 27
+#define LOCK_PIN 27
+#define UNLOCK_PIN 26
 #define LED_GREEN_PIN 28
 #define LED_RED_PIN 29
 
