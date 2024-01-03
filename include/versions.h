@@ -1,12 +1,11 @@
 #pragma once
 
-#define MAIN_Version "45132c4"
-#define KNX_Version "e602b59"
-#define MODULE_Common_Version "1.0.9+b4610cb"
-#define MODULE_Common_ETS 16
-#define MODULE_LogicModule_Version "2.0.3+6212270"
-#define MODULE_LogicModule_ETS 32
-#define MODULE_VirtualButton_Version "0.3.0+80d72af"
+#define MAIN_Version "ace51cc"
+#define KNX_Version "c8685fa"
+#define MODULE_Common_Version "1.0.10+d461f89"
+#define MODULE_LogicModule_Version "3.0.0+72d3033"
+#define MODULE_LogicModule_ETS 48
+#define MODULE_VirtualButton_Version "0.3.0+b46da5a"
 #define MODULE_VirtualButton_ETS 3
-#define MODULE_FileTransferModule_Version "0.0.4+bccd3ad"
+#define MODULE_FileTransferModule_Version "0.0.4+9ce355a"
 #define MODULE_FileTransferModule_ETS 0

@@ -15,8 +15,9 @@
     />
 
     <op:define prefix="BASE" ModuleType="10"
-              share="../lib/OGM-Common/src/Common.share.xml"
-    />
+              share="../lib/OGM-Common/src/Common.share.xml">
+      <op:verify File="../lib/OGM-Common/library.json" ModuleVersion="1.0" />
+    </op:define>
 
     <op:define prefix="FIN"
               share="FingerprintModule.share.xml"
@@ -29,7 +30,7 @@
               NumChannels="20"
               KoOffset="440"
               ModuleType="10" >
-      <op:verify File="../lib/OFM-LogicModule/library.json" ModuleVersion="2.0" />
+      <op:verify File="../lib/OFM-LogicModule/library.json" ModuleVersion="3.0" />
     </op:define>
 
     <op:define prefix="BTN"

@@ -11,10 +11,11 @@
 #define MAIN_OpenKnxId 0xA6
 #define MAIN_ApplicationNumber 1
 #define MAIN_ApplicationVersion 0
-#define MAIN_ParameterSize 2770
+#define MAIN_ParameterSize 2771
 #define MAIN_MaxKoNumber 499
 #define MAIN_OrderNumber "OpenKnxFingerprint"
-#define LOG_ModuleVersion 32
+#define BASE_ModuleVersion 16
+#define LOG_ModuleVersion 48
 #define BTN_ModuleVersion 3
 // Parameter with single occurrence
 
@@ -64,6 +65,9 @@
 #define BASE_ReadTimeDate                         5      // 1 Bit, Bit 5
 #define     BASE_ReadTimeDateMask 0x20
 #define     BASE_ReadTimeDateShift 5
+#define BASE_HeartbeatExtended                    5      // 1 Bit, Bit 4
+#define     BASE_HeartbeatExtendedMask 0x10
+#define     BASE_HeartbeatExtendedShift 4
 #define BASE_Latitude                             6      // float
 #define BASE_Longitude                           10      // float
 
@@ -101,6 +105,8 @@
 #define ParamBASE_Watchdog                            ((bool)(knx.paramByte(BASE_Watchdog) & BASE_WatchdogMask))
 // Bei Neustart vom Bus lesen
 #define ParamBASE_ReadTimeDate                        ((bool)(knx.paramByte(BASE_ReadTimeDate) & BASE_ReadTimeDateMask))
+// Erweitertes "In Betrieb"
+#define ParamBASE_HeartbeatExtended                   ((bool)(knx.paramByte(BASE_HeartbeatExtended) & BASE_HeartbeatExtendedMask))
 // Breitengrad
 #define ParamBASE_Latitude                            (knx.paramFloat(BASE_Latitude, Float_Enc_IEEE754Single))
 // Längengrad
@@ -240,7 +246,8 @@
 #define LOG_BuzzerSilent                        19      // uint16_t
 #define LOG_BuzzerNormal                        21      // uint16_t
 #define LOG_BuzzerLoud                          23      // uint16_t
-#define LOG_LedMapping                          25      // 3 Bits, Bit 7-5
+#define LOG_VisibleChannels                     25      // uint8_t
+#define LOG_LedMapping                          26      // 3 Bits, Bit 7-5
 #define     LOG_LedMappingMask 0xE0
 #define     LOG_LedMappingShift 5
 
@@ -326,6 +333,8 @@
 #define ParamLOG_BuzzerNormal                        (knx.paramWord(LOG_BuzzerNormal))
 // Frequenz für Buzzer (laut)
 #define ParamLOG_BuzzerLoud                          (knx.paramWord(LOG_BuzzerLoud))
+// Verfügbare Kanäle
+#define ParamLOG_VisibleChannels                     (knx.paramByte(LOG_VisibleChannels))
 // Lötpad A / B / C entspricht
 #define ParamLOG_LedMapping                          ((knx.paramByte(LOG_LedMapping) & LOG_LedMappingMask) >> LOG_LedMappingShift)
 
@@ -349,7 +358,7 @@
 #define LOG_ChannelCount 20
 
 // Parameter per channel
-#define LOG_ParamBlockOffset 26
+#define LOG_ParamBlockOffset 27
 #define LOG_ParamBlockSize 86
 #define LOG_ParamCalcIndex(index) (index + LOG_ParamBlockOffset + _channelIndex * LOG_ParamBlockSize)
 
@@ -1944,9 +1953,9 @@
 // Ausgang
 #define KoLOG_KOfO                                (knx.getGroupObject(LOG_KoCalcNumber(LOG_KoKOfO)))
 
-#define BTN_ReactionTimeMultiClick              1746      // 8 Bits, Bit 7-0
-#define BTN_ReactionTimeLong                    1747      // 8 Bits, Bit 7-0
-#define BTN_ReactionTimeExtraLong               1748      // 8 Bits, Bit 7-0
+#define BTN_ReactionTimeMultiClick              1747      // 8 Bits, Bit 7-0
+#define BTN_ReactionTimeLong                    1748      // 8 Bits, Bit 7-0
+#define BTN_ReactionTimeExtraLong               1749      // 8 Bits, Bit 7-0
 
 //   Mehrfach-Klick
 #define ParamBTN_ReactionTimeMultiClick              (knx.paramByte(BTN_ReactionTimeMultiClick))
@@ -1958,7 +1967,7 @@
 #define BTN_ChannelCount 20
 
 // Parameter per channel
-#define BTN_ParamBlockOffset 1750
+#define BTN_ParamBlockOffset 1751
 #define BTN_ParamBlockSize 51
 #define BTN_ParamCalcIndex(index) (index + BTN_ParamBlockOffset + _channelIndex * BTN_ParamBlockSize)
 
@@ -2570,7 +2579,7 @@
 #define BASE_KommentarModuleModuleParamSize 0
 #define BASE_KommentarModuleSubmodulesParamSize 0
 #define BASE_KommentarModuleParamSize 0
-#define BASE_KommentarModuleParamOffset 2770
+#define BASE_KommentarModuleParamOffset 2771
 #define BASE_KommentarModuleCalcIndex(index, m1) (index + BASE_KommentarModuleParamOffset + _channelIndex * BASE_KommentarModuleCount * BASE_KommentarModuleParamSize + m1 * BASE_KommentarModuleParamSize)
 
 
