@@ -7,10 +7,10 @@ void setup()
 {
     const uint8_t firmwareRevision = 0;
     openknx.init(firmwareRevision);
-    openknx.addModule(1, new Logic());
+    openknx.addModule(1, openknxLogic);
     openknx.addModule(2, openknxFingerprintModule);
-    openknx.addModule(3, new VirtualButtonModule());
-    openknx.addModule(9, new FileTransferModule());
+    openknx.addModule(3, openknxVirtualButtonModule);
+    openknx.addModule(9, openknxFileTransferModule);
     openknx.setup();
 
     // call direct for testing without KNX connected

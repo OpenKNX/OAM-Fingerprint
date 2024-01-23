@@ -147,6 +147,9 @@
 #define LOG_HolidaySend                         14      // 1 Bit, Bit 2
 #define     LOG_HolidaySendMask 0x04
 #define     LOG_HolidaySendShift 2
+#define LOG_EnableSave                          14      // 1 Bit, Bit 1
+#define     LOG_EnableSaveMask 0x02
+#define     LOG_EnableSaveShift 1
 #define LOG_Neujahr                             15      // 1 Bit, Bit 7
 #define     LOG_NeujahrMask 0x80
 #define     LOG_NeujahrShift 7
@@ -263,6 +266,8 @@
 #define ParamLOG_VacationRead                        ((bool)(knx.paramByte(LOG_VacationRead) & LOG_VacationReadMask))
 // Nach Neuberechnung Feiertagsinfo senden?
 #define ParamLOG_HolidaySend                         ((bool)(knx.paramByte(LOG_HolidaySend) & LOG_HolidaySendMask))
+// Speichern von Werten in Hardware möglich?
+#define ParamLOG_EnableSave                          ((bool)(knx.paramByte(LOG_EnableSave) & LOG_EnableSaveMask))
 // 1. Neujahr
 #define ParamLOG_Neujahr                             ((bool)(knx.paramByte(LOG_Neujahr) & LOG_NeujahrMask))
 // 2. Heilige Drei Könige
