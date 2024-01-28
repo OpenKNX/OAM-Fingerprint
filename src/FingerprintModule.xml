@@ -4,7 +4,7 @@
 
   <op:ETS OpenKnxId="0xA6"
             ApplicationNumber="0x01"
-            ApplicationVersion="0.0"
+            ApplicationVersion="0.1"
             ReplacesVersions="0.0"
             ApplicationRevision="0"
             ProductName="Fingerabdruckleser"
@@ -16,7 +16,7 @@
 
     <op:define prefix="BASE" ModuleType="10"
               share="../lib/OGM-Common/src/Common.share.xml">
-      <op:verify File="../lib/OGM-Common/library.json" ModuleVersion="1.0" />
+      <op:verify File="../lib/OGM-Common/library.json" ModuleVersion="1.1" />
     </op:define>
 
     <op:define prefix="FIN"
@@ -30,7 +30,7 @@
               NumChannels="20"
               KoOffset="440"
               ModuleType="10" >
-      <op:verify File="../lib/OFM-LogicModule/library.json" ModuleVersion="3.0" />
+      <op:verify File="../lib/OFM-LogicModule/library.json" ModuleVersion="3.1" />
     </op:define>
 
     <op:define prefix="BTN"
