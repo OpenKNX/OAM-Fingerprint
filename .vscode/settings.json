@@ -52,5 +52,6 @@
         "bitset": "cpp",
         "iostream": "cpp",
         "list": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "C:/Austausch/AB-SmartHouse/OpenKNX/OAM-Fingerprint/.pio/libdeps/waveshare_rp2040_zero/knx"
 }

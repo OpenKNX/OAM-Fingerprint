@@ -93,6 +93,7 @@ void FingerprintModule::loop()
                 {
                     logInfoP("Finger found in location %d", findFingerResult.location);
                     KoFIN_ScanSuccess.value(true, DPT_Switch);
+                    KoFIN_ScanSuccessId.value(findFingerResult.location, Dpt(7, 1));
 
                     KoFIN_ScanSuccessData.valueNoSend(findFingerResult.location, Dpt(15, 0, 0)); // access identification code
                     KoFIN_ScanSuccessData.valueNoSend(false, Dpt(15, 0, 1));                     // detection error
@@ -266,18 +267,24 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
     uint16_t lAsap = iKo.asap();
     switch (lAsap)
     {
-        case FIN_KoEnrollReqest:
-        case FIN_KoEnrollReqestSlot:
+        case FIN_KoEnrollNext:
+        case FIN_KoEnrollSlotId:
+        case FIN_KoEnrollSlotData:
             logInfoP("Enroll request:");
             logIndentUp();
 
             success = finger.createTemplate();
             if (success)
             {
-                if (lAsap == FIN_KoEnrollReqest)
+                if (lAsap == FIN_KoEnrollNext)
                 {
                     location = finger.getNextFreeLocation();
                     logInfoP("Next availabe location: %d", location);
+                }
+                else if (lAsap == FIN_KoEnrollSlotId)
+                {
+                    location = iKo.value(Dpt(7, 1));
+                    logInfoP("Location provided: %d", location);
                 }
                 else
                 {
@@ -299,6 +306,8 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
             if (success)
             {
                 logInfoP("Enrolled to location %d.", location);
+                KoFIN_EnrollSuccess.value(true, DPT_Switch);
+                KoFIN_EnrollSuccessId.value(location, Dpt(7, 1));
 
                 KoFIN_EnrollSuccess.valueNoSend(location, Dpt(15, 0, 0)); // access identification code
                 KoFIN_EnrollSuccess.valueNoSend(false, Dpt(15, 0, 1));    // detection error
@@ -310,6 +319,8 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
             else
             {
                 logInfoP("Enrolling template failed.");
+                KoFIN_EnrollFailed.value(true, DPT_Switch);
+                KoFIN_EnrollFailedId.value(location, Dpt(7, 1));
 
                 KoFIN_EnrollFailed.valueNoSend(location, Dpt(15, 0, 0)); // access identification code
                 KoFIN_EnrollFailed.valueNoSend(true, Dpt(15, 0, 1));     // detection error
@@ -322,17 +333,28 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
             logIndentDown();
             resetLedsTimer = millis();
             break;
-        case FIN_KoDeleteReqestSlot:
+        case FIN_KoDeleteSlotId:
+        case FIN_KoDeleteSlotData:
             logInfoP("Delete request:");
             logIndentUp();
 
-            location = iKo.value(Dpt(15, 0, 0));
-            logInfoP("Location provided: %d", location);
+            if (lAsap == FIN_KoDeleteSlotId)
+            {
+                location = iKo.value(Dpt(7, 1));
+                logInfoP("Location provided: %d", location);
+            }
+            else
+            {
+                location = iKo.value(Dpt(15, 0, 0));
+                logInfoP("Location provided: %d", location);
+            }
 
             success = finger.deleteTemplate(location);
             if (success)
             {
                 logInfoP("Template deleted from location %d.", location);
+                KoFIN_DeleteSuccess.value(true, DPT_Switch);
+                KoFIN_DeleteSuccessId.value(location, Dpt(7, 1));
 
                 KoFIN_DeleteSuccess.valueNoSend(location, Dpt(15, 0, 0)); // access identification code
                 KoFIN_DeleteSuccess.valueNoSend(false, Dpt(15, 0, 1));    // detection error
@@ -344,6 +366,8 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
             else
             {
                 logInfoP("Deleting template failed.");
+                KoFIN_DeleteFailed.value(true, DPT_Switch);
+                KoFIN_DeleteFailedId.value(location, Dpt(7, 1));
 
                 KoFIN_DeleteFailed.valueNoSend(location, Dpt(15, 0, 0)); // access identification code
                 KoFIN_DeleteFailed.valueNoSend(true, Dpt(15, 0, 1));     // detection error

@@ -30,7 +30,7 @@
               NumChannels="20"
               KoOffset="440"
               ModuleType="10" >
-      <op:verify File="../lib/OFM-LogicModule/library.json" ModuleVersion="3.1" />
+      <op:verify File="../lib/OFM-LogicModule/library.json" ModuleVersion="3.2" />
     </op:define>
 
     <op:define prefix="BTN"
