@@ -26,6 +26,8 @@ class FingerprintModule : public OpenKNX::Module
     void setup() override;
     void processAfterStartupDelay() override;
     void processInputKo(GroupObject &ko) override;
+		bool processFunctionProperty(uint8_t objectIndex, uint8_t propertyId, uint8_t length, uint8_t *data, uint8_t *resultData, uint8_t &resultLength) override;
+		// bool processFunctionPropertyState(uint8_t objectIndex, uint8_t propertyId, uint8_t length, uint8_t *data, uint8_t *resultData, uint8_t &resultLength) override;
 
     const std::string name() override;
     const std::string version() override;
@@ -39,6 +41,10 @@ class FingerprintModule : public OpenKNX::Module
     static void interruptLock();
     void setFingerprintPower(bool on);
     void updateLockLeds(bool showGreenWhenUnlock = true);
+    void handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
+
+    uint8_t numChannels;
+    uint8_t channelsToProcess = 0;
 
     Fingerprint finger;
     bool scanerHasPower = false;

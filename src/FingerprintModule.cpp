@@ -35,6 +35,8 @@ void FingerprintModule::setup()
     digitalWrite(LED_GREEN_PIN, HIGH);
     finger.setLed(Fingerprint::State::Success);
 
+    numChannels = ParamFIN_VisibleChannels;
+
     resetLedsTimer = millis();
     logInfoP("Fingerprint module ready.");
 }
@@ -392,6 +394,108 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
             updateLockLeds();
             break;
     }
+}
+
+bool FingerprintModule::processFunctionProperty(uint8_t objectIndex, uint8_t propertyId, uint8_t length, uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
+{
+    if (!knx.configured() || objectIndex != 160 || propertyId != 3)
+        return false;
+
+    switch(data[0])
+    {
+        case 1:
+            handleFunctionPropertyEnrollFinger(data, resultData, resultLength);
+            return true;
+    }
+
+    return false;
+}
+
+void FingerprintModule::handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
+{
+    /*logInfoP("Starting reading EVG settings");
+    
+    resultData[0] = 0x00;
+
+    uint8_t errorByte = 0;
+    uint16_t errorByteScene = 0;
+
+    int16_t resp = getInfo(data[1], DaliCmd::QUERY_MIN_LEVEL);
+    if(resp < 0)
+    {
+        logErrorP("Dali Error (MIN): Code %i", resp);
+        errorByte |= 0b1;
+        resp = 0xFF;
+    }
+    logDebugP("MIN: %.2X / %.2X", resp, DaliHelper::arcToPercent(resp));
+    resultData[1] = (resp == 255) ? 255 : DaliHelper::arcToPercent(resp);
+
+    resp = getInfo(data[1], DaliCmd::QUERY_MAX_LEVEL);
+    if(resp < 0)
+    {
+        logErrorP("Dali Error (MAX): Code %i", resp);
+        errorByte |= 0b10;
+        resp = 0xFF;
+    }
+    logDebugP("MAX: %.2X / %.2X", resp, DaliHelper::arcToPercent(resp));
+    resultData[2] = (resp == 255) ? 255 : DaliHelper::arcToPercent(resp);
+
+    resp = getInfo(data[1], DaliCmd::QUERY_POWER_ON_LEVEL);
+    if(resp < 0)
+    {
+        logErrorP("Dali Error (POWER): Code %i", resp);
+        errorByte |= 0b100;
+        resp = 0xFF;
+    }
+    logDebugP("POWER: %.2X / %.2X", resp, DaliHelper::arcToPercent(resp));
+    resultData[3] = (resp == 255) ? 255 : DaliHelper::arcToPercent(resp);
+
+    resp = getInfo(data[1], DaliCmd::QUERY_FAIL_LEVEL);
+    if(resp < 0)
+    {
+        logErrorP("Dali Error (FAILURE): Code %i", resp);
+        errorByte |= 0b1000;
+        resp = 0xFF;
+    }
+    logDebugP("FAILURE: %.2X / %.2X", resp, DaliHelper::arcToPercent(resp));
+    resultData[4] = (resp == 255) ? 255 : DaliHelper::arcToPercent(resp);
+    
+    resp = getInfo(data[1], DaliCmd::QUERY_FADE_SPEEDS);
+    if(resp < 0)
+    {
+        logErrorP("Dali Error (FAID): Code %i", resp);
+        errorByte |= 0b10000;
+        resp = 0xFF;
+    }
+    logDebugP("FAID: %.2X", resp);
+    resultData[5] = resp;
+    
+    //1byte free
+
+    resp = getInfo(data[1], DaliCmd::QUERY_GROUPS_0_7);
+    if(resp < 0)
+    {
+        logErrorP("Dali Error (GROUP1): Code %i", resp);
+        errorByte |= 0b1000000;
+        resp = 0;
+    }
+    logDebugP("GROUPS0-7: %.2X", resp);
+    resultData[7] = resp;
+    
+    resp = getInfo(data[1], DaliCmd::QUERY_GROUPS_8_15);
+    if(resp < 0)
+    {
+        logErrorP("Dali Error (GROUP2): Code %i", resp);
+        errorByte |= 0b10000000;
+        resp = 0;
+    }
+    logDebugP("GROUPS8-15: %.2X", resp);
+    resultData[8] = resp;
+
+    resultData[9] = errorByte;
+    resultData[10] = errorByteScene & 0xFF;
+    resultData[11] = (errorByteScene >> 8) & 0xFF;
+    resultLength = 12;*/
 }
 
 void FingerprintModule::processAfterStartupDelay()

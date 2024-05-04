@@ -14,7 +14,7 @@
             OrderNumber="OpenKnxFingerprint"
     />
 
-    <op:define prefix="BASE" ModuleType="10"
+    <op:define prefix="BASE" ModuleType="1"
               share="../lib/OGM-Common/src/Common.share.xml">
       <op:verify File="../lib/OGM-Common/library.json" ModuleVersion="1.1" />
     </op:define>
@@ -22,22 +22,25 @@
     <op:define prefix="FIN"
               share="FingerprintModule.share.xml"
               template="FingerprintModule.templ.xml"
-              ModuleType="20" />
+              ModuleType="2"
+              KoSingleOffset="20"
+              KoOffset="450"
+              NumChannels="3" />
 
     <op:define prefix="LOG"
               share="../lib/OFM-LogicModule/src/Logikmodul.share.xml"
               template="../lib/OFM-LogicModule/src/Logikmodul.templ.xml"
-              NumChannels="20"
-              KoOffset="440"
-              ModuleType="10" >
+              NumChannels="2"
+              KoOffset="100"
+              ModuleType="1" >
       <op:verify File="../lib/OFM-LogicModule/library.json" ModuleVersion="3.2" />
     </op:define>
 
     <op:define prefix="BTN"
               share="../lib/OFM-VirtualButton/src/VirtualButton.share.xml"
               template="../lib/OFM-VirtualButton/src/VirtualButton.templ.xml"
-              NumChannels="20"
-              KoOffset="200"
+              NumChannels="2"
+              KoOffset="400"
               ModuleType="3" >
       <op:verify File="../lib/OFM-VirtualButton/library.json" ModuleVersion="0.3" />
     </op:define>
