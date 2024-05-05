@@ -1,7 +1,8 @@
-#include <Adafruit_Fingerprint.h>
+#include "Adafruit_Fingerprint.h"
 #include "OpenKNX.h"
-#include <crc16.h>
+#include "crc16.h"
 #include <string>
+#include <functional>
 
 #if defined ESP32_WESP32 || defined ARDUINO_ARCH_RP2040
     #define mySerial Serial2
@@ -11,8 +12,12 @@
 
 #define TEMPLATE_SIZE 1536
 
+//typedef void (*fingerprint_delay_fptr_t)(uint32_t);
+
 class Fingerprint
 {
+  using fingerprint_delay_fptr_t = void (*)(uint32_t);
+
   public:
     enum State
     {
@@ -38,6 +43,7 @@ class Fingerprint
     bool scannerReady;
 
     Fingerprint(uint32_t overridePassword = 0);
+    Fingerprint(fingerprint_delay_fptr_t delayCallback, uint32_t overridePassword = 0);
 
     bool init();
     std::string logPrefix();
@@ -64,7 +70,9 @@ class Fingerprint
     };
 
     Adafruit_Fingerprint _finger;
+    fingerprint_delay_fptr_t _delayMs;
 
     bool _listTemplates();
     GetNotepadPageIndexResult _getNotepadPageIndex(u_int16_t templateLocation);
+    static void _delayCallbackDefault(uint32_t period);
 };

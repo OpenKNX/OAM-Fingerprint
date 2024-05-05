@@ -11,8 +11,8 @@
 #define MAIN_OpenKnxId 0xA6
 #define MAIN_ApplicationNumber 1
 #define MAIN_ApplicationVersion 1
-#define MAIN_ParameterSize 2763
-#define MAIN_MaxKoNumber 499
+#define MAIN_ParameterSize 397
+#define MAIN_MaxKoNumber 455
 #define MAIN_OrderNumber "OpenKnxFingerprint"
 #define BASE_ModuleVersion 17
 #define LOG_ModuleVersion 50
@@ -143,128 +143,282 @@
 // Speichern
 #define KoBASE_ManualSave                          (knx.getGroupObject(BASE_KoManualSave))
 
-#define LOG_BuzzerInstalled                     46      // 1 Bit, Bit 7
+#define FIN_VisibleChannels                     46      // uint16_t
+#define FIN_FingerprintScanner                  48      // 2 Bits, Bit 7-6
+#define     FIN_FingerprintScannerMask 0xC0
+#define     FIN_FingerprintScannerShift 6
+
+// Verfügbare Kanäle
+#define ParamFIN_VisibleChannels                     (knx.paramWord(FIN_VisibleChannels))
+// Fingerprint Scanner
+#define ParamFIN_FingerprintScanner                  ((knx.paramByte(FIN_FingerprintScanner) & FIN_FingerprintScannerMask) >> FIN_FingerprintScannerShift)
+
+#define FIN_KoTouched 21
+#define FIN_KoScanSuccess 31
+#define FIN_KoScanSuccessId 32
+#define FIN_KoScanSuccessData 33
+#define FIN_KoScanFailed 34
+#define FIN_KoScanFailedData 35
+#define FIN_KoEnrollNext 41
+#define FIN_KoEnrollSlotId 42
+#define FIN_KoEnrollSlotData 43
+#define FIN_KoEnrollSuccess 44
+#define FIN_KoEnrollSuccessId 45
+#define FIN_KoEnrollSuccessData 46
+#define FIN_KoEnrollFailed 47
+#define FIN_KoEnrollFailedId 48
+#define FIN_KoEnrollFailedData 49
+#define FIN_KoDeleteSlotId 51
+#define FIN_KoDeleteSlotData 52
+#define FIN_KoDeleteSuccess 53
+#define FIN_KoDeleteSuccessId 54
+#define FIN_KoDeleteSuccessData 55
+#define FIN_KoDeleteFailed 56
+#define FIN_KoDeleteFailedId 57
+#define FIN_KoDeleteFailedData 58
+#define FIN_KoLock 61
+#define FIN_KoLockStatus 62
+
+// Ausgang Berührung
+#define KoFIN_Touched                             (knx.getGroupObject(FIN_KoTouched))
+// Ausgang Scan erfolgreich
+#define KoFIN_ScanSuccess                         (knx.getGroupObject(FIN_KoScanSuccess))
+// Ausgang Scan erfolgreich (ID)
+#define KoFIN_ScanSuccessId                       (knx.getGroupObject(FIN_KoScanSuccessId))
+// Ausgang Scan erfolgreich (Zutrittsdaten)
+#define KoFIN_ScanSuccessData                     (knx.getGroupObject(FIN_KoScanSuccessData))
+// Ausgang Scan fehlgeschlagen
+#define KoFIN_ScanFailed                          (knx.getGroupObject(FIN_KoScanFailed))
+// Ausgang Scan fehlgeschlagen (Zutrittsdaten)
+#define KoFIN_ScanFailedData                      (knx.getGroupObject(FIN_KoScanFailedData))
+// Eingang Anlernung (nächster freier Slot)
+#define KoFIN_EnrollNext                          (knx.getGroupObject(FIN_KoEnrollNext))
+// Eingang Anlernung (verfügbare Slots: R503S: 0-149, R503: 0-199, R503Pro: 0-1499; ID)
+#define KoFIN_EnrollSlotId                        (knx.getGroupObject(FIN_KoEnrollSlotId))
+// Eingang Anlernung (verfügbare Slots: R503S: 0-149, R503: 0-199, R503Pro: 0-1499; Zutrittsdaten)
+#define KoFIN_EnrollSlotData                      (knx.getGroupObject(FIN_KoEnrollSlotData))
+// Anlernung erfolgreich
+#define KoFIN_EnrollSuccess                       (knx.getGroupObject(FIN_KoEnrollSuccess))
+// Anlernung erfolgreich (ID)
+#define KoFIN_EnrollSuccessId                     (knx.getGroupObject(FIN_KoEnrollSuccessId))
+// Anlernung erfolgreich (Zutrittsdaten)
+#define KoFIN_EnrollSuccessData                   (knx.getGroupObject(FIN_KoEnrollSuccessData))
+// Anlernung fehlgeschlagen
+#define KoFIN_EnrollFailed                        (knx.getGroupObject(FIN_KoEnrollFailed))
+// Anlernung fehlgeschlagen (ID)
+#define KoFIN_EnrollFailedId                      (knx.getGroupObject(FIN_KoEnrollFailedId))
+// Anlernung fehlgeschlagen (Zutrittsdaten)
+#define KoFIN_EnrollFailedData                    (knx.getGroupObject(FIN_KoEnrollFailedData))
+// Eingang Löschung (ID)
+#define KoFIN_DeleteSlotId                        (knx.getGroupObject(FIN_KoDeleteSlotId))
+// Eingang Löschung (Zutrittsdaten)
+#define KoFIN_DeleteSlotData                      (knx.getGroupObject(FIN_KoDeleteSlotData))
+// Löschung erfolgreich
+#define KoFIN_DeleteSuccess                       (knx.getGroupObject(FIN_KoDeleteSuccess))
+// Löschung erfolgreich (ID)
+#define KoFIN_DeleteSuccessId                     (knx.getGroupObject(FIN_KoDeleteSuccessId))
+// Löschung erfolgreich (Zutrittsdaten)
+#define KoFIN_DeleteSuccessData                   (knx.getGroupObject(FIN_KoDeleteSuccessData))
+// Löschung fehlgeschlagen
+#define KoFIN_DeleteFailed                        (knx.getGroupObject(FIN_KoDeleteFailed))
+// Löschung fehlgeschlagen (ID)
+#define KoFIN_DeleteFailedId                      (knx.getGroupObject(FIN_KoDeleteFailedId))
+// Löschung fehlgeschlagen (Zutrittsdaten)
+#define KoFIN_DeleteFailedData                    (knx.getGroupObject(FIN_KoDeleteFailedData))
+// Sperre
+#define KoFIN_Lock                                (knx.getGroupObject(FIN_KoLock))
+// Status der Sperre
+#define KoFIN_LockStatus                          (knx.getGroupObject(FIN_KoLockStatus))
+
+#define FIN_ChannelCount 3
+
+// Parameter per channel
+#define FIN_ParamBlockOffset 47
+#define FIN_ParamBlockSize 21
+#define FIN_ParamCalcIndex(index) (index + FIN_ParamBlockOffset + _channelIndex * FIN_ParamBlockSize)
+
+#define FIN_ChannelChannelActive                16      // 2 Bits, Bit 3-2
+#define     FIN_ChannelChannelActiveMask 0x0C
+#define     FIN_ChannelChannelActiveShift 2
+#define FIN_ChannelPersonName                    0      // char*, 16 Byte
+#define FIN_ChannelPersonFinger                 16      // 4 Bits, Bit 7-4
+#define     FIN_ChannelPersonFingerMask 0xF0
+#define     FIN_ChannelPersonFingerShift 4
+#define FIN_ChannelFingerIdR503                 17      // uint16_t
+#define FIN_ChannelFingerIdR503S                17      // uint16_t
+#define FIN_ChannelFingerId                     17      // uint16_t
+#define FIN_ChannelActionType                   19      // 2 Bits, Bit 7-6
+#define     FIN_ChannelActionTypeMask 0xC0
+#define     FIN_ChannelActionTypeShift 6
+#define FIN_ChannelTimerDelayBase               20      // 2 Bits, Bit 7-6
+#define     FIN_ChannelTimerDelayBaseMask 0xC0
+#define     FIN_ChannelTimerDelayBaseShift 6
+#define FIN_ChannelTimerDelayTime               20      // 14 Bits, Bit 13-0
+#define     FIN_ChannelTimerDelayTimeMask 0x3FFF
+#define     FIN_ChannelTimerDelayTimeShift 0
+
+// Kanalaktivität
+#define ParamFIN_ChannelChannelActive                ((knx.paramByte(FIN_ParamCalcIndex(FIN_ChannelChannelActive)) & FIN_ChannelChannelActiveMask) >> FIN_ChannelChannelActiveShift)
+// Name der Person
+#define ParamFIN_ChannelPersonName                   (knx.paramData(FIN_ParamCalcIndex(FIN_ChannelPersonName)))
+// Finger der Person
+#define ParamFIN_ChannelPersonFinger                 ((knx.paramByte(FIN_ParamCalcIndex(FIN_ChannelPersonFinger)) & FIN_ChannelPersonFingerMask) >> FIN_ChannelPersonFingerShift)
+// Scanner Finger ID
+#define ParamFIN_ChannelFingerIdR503                 (knx.paramWord(FIN_ParamCalcIndex(FIN_ChannelFingerIdR503)))
+// Scanner Finger ID
+#define ParamFIN_ChannelFingerIdR503S                (knx.paramWord(FIN_ParamCalcIndex(FIN_ChannelFingerIdR503S)))
+// Scanner Finger ID
+#define ParamFIN_ChannelFingerId                     (knx.paramWord(FIN_ParamCalcIndex(FIN_ChannelFingerId)))
+// Zeitbasis
+#define ParamFIN_ChannelActionType                   ((knx.paramByte(FIN_ParamCalcIndex(FIN_ChannelActionType)) & FIN_ChannelActionTypeMask) >> FIN_ChannelActionTypeShift)
+// Zeitbasis
+#define ParamFIN_ChannelTimerDelayBase               ((knx.paramByte(FIN_ParamCalcIndex(FIN_ChannelTimerDelayBase)) & FIN_ChannelTimerDelayBaseMask) >> FIN_ChannelTimerDelayBaseShift)
+// Zeit
+#define ParamFIN_ChannelTimerDelayTime               (knx.paramWord(FIN_ParamCalcIndex(FIN_ChannelTimerDelayTime)) & FIN_ChannelTimerDelayTimeMask)
+// Zeit (in Millisekunden)
+#define ParamFIN_ChannelTimerDelayTimeMS             (paramDelay(knx.paramWord(FIN_ParamCalcIndex(FIN_ChannelTimerDelayTime))))
+
+// deprecated
+#define FIN_KoOffset 450
+
+// Communication objects per channel (multiple occurrence)
+#define FIN_KoBlockOffset 450
+#define FIN_KoBlockSize 2
+
+#define FIN_KoCalcNumber(index) (index + FIN_KoBlockOffset + _channelIndex * FIN_KoBlockSize)
+#define FIN_KoCalcIndex(number) ((number >= FIN_KoCalcNumber(0) && number < FIN_KoCalcNumber(FIN_KoBlockSize)) ? (number - FIN_KoBlockOffset) % FIN_KoBlockSize : -1)
+#define FIN_KoCalcChannel(number) ((number >= FIN_KoBlockOffset && number < FIN_KoBlockOffset + FIN_ChannelCount * FIN_KoBlockSize) ? (number - FIN_KoBlockOffset) / FIN_KoBlockSize : -1)
+
+#define FIN_KoChannelAction 0
+#define FIN_KoChannelActionStatus 1
+
+// Ausgang
+#define KoFIN_ChannelAction                       (knx.getGroupObject(FIN_KoCalcNumber(FIN_KoChannelAction)))
+// Eingang
+#define KoFIN_ChannelActionStatus                 (knx.getGroupObject(FIN_KoCalcNumber(FIN_KoChannelActionStatus)))
+
+#define LOG_BuzzerInstalled                     110      // 1 Bit, Bit 7
 #define     LOG_BuzzerInstalledMask 0x80
 #define     LOG_BuzzerInstalledShift 7
-#define LOG_LedInstalled                        46      // 1 Bit, Bit 6
+#define LOG_LedInstalled                        110      // 1 Bit, Bit 6
 #define     LOG_LedInstalledMask 0x40
 #define     LOG_LedInstalledShift 6
-#define LOG_VacationKo                          46      // 1 Bit, Bit 5
+#define LOG_VacationKo                          110      // 1 Bit, Bit 5
 #define     LOG_VacationKoMask 0x20
 #define     LOG_VacationKoShift 5
-#define LOG_HolidayKo                           46      // 1 Bit, Bit 4
+#define LOG_HolidayKo                           110      // 1 Bit, Bit 4
 #define     LOG_HolidayKoMask 0x10
 #define     LOG_HolidayKoShift 4
-#define LOG_VacationRead                        46      // 1 Bit, Bit 3
+#define LOG_VacationRead                        110      // 1 Bit, Bit 3
 #define     LOG_VacationReadMask 0x08
 #define     LOG_VacationReadShift 3
-#define LOG_HolidaySend                         46      // 1 Bit, Bit 2
+#define LOG_HolidaySend                         110      // 1 Bit, Bit 2
 #define     LOG_HolidaySendMask 0x04
 #define     LOG_HolidaySendShift 2
-#define LOG_EnableSave                          46      // 1 Bit, Bit 1
+#define LOG_EnableSave                          110      // 1 Bit, Bit 1
 #define     LOG_EnableSaveMask 0x02
 #define     LOG_EnableSaveShift 1
-#define LOG_Neujahr                             47      // 1 Bit, Bit 7
+#define LOG_Neujahr                             111      // 1 Bit, Bit 7
 #define     LOG_NeujahrMask 0x80
 #define     LOG_NeujahrShift 7
-#define LOG_DreiKoenige                         47      // 1 Bit, Bit 6
+#define LOG_DreiKoenige                         111      // 1 Bit, Bit 6
 #define     LOG_DreiKoenigeMask 0x40
 #define     LOG_DreiKoenigeShift 6
-#define LOG_Weiberfastnacht                     47      // 1 Bit, Bit 5
+#define LOG_Weiberfastnacht                     111      // 1 Bit, Bit 5
 #define     LOG_WeiberfastnachtMask 0x20
 #define     LOG_WeiberfastnachtShift 5
-#define LOG_Rosenmontag                         47      // 1 Bit, Bit 4
+#define LOG_Rosenmontag                         111      // 1 Bit, Bit 4
 #define     LOG_RosenmontagMask 0x10
 #define     LOG_RosenmontagShift 4
-#define LOG_Fastnachtsdienstag                  47      // 1 Bit, Bit 3
+#define LOG_Fastnachtsdienstag                  111      // 1 Bit, Bit 3
 #define     LOG_FastnachtsdienstagMask 0x08
 #define     LOG_FastnachtsdienstagShift 3
-#define LOG_Aschermittwoch                      47      // 1 Bit, Bit 2
+#define LOG_Aschermittwoch                      111      // 1 Bit, Bit 2
 #define     LOG_AschermittwochMask 0x04
 #define     LOG_AschermittwochShift 2
-#define LOG_Frauentag                           47      // 1 Bit, Bit 1
+#define LOG_Frauentag                           111      // 1 Bit, Bit 1
 #define     LOG_FrauentagMask 0x02
 #define     LOG_FrauentagShift 1
-#define LOG_Gruendonnerstag                     47      // 1 Bit, Bit 0
+#define LOG_Gruendonnerstag                     111      // 1 Bit, Bit 0
 #define     LOG_GruendonnerstagMask 0x01
 #define     LOG_GruendonnerstagShift 0
-#define LOG_Karfreitag                          48      // 1 Bit, Bit 7
+#define LOG_Karfreitag                          112      // 1 Bit, Bit 7
 #define     LOG_KarfreitagMask 0x80
 #define     LOG_KarfreitagShift 7
-#define LOG_Ostersonntag                        48      // 1 Bit, Bit 6
+#define LOG_Ostersonntag                        112      // 1 Bit, Bit 6
 #define     LOG_OstersonntagMask 0x40
 #define     LOG_OstersonntagShift 6
-#define LOG_Ostermontag                         48      // 1 Bit, Bit 5
+#define LOG_Ostermontag                         112      // 1 Bit, Bit 5
 #define     LOG_OstermontagMask 0x20
 #define     LOG_OstermontagShift 5
-#define LOG_TagDerArbeit                        48      // 1 Bit, Bit 4
+#define LOG_TagDerArbeit                        112      // 1 Bit, Bit 4
 #define     LOG_TagDerArbeitMask 0x10
 #define     LOG_TagDerArbeitShift 4
-#define LOG_Himmelfahrt                         48      // 1 Bit, Bit 3
+#define LOG_Himmelfahrt                         112      // 1 Bit, Bit 3
 #define     LOG_HimmelfahrtMask 0x08
 #define     LOG_HimmelfahrtShift 3
-#define LOG_Pfingstsonntag                      48      // 1 Bit, Bit 2
+#define LOG_Pfingstsonntag                      112      // 1 Bit, Bit 2
 #define     LOG_PfingstsonntagMask 0x04
 #define     LOG_PfingstsonntagShift 2
-#define LOG_Pfingstmontag                       48      // 1 Bit, Bit 1
+#define LOG_Pfingstmontag                       112      // 1 Bit, Bit 1
 #define     LOG_PfingstmontagMask 0x02
 #define     LOG_PfingstmontagShift 1
-#define LOG_Fronleichnam                        48      // 1 Bit, Bit 0
+#define LOG_Fronleichnam                        112      // 1 Bit, Bit 0
 #define     LOG_FronleichnamMask 0x01
 #define     LOG_FronleichnamShift 0
-#define LOG_Friedensfest                        49      // 1 Bit, Bit 7
+#define LOG_Friedensfest                        113      // 1 Bit, Bit 7
 #define     LOG_FriedensfestMask 0x80
 #define     LOG_FriedensfestShift 7
-#define LOG_MariaHimmelfahrt                    49      // 1 Bit, Bit 6
+#define LOG_MariaHimmelfahrt                    113      // 1 Bit, Bit 6
 #define     LOG_MariaHimmelfahrtMask 0x40
 #define     LOG_MariaHimmelfahrtShift 6
-#define LOG_DeutscheEinheit                     49      // 1 Bit, Bit 5
+#define LOG_DeutscheEinheit                     113      // 1 Bit, Bit 5
 #define     LOG_DeutscheEinheitMask 0x20
 #define     LOG_DeutscheEinheitShift 5
-#define LOG_Nationalfeiertag                    50      // 1 Bit, Bit 1
+#define LOG_Nationalfeiertag                    114      // 1 Bit, Bit 1
 #define     LOG_NationalfeiertagMask 0x02
 #define     LOG_NationalfeiertagShift 1
-#define LOG_Reformationstag                     49      // 1 Bit, Bit 4
+#define LOG_Reformationstag                     113      // 1 Bit, Bit 4
 #define     LOG_ReformationstagMask 0x10
 #define     LOG_ReformationstagShift 4
-#define LOG_Allerheiligen                       49      // 1 Bit, Bit 3
+#define LOG_Allerheiligen                       113      // 1 Bit, Bit 3
 #define     LOG_AllerheiligenMask 0x08
 #define     LOG_AllerheiligenShift 3
-#define LOG_BussBettag                          49      // 1 Bit, Bit 2
+#define LOG_BussBettag                          113      // 1 Bit, Bit 2
 #define     LOG_BussBettagMask 0x04
 #define     LOG_BussBettagShift 2
-#define LOG_MariaEmpfaengnis                    50      // 1 Bit, Bit 0
+#define LOG_MariaEmpfaengnis                    114      // 1 Bit, Bit 0
 #define     LOG_MariaEmpfaengnisMask 0x01
 #define     LOG_MariaEmpfaengnisShift 0
-#define LOG_Advent1                             49      // 1 Bit, Bit 1
+#define LOG_Advent1                             113      // 1 Bit, Bit 1
 #define     LOG_Advent1Mask 0x02
 #define     LOG_Advent1Shift 1
-#define LOG_Advent2                             49      // 1 Bit, Bit 0
+#define LOG_Advent2                             113      // 1 Bit, Bit 0
 #define     LOG_Advent2Mask 0x01
 #define     LOG_Advent2Shift 0
-#define LOG_Advent3                             50      // 1 Bit, Bit 7
+#define LOG_Advent3                             114      // 1 Bit, Bit 7
 #define     LOG_Advent3Mask 0x80
 #define     LOG_Advent3Shift 7
-#define LOG_Advent4                             50      // 1 Bit, Bit 6
+#define LOG_Advent4                             114      // 1 Bit, Bit 6
 #define     LOG_Advent4Mask 0x40
 #define     LOG_Advent4Shift 6
-#define LOG_Heiligabend                         50      // 1 Bit, Bit 5
+#define LOG_Heiligabend                         114      // 1 Bit, Bit 5
 #define     LOG_HeiligabendMask 0x20
 #define     LOG_HeiligabendShift 5
-#define LOG_Weihnachtstag1                      50      // 1 Bit, Bit 4
+#define LOG_Weihnachtstag1                      114      // 1 Bit, Bit 4
 #define     LOG_Weihnachtstag1Mask 0x10
 #define     LOG_Weihnachtstag1Shift 4
-#define LOG_Weihnachtstag2                      50      // 1 Bit, Bit 3
+#define LOG_Weihnachtstag2                      114      // 1 Bit, Bit 3
 #define     LOG_Weihnachtstag2Mask 0x08
 #define     LOG_Weihnachtstag2Shift 3
-#define LOG_Silvester                           50      // 1 Bit, Bit 2
+#define LOG_Silvester                           114      // 1 Bit, Bit 2
 #define     LOG_SilvesterMask 0x04
 #define     LOG_SilvesterShift 2
-#define LOG_BuzzerSilent                        51      // uint16_t
-#define LOG_BuzzerNormal                        53      // uint16_t
-#define LOG_BuzzerLoud                          55      // uint16_t
-#define LOG_VisibleChannels                     57      // uint8_t
-#define LOG_LedMapping                          58      // 3 Bits, Bit 7-5
+#define LOG_BuzzerSilent                        115      // uint16_t
+#define LOG_BuzzerNormal                        117      // uint16_t
+#define LOG_BuzzerLoud                          119      // uint16_t
+#define LOG_VisibleChannels                     121      // uint8_t
+#define LOG_LedMapping                          122      // 3 Bits, Bit 7-5
 #define     LOG_LedMappingMask 0xE0
 #define     LOG_LedMappingShift 5
 
@@ -374,10 +528,10 @@
 // Buzzer sperren
 #define KoLOG_BuzzerLock                          (knx.getGroupObject(LOG_KoBuzzerLock))
 
-#define LOG_ChannelCount 20
+#define LOG_ChannelCount 2
 
 // Parameter per channel
-#define LOG_ParamBlockOffset 59
+#define LOG_ParamBlockOffset 123
 #define LOG_ParamBlockSize 84
 #define LOG_ParamCalcIndex(index) (index + LOG_ParamBlockOffset + _channelIndex * LOG_ParamBlockSize)
 
@@ -2032,10 +2186,10 @@
 #define ParamLOG_fOOffKOSendNumber                   (knx.paramWord(LOG_ParamCalcIndex(LOG_fOOffKOSendNumber)) & LOG_fOOffKOSendNumberMask)
 
 // deprecated
-#define LOG_KoOffset 440
+#define LOG_KoOffset 100
 
 // Communication objects per channel (multiple occurrence)
-#define LOG_KoBlockOffset 440
+#define LOG_KoBlockOffset 100
 #define LOG_KoBlockSize 3
 
 #define LOG_KoCalcNumber(index) (index + LOG_KoBlockOffset + _channelIndex * LOG_KoBlockSize)
@@ -2053,9 +2207,9 @@
 // Ausgang
 #define KoLOG_KOfO                                (knx.getGroupObject(LOG_KoCalcNumber(LOG_KoKOfO)))
 
-#define BTN_ReactionTimeMultiClick              1739      // 8 Bits, Bit 7-0
-#define BTN_ReactionTimeLong                    1740      // 8 Bits, Bit 7-0
-#define BTN_ReactionTimeExtraLong               1741      // 8 Bits, Bit 7-0
+#define BTN_ReactionTimeMultiClick              291      // 8 Bits, Bit 7-0
+#define BTN_ReactionTimeLong                    292      // 8 Bits, Bit 7-0
+#define BTN_ReactionTimeExtraLong               293      // 8 Bits, Bit 7-0
 
 //   Mehrfach-Klick
 #define ParamBTN_ReactionTimeMultiClick              (knx.paramByte(BTN_ReactionTimeMultiClick))
@@ -2064,10 +2218,10 @@
 //   Extra langer Tastedruck
 #define ParamBTN_ReactionTimeExtraLong               (knx.paramByte(BTN_ReactionTimeExtraLong))
 
-#define BTN_ChannelCount 20
+#define BTN_ChannelCount 2
 
 // Parameter per channel
-#define BTN_ParamBlockOffset 1743
+#define BTN_ParamBlockOffset 295
 #define BTN_ParamBlockSize 51
 #define BTN_ParamCalcIndex(index) (index + BTN_ParamBlockOffset + _channelIndex * BTN_ParamBlockSize)
 
@@ -2578,10 +2732,10 @@
 #define ParamBTN_ChannelStatusFallbackTimeMS         (paramDelay(knx.paramWord(BTN_ParamCalcIndex(BTN_ChannelStatusFallbackTime))))
 
 // deprecated
-#define BTN_KoOffset 200
+#define BTN_KoOffset 400
 
 // Communication objects per channel (multiple occurrence)
-#define BTN_KoBlockOffset 200
+#define BTN_KoBlockOffset 400
 #define BTN_KoBlockSize 12
 
 #define BTN_KoCalcNumber(index) (index + BTN_KoBlockOffset + _channelIndex * BTN_KoBlockSize)
@@ -2628,92 +2782,13 @@
 
 
 
-#define FIN_KoTouched 101
-#define FIN_KoScanSuccess 111
-#define FIN_KoScanSuccessId 112
-#define FIN_KoScanSuccessData 113
-#define FIN_KoScanFailed 114
-#define FIN_KoScanFailedData 115
-#define FIN_KoEnrollNext 121
-#define FIN_KoEnrollSlotId 122
-#define FIN_KoEnrollSlotData 123
-#define FIN_KoEnrollSuccess 124
-#define FIN_KoEnrollSuccessId 125
-#define FIN_KoEnrollSuccessData 126
-#define FIN_KoEnrollFailed 127
-#define FIN_KoEnrollFailedId 128
-#define FIN_KoEnrollFailedData 129
-#define FIN_KoDeleteSlotId 131
-#define FIN_KoDeleteSlotData 132
-#define FIN_KoDeleteSuccess 133
-#define FIN_KoDeleteSuccessId 134
-#define FIN_KoDeleteSuccessData 135
-#define FIN_KoDeleteFailed 136
-#define FIN_KoDeleteFailedId 137
-#define FIN_KoDeleteFailedData 138
-#define FIN_KoLock 141
-#define FIN_KoLockStatus 142
-
-// Ausgang Berührung
-#define KoFIN_Touched                             (knx.getGroupObject(FIN_KoTouched))
-// Ausgang Scan erfolgreich
-#define KoFIN_ScanSuccess                         (knx.getGroupObject(FIN_KoScanSuccess))
-// Ausgang Scan erfolgreich (ID)
-#define KoFIN_ScanSuccessId                       (knx.getGroupObject(FIN_KoScanSuccessId))
-// Ausgang Scan erfolgreich (Zutrittsdaten)
-#define KoFIN_ScanSuccessData                     (knx.getGroupObject(FIN_KoScanSuccessData))
-// Ausgang Scan fehlgeschlagen
-#define KoFIN_ScanFailed                          (knx.getGroupObject(FIN_KoScanFailed))
-// Ausgang Scan fehlgeschlagen (Zutrittsdaten)
-#define KoFIN_ScanFailedData                      (knx.getGroupObject(FIN_KoScanFailedData))
-// Eingang Anlernung (nächster freier Slot)
-#define KoFIN_EnrollNext                          (knx.getGroupObject(FIN_KoEnrollNext))
-// Eingang Anlernung (verfügbare Slots: R503S: 0-149, R503: 0-199, R503Pro: 0-1499; ID)
-#define KoFIN_EnrollSlotId                        (knx.getGroupObject(FIN_KoEnrollSlotId))
-// Eingang Anlernung (verfügbare Slots: R503S: 0-149, R503: 0-199, R503Pro: 0-1499; Zutrittsdaten)
-#define KoFIN_EnrollSlotData                      (knx.getGroupObject(FIN_KoEnrollSlotData))
-// Anlernung erfolgreich
-#define KoFIN_EnrollSuccess                       (knx.getGroupObject(FIN_KoEnrollSuccess))
-// Anlernung erfolgreich (ID)
-#define KoFIN_EnrollSuccessId                     (knx.getGroupObject(FIN_KoEnrollSuccessId))
-// Anlernung erfolgreich (Zutrittsdaten)
-#define KoFIN_EnrollSuccessData                   (knx.getGroupObject(FIN_KoEnrollSuccessData))
-// Anlernung fehlgeschlagen
-#define KoFIN_EnrollFailed                        (knx.getGroupObject(FIN_KoEnrollFailed))
-// Anlernung fehlgeschlagen (ID)
-#define KoFIN_EnrollFailedId                      (knx.getGroupObject(FIN_KoEnrollFailedId))
-// Anlernung fehlgeschlagen (Zutrittsdaten)
-#define KoFIN_EnrollFailedData                    (knx.getGroupObject(FIN_KoEnrollFailedData))
-// Eingang Löschung (ID)
-#define KoFIN_DeleteSlotId                        (knx.getGroupObject(FIN_KoDeleteSlotId))
-// Eingang Löschung (Zutrittsdaten)
-#define KoFIN_DeleteSlotData                      (knx.getGroupObject(FIN_KoDeleteSlotData))
-// Löschung erfolgreich
-#define KoFIN_DeleteSuccess                       (knx.getGroupObject(FIN_KoDeleteSuccess))
-// Löschung erfolgreich (ID)
-#define KoFIN_DeleteSuccessId                     (knx.getGroupObject(FIN_KoDeleteSuccessId))
-// Löschung erfolgreich (Zutrittsdaten)
-#define KoFIN_DeleteSuccessData                   (knx.getGroupObject(FIN_KoDeleteSuccessData))
-// Löschung fehlgeschlagen
-#define KoFIN_DeleteFailed                        (knx.getGroupObject(FIN_KoDeleteFailed))
-// Löschung fehlgeschlagen (ID)
-#define KoFIN_DeleteFailedId                      (knx.getGroupObject(FIN_KoDeleteFailedId))
-// Löschung fehlgeschlagen (Zutrittsdaten)
-#define KoFIN_DeleteFailedData                    (knx.getGroupObject(FIN_KoDeleteFailedData))
-// Sperre
-#define KoFIN_Lock                                (knx.getGroupObject(FIN_KoLock))
-// Status der Sperre
-#define KoFIN_LockStatus                          (knx.getGroupObject(FIN_KoLockStatus))
-
-
-
 // Header generation for Module 'BASE_KommentarModule'
 
-#define BASE_KommentarModuleCount 20
+#define BASE_KommentarModuleCount 2
 #define BASE_KommentarModuleModuleParamSize 0
 #define BASE_KommentarModuleSubmodulesParamSize 0
 #define BASE_KommentarModuleParamSize 0
-#define BASE_KommentarModuleParamOffset 2763
+#define BASE_KommentarModuleParamOffset 397
 #define BASE_KommentarModuleCalcIndex(index, m1) (index + BASE_KommentarModuleParamOffset + _channelIndex * BASE_KommentarModuleCount * BASE_KommentarModuleParamSize + m1 * BASE_KommentarModuleParamSize)
 
 

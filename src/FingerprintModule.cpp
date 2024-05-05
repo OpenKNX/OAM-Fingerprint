@@ -1,4 +1,4 @@
-#include <FingerprintModule.h>
+#include "FingerprintModule.h"
 
 const std::string FingerprintModule::name()
 {
@@ -12,7 +12,7 @@ const std::string FingerprintModule::version()
 
 void FingerprintModule::setup()
 {
-    finger = Fingerprint(FINGERPRINT_PASSWORD);
+    finger = Fingerprint(delayCallback, FINGERPRINT_PASSWORD);
 
     pinMode(LED_GREEN_PIN, OUTPUT);
     pinMode(LED_RED_PIN, OUTPUT);
@@ -35,7 +35,12 @@ void FingerprintModule::setup()
     digitalWrite(LED_GREEN_PIN, HIGH);
     finger.setLed(Fingerprint::State::Success);
 
-    numChannels = ParamFIN_VisibleChannels;
+// hängt!?
+    /*for (uint8_t i = 0; i < ParamFIN_VisibleChannels; i++)
+    {
+        _channels[i] = new ActionChannel(i);
+        _channels[i]->setup();
+    }*/
 
     resetLedsTimer = millis();
     logInfoP("Fingerprint module ready.");
@@ -76,6 +81,9 @@ void FingerprintModule::setFingerprintPower(bool on)
 
 void FingerprintModule::loop()
 {
+    if (delayCallbackActive)
+        return;
+
     if (touched)
     {
         touched = false;
@@ -103,6 +111,11 @@ void FingerprintModule::loop()
                     KoFIN_ScanSuccessData.valueNoSend(false, Dpt(15, 0, 3));                     // read direction (not used)
                     KoFIN_ScanSuccessData.valueNoSend(false, Dpt(15, 0, 4));                     // encryption (not used for now)
                     KoFIN_ScanSuccessData.value((uint8_t)0, Dpt(15, 0, 5));                      // index of access identification code (not used)
+
+                    for (uint8_t i = 0; i < ParamFIN_VisibleChannels; i++)
+                    {
+                        _channels[i]->processScan(findFingerResult.location);
+                    }
                 }
                 else
                 {
@@ -261,6 +274,97 @@ void FingerprintModule::updateLockLeds(bool showGreenWhenUnlock)
     }
 }
 
+bool FingerprintModule::enrollFinger(uint16_t location)
+{
+    logInfoP("Enroll request:");
+    logIndentUp();
+
+    bool success = finger.createTemplate();
+    if (success)
+    {
+        success = finger.storeTemplate(location);
+        if (!success)
+        {
+            logInfoP("Storing template failed.");
+        }
+    }
+    else
+    {
+        logInfoP("Creating template failed.");
+    }
+
+    if (success)
+    {
+        logInfoP("Enrolled to location %d.", location);
+        KoFIN_EnrollSuccess.value(true, DPT_Switch);
+        KoFIN_EnrollSuccessId.value(location, Dpt(7, 1));
+
+        KoFIN_EnrollSuccess.valueNoSend(location, Dpt(15, 0, 0)); // access identification code
+        KoFIN_EnrollSuccess.valueNoSend(false, Dpt(15, 0, 1));    // detection error
+        KoFIN_EnrollSuccess.valueNoSend(true, Dpt(15, 0, 2));     // permission accepted
+        KoFIN_EnrollSuccess.valueNoSend(false, Dpt(15, 0, 3));    // read direction (not used)
+        KoFIN_EnrollSuccess.valueNoSend(false, Dpt(15, 0, 4));    // encryption (not used for now)
+        KoFIN_EnrollSuccess.value((uint8_t)0, Dpt(15, 0, 5));     // index of access identification code (not used)
+    }
+    else
+    {
+        logInfoP("Enrolling template failed.");
+        KoFIN_EnrollFailed.value(true, DPT_Switch);
+        KoFIN_EnrollFailedId.value(location, Dpt(7, 1));
+
+        KoFIN_EnrollFailed.valueNoSend(location, Dpt(15, 0, 0)); // access identification code
+        KoFIN_EnrollFailed.valueNoSend(true, Dpt(15, 0, 1));     // detection error
+        KoFIN_EnrollFailed.valueNoSend(false, Dpt(15, 0, 2));    // permission accepted
+        KoFIN_EnrollFailed.valueNoSend(false, Dpt(15, 0, 3));    // read direction (not used)
+        KoFIN_EnrollFailed.valueNoSend(false, Dpt(15, 0, 4));    // encryption (not used for now)
+        KoFIN_EnrollFailed.value((uint8_t)0, Dpt(15, 0, 5));     // index of access identification code (not used)
+    }
+
+    logIndentDown();
+    resetLedsTimer = millis();
+
+    return success;
+}
+
+bool FingerprintModule::deleteFinger(uint16_t location)
+{
+    logInfoP("Delete request:");
+    logIndentUp();
+
+    bool success = finger.deleteTemplate(location);
+    if (success)
+    {
+        logInfoP("Template deleted from location %d.", location);
+        KoFIN_DeleteSuccess.value(true, DPT_Switch);
+        KoFIN_DeleteSuccessId.value(location, Dpt(7, 1));
+
+        KoFIN_DeleteSuccess.valueNoSend(location, Dpt(15, 0, 0)); // access identification code
+        KoFIN_DeleteSuccess.valueNoSend(false, Dpt(15, 0, 1));    // detection error
+        KoFIN_DeleteSuccess.valueNoSend(true, Dpt(15, 0, 2));     // permission accepted
+        KoFIN_DeleteSuccess.valueNoSend(false, Dpt(15, 0, 3));    // read direction (not used)
+        KoFIN_DeleteSuccess.valueNoSend(false, Dpt(15, 0, 4));    // encryption (not used for now)
+        KoFIN_DeleteSuccess.value((uint8_t)0, Dpt(15, 0, 5));     // index of access identification code (not used)
+    }
+    else
+    {
+        logInfoP("Deleting template failed.");
+        KoFIN_DeleteFailed.value(true, DPT_Switch);
+        KoFIN_DeleteFailedId.value(location, Dpt(7, 1));
+
+        KoFIN_DeleteFailed.valueNoSend(location, Dpt(15, 0, 0)); // access identification code
+        KoFIN_DeleteFailed.valueNoSend(true, Dpt(15, 0, 1));     // detection error
+        KoFIN_DeleteFailed.valueNoSend(false, Dpt(15, 0, 2));    // permission accepted
+        KoFIN_DeleteFailed.valueNoSend(false, Dpt(15, 0, 3));    // read direction (not used)
+        KoFIN_DeleteFailed.valueNoSend(false, Dpt(15, 0, 4));    // encryption (not used for now)
+        KoFIN_DeleteFailed.value((uint8_t)0, Dpt(15, 0, 5));     // index of access identification code (not used)
+    }
+
+    logIndentDown();
+    resetLedsTimer = millis();
+
+    return success;
+}
+
 void FingerprintModule::processInputKo(GroupObject& iKo)
 {
     bool success;
@@ -272,74 +376,26 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
         case FIN_KoEnrollNext:
         case FIN_KoEnrollSlotId:
         case FIN_KoEnrollSlotData:
-            logInfoP("Enroll request:");
-            logIndentUp();
-
-            success = finger.createTemplate();
-            if (success)
+            if (lAsap == FIN_KoEnrollNext)
             {
-                if (lAsap == FIN_KoEnrollNext)
-                {
-                    location = finger.getNextFreeLocation();
-                    logInfoP("Next availabe location: %d", location);
-                }
-                else if (lAsap == FIN_KoEnrollSlotId)
-                {
-                    location = iKo.value(Dpt(7, 1));
-                    logInfoP("Location provided: %d", location);
-                }
-                else
-                {
-                    location = iKo.value(Dpt(15, 0, 0));
-                    logInfoP("Location provided: %d", location);
-                }
-
-                success = finger.storeTemplate(location);
-                if (!success)
-                {
-                    logInfoP("Storing template failed.");
-                }
+                location = finger.getNextFreeLocation();
+                logInfoP("Next availabe location: %d", location);
+            }
+            else if (lAsap == FIN_KoEnrollSlotId)
+            {
+                location = iKo.value(Dpt(7, 1));
+                logInfoP("Location provided: %d", location);
             }
             else
             {
-                logInfoP("Creating template failed.");
+                location = iKo.value(Dpt(15, 0, 0));
+                logInfoP("Location provided: %d", location);
             }
 
-            if (success)
-            {
-                logInfoP("Enrolled to location %d.", location);
-                KoFIN_EnrollSuccess.value(true, DPT_Switch);
-                KoFIN_EnrollSuccessId.value(location, Dpt(7, 1));
-
-                KoFIN_EnrollSuccess.valueNoSend(location, Dpt(15, 0, 0)); // access identification code
-                KoFIN_EnrollSuccess.valueNoSend(false, Dpt(15, 0, 1));    // detection error
-                KoFIN_EnrollSuccess.valueNoSend(true, Dpt(15, 0, 2));     // permission accepted
-                KoFIN_EnrollSuccess.valueNoSend(false, Dpt(15, 0, 3));    // read direction (not used)
-                KoFIN_EnrollSuccess.valueNoSend(false, Dpt(15, 0, 4));    // encryption (not used for now)
-                KoFIN_EnrollSuccess.value((uint8_t)0, Dpt(15, 0, 5));     // index of access identification code (not used)
-            }
-            else
-            {
-                logInfoP("Enrolling template failed.");
-                KoFIN_EnrollFailed.value(true, DPT_Switch);
-                KoFIN_EnrollFailedId.value(location, Dpt(7, 1));
-
-                KoFIN_EnrollFailed.valueNoSend(location, Dpt(15, 0, 0)); // access identification code
-                KoFIN_EnrollFailed.valueNoSend(true, Dpt(15, 0, 1));     // detection error
-                KoFIN_EnrollFailed.valueNoSend(false, Dpt(15, 0, 2));    // permission accepted
-                KoFIN_EnrollFailed.valueNoSend(false, Dpt(15, 0, 3));    // read direction (not used)
-                KoFIN_EnrollFailed.valueNoSend(false, Dpt(15, 0, 4));    // encryption (not used for now)
-                KoFIN_EnrollFailed.value((uint8_t)0, Dpt(15, 0, 5));     // index of access identification code (not used)
-            }
-
-            logIndentDown();
-            resetLedsTimer = millis();
+            enrollFinger(location);
             break;
         case FIN_KoDeleteSlotId:
         case FIN_KoDeleteSlotData:
-            logInfoP("Delete request:");
-            logIndentUp();
-
             if (lAsap == FIN_KoDeleteSlotId)
             {
                 location = iKo.value(Dpt(7, 1));
@@ -351,36 +407,7 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
                 logInfoP("Location provided: %d", location);
             }
 
-            success = finger.deleteTemplate(location);
-            if (success)
-            {
-                logInfoP("Template deleted from location %d.", location);
-                KoFIN_DeleteSuccess.value(true, DPT_Switch);
-                KoFIN_DeleteSuccessId.value(location, Dpt(7, 1));
-
-                KoFIN_DeleteSuccess.valueNoSend(location, Dpt(15, 0, 0)); // access identification code
-                KoFIN_DeleteSuccess.valueNoSend(false, Dpt(15, 0, 1));    // detection error
-                KoFIN_DeleteSuccess.valueNoSend(true, Dpt(15, 0, 2));     // permission accepted
-                KoFIN_DeleteSuccess.valueNoSend(false, Dpt(15, 0, 3));    // read direction (not used)
-                KoFIN_DeleteSuccess.valueNoSend(false, Dpt(15, 0, 4));    // encryption (not used for now)
-                KoFIN_DeleteSuccess.value((uint8_t)0, Dpt(15, 0, 5));     // index of access identification code (not used)
-            }
-            else
-            {
-                logInfoP("Deleting template failed.");
-                KoFIN_DeleteFailed.value(true, DPT_Switch);
-                KoFIN_DeleteFailedId.value(location, Dpt(7, 1));
-
-                KoFIN_DeleteFailed.valueNoSend(location, Dpt(15, 0, 0)); // access identification code
-                KoFIN_DeleteFailed.valueNoSend(true, Dpt(15, 0, 1));     // detection error
-                KoFIN_DeleteFailed.valueNoSend(false, Dpt(15, 0, 2));    // permission accepted
-                KoFIN_DeleteFailed.valueNoSend(false, Dpt(15, 0, 3));    // read direction (not used)
-                KoFIN_DeleteFailed.valueNoSend(false, Dpt(15, 0, 4));    // encryption (not used for now)
-                KoFIN_DeleteFailed.value((uint8_t)0, Dpt(15, 0, 5));     // index of access identification code (not used)
-            }
-
-            logIndentDown();
-            resetLedsTimer = millis();
+            deleteFinger(location);
             break;
         case FIN_KoLock:
             lockRequested = KoFIN_Lock.value(DPT_Switch);
@@ -413,93 +440,44 @@ bool FingerprintModule::processFunctionProperty(uint8_t objectIndex, uint8_t pro
 
 void FingerprintModule::handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
 {
-    /*logInfoP("Starting reading EVG settings");
+    logInfoP("Function property: Enroll request");
+
+    uint16_t location = (data[1] << 8) | data[2];
+    logDebugP("location: %d", location);
+
+    uint8_t personFinger = data[3];
+    logDebugP("personFinger: %d", personFinger);
+
+    char personName[29];
+    for (size_t i = 0; i < 28; i++)
+    {
+        memcpy(personName + i, data + 4 + i, 1);
+        if (personName[i] == 0) // null termination
+            break;
+    }
+    logDebugP("personFinger: %s", personName);
+
+    //bool success = enrollFinger(location);
     
-    resultData[0] = 0x00;
-
-    uint8_t errorByte = 0;
-    uint16_t errorByteScene = 0;
-
-    int16_t resp = getInfo(data[1], DaliCmd::QUERY_MIN_LEVEL);
-    if(resp < 0)
-    {
-        logErrorP("Dali Error (MIN): Code %i", resp);
-        errorByte |= 0b1;
-        resp = 0xFF;
-    }
-    logDebugP("MIN: %.2X / %.2X", resp, DaliHelper::arcToPercent(resp));
-    resultData[1] = (resp == 255) ? 255 : DaliHelper::arcToPercent(resp);
-
-    resp = getInfo(data[1], DaliCmd::QUERY_MAX_LEVEL);
-    if(resp < 0)
-    {
-        logErrorP("Dali Error (MAX): Code %i", resp);
-        errorByte |= 0b10;
-        resp = 0xFF;
-    }
-    logDebugP("MAX: %.2X / %.2X", resp, DaliHelper::arcToPercent(resp));
-    resultData[2] = (resp == 255) ? 255 : DaliHelper::arcToPercent(resp);
-
-    resp = getInfo(data[1], DaliCmd::QUERY_POWER_ON_LEVEL);
-    if(resp < 0)
-    {
-        logErrorP("Dali Error (POWER): Code %i", resp);
-        errorByte |= 0b100;
-        resp = 0xFF;
-    }
-    logDebugP("POWER: %.2X / %.2X", resp, DaliHelper::arcToPercent(resp));
-    resultData[3] = (resp == 255) ? 255 : DaliHelper::arcToPercent(resp);
-
-    resp = getInfo(data[1], DaliCmd::QUERY_FAIL_LEVEL);
-    if(resp < 0)
-    {
-        logErrorP("Dali Error (FAILURE): Code %i", resp);
-        errorByte |= 0b1000;
-        resp = 0xFF;
-    }
-    logDebugP("FAILURE: %.2X / %.2X", resp, DaliHelper::arcToPercent(resp));
-    resultData[4] = (resp == 255) ? 255 : DaliHelper::arcToPercent(resp);
-    
-    resp = getInfo(data[1], DaliCmd::QUERY_FADE_SPEEDS);
-    if(resp < 0)
-    {
-        logErrorP("Dali Error (FAID): Code %i", resp);
-        errorByte |= 0b10000;
-        resp = 0xFF;
-    }
-    logDebugP("FAID: %.2X", resp);
-    resultData[5] = resp;
-    
-    //1byte free
-
-    resp = getInfo(data[1], DaliCmd::QUERY_GROUPS_0_7);
-    if(resp < 0)
-    {
-        logErrorP("Dali Error (GROUP1): Code %i", resp);
-        errorByte |= 0b1000000;
-        resp = 0;
-    }
-    logDebugP("GROUPS0-7: %.2X", resp);
-    resultData[7] = resp;
-    
-    resp = getInfo(data[1], DaliCmd::QUERY_GROUPS_8_15);
-    if(resp < 0)
-    {
-        logErrorP("Dali Error (GROUP2): Code %i", resp);
-        errorByte |= 0b10000000;
-        resp = 0;
-    }
-    logDebugP("GROUPS8-15: %.2X", resp);
-    resultData[8] = resp;
-
-    resultData[9] = errorByte;
-    resultData[10] = errorByteScene & 0xFF;
-    resultData[11] = (errorByteScene >> 8) & 0xFF;
-    resultLength = 12;*/
+    bool success = true;
+    resultData[0] = success ? 0 : 1;
+    resultLength = 1;
 }
 
 void FingerprintModule::processAfterStartupDelay()
 {
+}
+
+void FingerprintModule::delayCallback(uint32_t period)
+{
+    uint32_t start = millis();
+    delayCallbackActive = true;
+
+    while (millis() - start < period)
+        openknx.loop();
+
+    openknx.common.skipLooptimeWarning();
+    delayCallbackActive = false;
 }
 
 FingerprintModule openknxFingerprintModule;

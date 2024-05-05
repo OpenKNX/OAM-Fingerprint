@@ -1,7 +1,8 @@
 #include "OpenKNX.h"
 #include "hardware.h"
-#include <Fingerprint.h>
-#include <secrets.h>
+#include "Fingerprint.h"
+#include "ActionChannel.h"
+#include "secrets.h"
 
 #define PWR_PIN 1
 #define TOUCH_PIN 2
@@ -39,18 +40,21 @@ class FingerprintModule : public OpenKNX::Module
     static void interruptTouched();
     static void interruptUnlock();
     static void interruptLock();
+    bool enrollFinger(uint16_t location);
+    bool deleteFinger(uint16_t location);
     void setFingerprintPower(bool on);
     void updateLockLeds(bool showGreenWhenUnlock = true);
     void handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
+    static void delayCallback(uint32_t period);
 
-    uint8_t numChannels;
-    uint8_t channelsToProcess = 0;
+    ActionChannel *_channels[FIN_ChannelCount];
 
     Fingerprint finger;
     bool scanerHasPower = false;
     bool lockRequested = false;
     bool isLocked = false;
     unsigned long resetLedsTimer = 0;
+    inline static bool delayCallbackActive = false;
 
     inline volatile static bool touched = false;
     inline volatile static bool unlockTouched = false;

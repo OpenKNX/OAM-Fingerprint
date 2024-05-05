@@ -1,8 +1,15 @@
 #include "Fingerprint.h"
 
-Fingerprint::Fingerprint(uint32_t password)
-    : _finger(Adafruit_Fingerprint(&mySerial, password))
+Fingerprint::Fingerprint(uint32_t overridePassword)
+    : _finger(Adafruit_Fingerprint(&mySerial, overridePassword))
 {
+    _delayMs = _delayCallbackDefault;
+}
+
+Fingerprint::Fingerprint(fingerprint_delay_fptr_t delayCallback, uint32_t overridePassword)
+    : _finger(Adafruit_Fingerprint(&mySerial, overridePassword))
+{
+    _delayMs = delayCallback;
 }
 
 bool Fingerprint::init()
@@ -19,7 +26,7 @@ bool Fingerprint::init()
     _finger.begin(57600, 39, 33);
 #endif
 
-    delay(500);
+    _delayMs(500);
 
     if (_finger.verifyPassword())
     {
@@ -289,6 +296,8 @@ bool Fingerprint::createTemplate()
                     logIndent(0);
                     return false;
             }
+
+            _delayMs(10);
         }
         logIndentDown();
 
@@ -327,16 +336,17 @@ bool Fingerprint::createTemplate()
         {
             logDebugP("Remove finger");
             setLed(RemoveFinger);
-            delay(500);
+            _delayMs(500);
             while (p != FINGERPRINT_NOFINGER)
             {
                 p = _finger.getImage();
+                 _delayMs(10);
             }
         }
     }
 
     setLed(EnrollCreateModel);
-    delay(1000);
+    _delayMs(1000);
 
     logDebugP("Creating model...");
     logIndentUp();
@@ -346,7 +356,7 @@ bool Fingerprint::createTemplate()
         case FINGERPRINT_OK:
             logDebugP("Created");
             setLed(Success);
-            delay(1000);
+            _delayMs(1000);
             break;
         case FINGERPRINT_ENROLLMISMATCH:
             logDebugP("Prints did not match");
@@ -379,7 +389,7 @@ bool Fingerprint::sendTemplate(uint8_t *templateData)
     logDebugP("Send template:");
     logIndentUp();
     uint8_t p = _finger.write_template_to_sensor(TEMPLATE_SIZE, templateData);
-    delay(1000); // needed, otherwise store might fail
+    _delayMs(1000); // needed, otherwise store might fail
     logDebugP("Sent");
     logIndentDown();
 
@@ -532,4 +542,9 @@ Fingerprint::GetNotepadPageIndexResult Fingerprint::_getNotepadPageIndex(u_int16
     getNotepadPageIndexResult.page = page;
     getNotepadPageIndexResult.index = index;
     return getNotepadPageIndexResult;
+}
+
+void Fingerprint::_delayCallbackDefault(uint32_t period)
+{
+    delay(period);
 }

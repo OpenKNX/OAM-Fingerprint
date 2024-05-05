@@ -10,17 +10,21 @@
               <Parameter Id="%AID%_P-%T%%CCC%000" Name="%C%Description" ParameterType="%AID%_PT-Text40Byte" Text="Beschreibung des Fingers" Value="" Access="Read" />
               <Union SizeInBit="168">
                 <Memory CodeSegment="%AID%_RS-04-00000" Offset="0" BitOffset="0" />
-                <Parameter Id="%AID%_UP-%T%%CCC%001" Name="%C%Name" Offset="0" BitOffset="0" ParameterType="%AID%_PT-Text16Byte" Text="Name der Person" Value="" />
-                <Parameter Id="%AID%_UP-%T%%CCC%002" Name="%C%Finger" Offset="16" BitOffset="0" ParameterType="%AID%_PT-Finger" Text="Finger" Value="0" />
-                <Parameter Id="%AID%_UP-%T%%CCC%003" Name="%C%ChannelActive" Offset="16" BitOffset="4" ParameterType="%AID%_PT-ChannelActive" Text="Kanalaktivität" Value="0" />
+                <Parameter Id="%AID%_UP-%T%%CCC%003" Name="Channel%C%ChannelActive" Offset="16" BitOffset="4" ParameterType="%AID%_PT-ChannelActive" Text="Kanalaktivität" Value="0" />
+
+                <!---->
+                <Parameter Id="%AID%_UP-%T%%CCC%001" Name="Channel%C%PersonName" Offset="0" BitOffset="0" ParameterType="%AID%_PT-Text16Byte" Text="Name der Person" Value="" />
+                <Parameter Id="%AID%_UP-%T%%CCC%002" Name="Channel%C%PersonFinger" Offset="16" BitOffset="0" ParameterType="%AID%_PT-Finger" Text="Finger der Person" Value="0" />
+                <Parameter Id="%AID%_UP-%T%%CCC%004" Name="Channel%C%FingerIdR503" Offset="17" BitOffset="0" ParameterType="%AID%_PT-FingerIdR503" Text="Scanner Finger ID" Value="0" />
+                <Parameter Id="%AID%_UP-%T%%CCC%005" Name="Channel%C%FingerIdR503S" Offset="17" BitOffset="0" ParameterType="%AID%_PT-FingerIdR503S" Text="Scanner Finger ID" Value="0" />
+                <Parameter Id="%AID%_UP-%T%%CCC%006" Name="Channel%C%FingerId" Offset="17" BitOffset="0" ParameterType="%AID%_PT-FingerId" Text="Scanner Finger ID" Value="0" />
+                
+
                 <!-- 2 bit -->
-                <Parameter Id="%AID%_UP-%T%%CCC%004" Name="%C%FingerIdR503" Offset="17" BitOffset="0" ParameterType="%AID%_PT-FingerIdR503" Text="Finger" Value="0" />
-                <Parameter Id="%AID%_UP-%T%%CCC%005" Name="%C%FingerIdR503S" Offset="17" BitOffset="0" ParameterType="%AID%_PT-FingerIdR503S" Text="Finger" Value="0" />
-                <Parameter Id="%AID%_UP-%T%%CCC%006" Name="%C%FingerId" Offset="17" BitOffset="0" ParameterType="%AID%_PT-FingerId" Text="Finger" Value="0" />
-                <Parameter Id="%AID%_UP-%T%%CCC%007" Name="%C%ActionType" ParameterType="%AID%_PT-ActionType" Offset="19" BitOffset="0" Text="Zeitbasis" Value="0" />
+                <Parameter Id="%AID%_UP-%T%%CCC%007" Name="Channel%C%ActionType" ParameterType="%AID%_PT-ActionType" Offset="19" BitOffset="0" Text="Zeitbasis" Value="0" />
                 <!-- 6 bit -->
-                <Parameter Id="%AID%_UP-%T%%CCC%008" Name="%C%TimerDelayBase" ParameterType="%AID%_PT-DelayBase" Offset="20" BitOffset="0" Text="Zeitbasis" Value="0" />
-                <Parameter Id="%AID%_UP-%T%%CCC%009" Name="%C%TimerDelayTime" ParameterType="%AID%_PT-DelayTime" Offset="20" BitOffset="2" Text="Zeit" Value="0" />
+                <Parameter Id="%AID%_UP-%T%%CCC%008" Name="Channel%C%TimerDelayBase" ParameterType="%AID%_PT-DelayBase" Offset="20" BitOffset="0" Text="Zeitbasis" Value="0" />
+                <Parameter Id="%AID%_UP-%T%%CCC%009" Name="Channel%C%TimerDelayTime" ParameterType="%AID%_PT-DelayTime" Offset="20" BitOffset="2" Text="Zeit" Value="0" />
               </Union>
             </Parameters>
             <ParameterRefs>
@@ -47,8 +51,8 @@
               </ParameterCalculation>
             </ParameterCalculations>
             <ComObjectTable>
-              <ComObject Id="%AID%_O-%T%%CCC%001" Name="%C%Action"       Number="%K0%" ObjectSize="1 Bit"   Text="Ausgang" FunctionText="Aktion %C%, Schalten" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
-              <ComObject Id="%AID%_O-%T%%CCC%002" Name="%C%ActionStatus" Number="%K1%" ObjectSize="1 Bit"   Text="Eingang" FunctionText="Aktion %C%, Status" ReadFlag="Enabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="%AID%_O-%T%%CCC%001" Name="Channel%C%Action"       Number="%K0%" ObjectSize="1 Bit"   Text="Ausgang" FunctionText="Aktion %C%, Schalten" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="%AID%_O-%T%%CCC%002" Name="Channel%C%ActionStatus" Number="%K1%" ObjectSize="1 Bit"   Text="Eingang" FunctionText="Aktion %C%, Status" ReadFlag="Enabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
             </ComObjectTable>
             <ComObjectRefs>
               <ComObjectRef Id="%AID%_O-%T%%CCC%001_R-%T%%CCC%00101" RefId="%AID%_O-%T%%CCC%001" Text="{{0:Aktion %C%}}: Ausgang" TextParameterRefId="%AID%_P-%T%%CCC%000_R-%T%%CCC%00001" />
@@ -67,11 +71,12 @@
 
                     <choose ParamRefId="%AID%_UP-%T%%CCC%003_R-%T%%CCC%00301">
                       <when test="&gt;0">
+
+
                         <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
                         <ParameterSeparator Id="%AID%_PS-nnn" Text="Finger" UIHint="Headline" />
                         <ParameterRefRef RefId="%AID%_UP-%T%%CCC%001_R-%T%%CCC%00101" IndentLevel="1" />
                         <ParameterRefRef RefId="%AID%_UP-%T%%CCC%002_R-%T%%CCC%00201" IndentLevel="1" />
-                        
                         <choose ParamRefId="%AID%_UP-%T%000002_R-%T%00000201">
                           <when test="0">
                             <ParameterRefRef RefId="%AID%_UP-%T%%CCC%004_R-%T%%CCC%00401" IndentLevel="1" />
@@ -83,6 +88,7 @@
                             <ParameterRefRef RefId="%AID%_UP-%T%%CCC%006_R-%T%%CCC%00601" IndentLevel="1" />
                           </when>
                         </choose>
+
 
                         <ComObjectRefRef RefId="%AID%_O-%T%%CCC%001_R-%T%%CCC%00101" />
 
