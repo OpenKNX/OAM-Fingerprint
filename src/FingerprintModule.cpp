@@ -12,6 +12,9 @@ const std::string FingerprintModule::version()
 
 void FingerprintModule::setup()
 {
+    OpenKNX::Flash::Driver _fingerprintStorage;
+    _fingerprintStorage.init("fingerprint", FINGERPRINT_FLASH_OFFSET, FINGERPRINT_FLASH_SIZE);
+
     finger = Fingerprint(delayCallback, FINGERPRINT_PASSWORD);
 
     pinMode(LED_GREEN_PIN, OUTPUT);
@@ -448,7 +451,7 @@ void FingerprintModule::handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_
     uint8_t personFinger = data[3];
     logDebugP("personFinger: %d", personFinger);
 
-    char personName[29];
+    char personName[29] = {};
     for (size_t i = 0; i < 28; i++)
     {
         memcpy(personName + i, data + 4 + i, 1);
@@ -457,9 +460,16 @@ void FingerprintModule::handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_
     }
     logDebugP("personFinger: %s", personName);
 
+    uint32_t storageOffset = location * 32 - 1;
+    // first byte stays free for future usage
+    _fingerprintStorage->writeWord(storageOffset + 1, location);
+    _fingerprintStorage->writeByte(storageOffset + 3, personFinger); // only 4 bits used
+    _fingerprintStorage->write(storageOffset + 4, *personName, 28);
+    _fingerprintStorage->commit();
+
     //bool success = enrollFinger(location);
-    
     bool success = true;
+    
     resultData[0] = success ? 0 : 1;
     resultLength = 1;
 }

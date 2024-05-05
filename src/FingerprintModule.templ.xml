@@ -1,52 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-model href="../../Organization/knxprod-support/knx_project_20/knx-editor.xsd" type="application/xml" schematypens="http://www.w3.org/2001/XMLSchema"?>
-<KNX xmlns:op="http://github.com/OpenKNX/OpenKNXproducer" xmlns="http://knx.org/xml/project/50" CreatedBy="KNX MT" ToolVersion="5.1.255.16695">
+<KNX xmlns:op="http://github.com/OpenKNX/OpenKNXproducer" xmlns="http://knx.org/xml/project/20" CreatedBy="KNX MT" ToolVersion="5.1.255.16695">
   <ManufacturerData>
     <Manufacturer>
       <ApplicationPrograms>
         <ApplicationProgram>
           <Static>
             <Parameters>
-              <Parameter Id="%AID%_P-%T%%CCC%000" Name="%C%Description" ParameterType="%AID%_PT-Text40Byte" Text="Beschreibung des Fingers" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%T%%CCC%000" Name="Channel%C%Description" ParameterType="%AID%_PT-Text40Byte" Text="Beschreibung des Fingers" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%T%%CCC%001" Name="Channel%C%FingerIds" ParameterType="%AID%_PT-FingerIdList" Text="Scanner Finger IDs" Value="" />
               <Union SizeInBit="168">
                 <Memory CodeSegment="%AID%_RS-04-00000" Offset="0" BitOffset="0" />
-                <Parameter Id="%AID%_UP-%T%%CCC%003" Name="Channel%C%ChannelActive" Offset="16" BitOffset="4" ParameterType="%AID%_PT-ChannelActive" Text="Kanalaktivität" Value="0" />
-
-                <!---->
-                <Parameter Id="%AID%_UP-%T%%CCC%001" Name="Channel%C%PersonName" Offset="0" BitOffset="0" ParameterType="%AID%_PT-Text16Byte" Text="Name der Person" Value="" />
-                <Parameter Id="%AID%_UP-%T%%CCC%002" Name="Channel%C%PersonFinger" Offset="16" BitOffset="0" ParameterType="%AID%_PT-Finger" Text="Finger der Person" Value="0" />
-                <Parameter Id="%AID%_UP-%T%%CCC%004" Name="Channel%C%FingerIdR503" Offset="17" BitOffset="0" ParameterType="%AID%_PT-FingerIdR503" Text="Scanner Finger ID" Value="0" />
-                <Parameter Id="%AID%_UP-%T%%CCC%005" Name="Channel%C%FingerIdR503S" Offset="17" BitOffset="0" ParameterType="%AID%_PT-FingerIdR503S" Text="Scanner Finger ID" Value="0" />
-                <Parameter Id="%AID%_UP-%T%%CCC%006" Name="Channel%C%FingerId" Offset="17" BitOffset="0" ParameterType="%AID%_PT-FingerId" Text="Scanner Finger ID" Value="0" />
-                
-
-                <!-- 2 bit -->
-                <Parameter Id="%AID%_UP-%T%%CCC%007" Name="Channel%C%ActionType" ParameterType="%AID%_PT-ActionType" Offset="19" BitOffset="0" Text="Zeitbasis" Value="0" />
-                <!-- 6 bit -->
-                <Parameter Id="%AID%_UP-%T%%CCC%008" Name="Channel%C%TimerDelayBase" ParameterType="%AID%_PT-DelayBase" Offset="20" BitOffset="0" Text="Zeitbasis" Value="0" />
-                <Parameter Id="%AID%_UP-%T%%CCC%009" Name="Channel%C%TimerDelayTime" ParameterType="%AID%_PT-DelayTime" Offset="20" BitOffset="2" Text="Zeit" Value="0" />
+                <Parameter Id="%AID%_UP-%T%%CCC%002" Name="Channel%C%Active" Offset="0" BitOffset="0" ParameterType="%AID%_PT-ChannelActive" Text="Kanalaktivität" Value="0" />
+                <Parameter Id="%AID%_UP-%T%%CCC%003" Name="Channel%C%ActionType" ParameterType="%AID%_PT-ActionType" Offset="0" BitOffset="2" Text="Aktionstyp" Value="0" />
+                <!-- 4 bit -->
+                <Parameter Id="%AID%_UP-%T%%CCC%004" Name="Channel%C%DelayBase" ParameterType="%AID%_PT-DelayBase" Offset="1" BitOffset="0" Text="Zeitbasis" Value="0" />
+                <Parameter Id="%AID%_UP-%T%%CCC%005" Name="Channel%C%DelayTime" ParameterType="%AID%_PT-DelayTime" Offset="1" BitOffset="2" Text="Zeit" Value="0" />
               </Union>
             </Parameters>
             <ParameterRefs>
               <ParameterRef Id="%AID%_P-%T%%CCC%000_R-%T%%CCC%00001" RefId="%AID%_P-%T%%CCC%000" />
-              <ParameterRef Id="%AID%_UP-%T%%CCC%001_R-%T%%CCC%00101" RefId="%AID%_UP-%T%%CCC%001" />
+              <ParameterRef Id="%AID%_P-%T%%CCC%001_R-%T%%CCC%00101" RefId="%AID%_P-%T%%CCC%001" />
               <ParameterRef Id="%AID%_UP-%T%%CCC%002_R-%T%%CCC%00201" RefId="%AID%_UP-%T%%CCC%002" />
               <ParameterRef Id="%AID%_UP-%T%%CCC%003_R-%T%%CCC%00301" RefId="%AID%_UP-%T%%CCC%003" />
               <ParameterRef Id="%AID%_UP-%T%%CCC%004_R-%T%%CCC%00401" RefId="%AID%_UP-%T%%CCC%004" />
               <ParameterRef Id="%AID%_UP-%T%%CCC%005_R-%T%%CCC%00501" RefId="%AID%_UP-%T%%CCC%005" />
-              <ParameterRef Id="%AID%_UP-%T%%CCC%006_R-%T%%CCC%00601" RefId="%AID%_UP-%T%%CCC%006" />
-              <ParameterRef Id="%AID%_UP-%T%%CCC%007_R-%T%%CCC%00701" RefId="%AID%_UP-%T%%CCC%007" />
-              <ParameterRef Id="%AID%_UP-%T%%CCC%008_R-%T%%CCC%00801" RefId="%AID%_UP-%T%%CCC%008" />
-              <ParameterRef Id="%AID%_UP-%T%%CCC%009_R-%T%%CCC%00901" RefId="%AID%_UP-%T%%CCC%009" />
             </ParameterRefs>
             <ParameterCalculations>
-              <ParameterCalculation Id="%AID%_PC-%T%%CCC%001" Language="JavaScript" Name="NameFingerToChannel%C%" LRTransformationFunc="FIN_calcChannelText" RLTransformationFunc="FIN_dummy">
+              <ParameterCalculation Id="%AID%_PC-%T%%CCC%002" Language="JavaScript" Name="FingerIdsToDataBlock%C%" LRTransformationFunc="FIN_calcFingerIdsToDataBlock" LRTransformationParameters="{ &quot;Channel&quot;: %C% }" RLTransformationFunc="FIN_dummy">
                 <LParameters>
-                  <ParameterRefRef RefId="%AID%_UP-%T%%CCC%001_R-%T%%CCC%00101" AliasName="Name" />
-                  <ParameterRefRef RefId="%AID%_UP-%T%%CCC%002_R-%T%%CCC%00201" AliasName="Finger" />
+                  <ParameterRefRef RefId="%AID%_P-%T%%CCC%001_R-%T%%CCC%00101" AliasName="FingerIds" />
                 </LParameters>
                 <RParameters>
-                  <ParameterRefRef RefId="%AID%_P-%T%%CCC%000_R-%T%%CCC%00001" AliasName="Channel" />
+                  <ParameterRefRef RefId="%AID%_P-%T%000000_R-%T%00000001" AliasName="DataBlock" />
                 </RParameters>
               </ParameterCalculation>
             </ParameterCalculations>
@@ -67,34 +53,22 @@
                     <ParameterSeparator Id="%AID%_PS-nnn" Text="Kanaldefinition" UIHint="Headline" />
                     <!-- Channel name -->
                     <ParameterRefRef RefId="%AID%_P-%T%%CCC%000_R-%T%%CCC%00001" IndentLevel="1" />
-                    <ParameterRefRef RefId="%AID%_UP-%T%%CCC%003_R-%T%%CCC%00301" IndentLevel="1" />
+                    <ParameterRefRef RefId="%AID%_UP-%T%%CCC%002_R-%T%%CCC%00201" IndentLevel="1" />
 
-                    <choose ParamRefId="%AID%_UP-%T%%CCC%003_R-%T%%CCC%00301">
+                    <choose ParamRefId="%AID%_UP-%T%%CCC%002_R-%T%%CCC%00201">
                       <when test="&gt;0">
 
 
                         <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
-                        <ParameterSeparator Id="%AID%_PS-nnn" Text="Finger" UIHint="Headline" />
-                        <ParameterRefRef RefId="%AID%_UP-%T%%CCC%001_R-%T%%CCC%00101" IndentLevel="1" />
-                        <ParameterRefRef RefId="%AID%_UP-%T%%CCC%002_R-%T%%CCC%00201" IndentLevel="1" />
-                        <choose ParamRefId="%AID%_UP-%T%000002_R-%T%00000201">
-                          <when test="0">
-                            <ParameterRefRef RefId="%AID%_UP-%T%%CCC%004_R-%T%%CCC%00401" IndentLevel="1" />
-                          </when>
-                          <when test="1">
-                            <ParameterRefRef RefId="%AID%_UP-%T%%CCC%005_R-%T%%CCC%00501" IndentLevel="1" />
-                          </when>
-                          <when test="2">
-                            <ParameterRefRef RefId="%AID%_UP-%T%%CCC%006_R-%T%%CCC%00601" IndentLevel="1" />
-                          </when>
-                        </choose>
+                        <ParameterSeparator Id="%AID%_PS-nnn" Text="Fingerzuordnung" UIHint="Headline" />
+                        <ParameterRefRef RefId="%AID%_P-%T%%CCC%001_R-%T%%CCC%00101" IndentLevel="1" />
 
 
                         <ComObjectRefRef RefId="%AID%_O-%T%%CCC%001_R-%T%%CCC%00101" />
 
                         <ParameterSeparator Id="%AID%_PS-nnn" Text="Aktion" UIHint="Headline" />
-                        <ParameterRefRef RefId="%AID%_UP-%T%%CCC%007_R-%T%%CCC%00701" IndentLevel="1" />
-                        <choose ParamRefId="%AID%_UP-%T%%CCC%007_R-%T%%CCC%00701">
+                        <ParameterRefRef RefId="%AID%_UP-%T%%CCC%003_R-%T%%CCC%00301" IndentLevel="1" />
+                        <choose ParamRefId="%AID%_UP-%T%%CCC%003_R-%T%%CCC%00301">
                           <when test="1">
                             <ComObjectRefRef RefId="%AID%_O-%T%%CCC%002_R-%T%%CCC%00201" />
                           </when>
@@ -110,9 +84,9 @@
                                 <Column Id="%AID%_PB-nnn_C-3" Name="Col3" Width="15%" />
                                 <Column Id="%AID%_PB-nnn_C-4" Name="Col4" Width="20%" />
                               </Columns>
-                              <ParameterSeparator Id="%AID%_PS-nnn" Text="Einschaltdauer" Cell="1,2" />
-                              <ParameterRefRef RefId="%AID%_UP-%T%%CCC%009_R-%T%%CCC%00901" Cell="1,3" />
-                              <ParameterRefRef RefId="%AID%_UP-%T%%CCC%008_R-%T%%CCC%00801" Cell="1,4" />
+                              <ParameterSeparator Id="%AID%_PS-nnn" Text="Treppenlicht" Cell="1,2" />
+                              <ParameterRefRef RefId="%AID%_UP-%T%%CCC%005_R-%T%%CCC%00501" Cell="1,3" />
+                              <ParameterRefRef RefId="%AID%_UP-%T%%CCC%004_R-%T%%CCC%00401" Cell="1,4" />
                             </ParameterBlock>
                           </when>
                         </choose>

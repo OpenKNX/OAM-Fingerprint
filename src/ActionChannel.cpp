@@ -21,8 +21,8 @@ void ActionChannel::processInputKo(GroupObject &ko)
 
 void ActionChannel::processScan(uint16_t location)
 {
-    if (FIN_ChannelFingerId != location)
-        return;
+    //if (FIN_ChannelFingerId != location)
+    //    return;
     
-    
+
 }

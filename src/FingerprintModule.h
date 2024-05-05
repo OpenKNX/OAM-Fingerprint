@@ -47,6 +47,7 @@ class FingerprintModule : public OpenKNX::Module
     void handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
     static void delayCallback(uint32_t period);
 
+    OpenKNX::Flash::Driver *_fingerprintStorage = nullptr;
     ActionChannel *_channels[FIN_ChannelCount];
 
     Fingerprint finger;
