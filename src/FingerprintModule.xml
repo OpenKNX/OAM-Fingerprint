@@ -3,16 +3,17 @@
 <KNX xmlns="http://knx.org/xml/project/20" xmlns:op="http://github.com/OpenKNX/OpenKNXproducer">
 
   <op:ETS OpenKnxId="0xA6"
-            ApplicationNumber="0x01"
-            ApplicationVersion="0.1"
-            ReplacesVersions="0.0"
-            ApplicationRevision="0"
-            ProductName="Fingerabdruckleser"
-            ApplicationName="AB-Finger-Logic-Button"
-            BuildSuffix="-dev"
-            BuildSuffixText=" (dev)"
-            OrderNumber="OpenKnxFingerprint"
-    />
+    ApplicationNumber="0x01"
+    ApplicationVersion="1.0"
+    ReplacesVersions="0.15"
+    ApplicationRevision="0"
+    ProductName="Fingerabdruckleser"
+    ApplicationName="AB-Finger-Logic-Button"
+    BuildSuffix="-dev"
+    BuildSuffixText=" (dev)"
+    OrderNumber="OpenKnxFingerprint"
+    BaggagesRootDir="A6/01"
+  />
 
     <op:define prefix="BASE" ModuleType="1"
               share="../lib/OGM-Common/src/Common.share.xml">
@@ -25,7 +26,13 @@
               ModuleType="2"
               KoSingleOffset="20"
               KoOffset="500"
-              NumChannels="3" />
+              NumChannels="10" />
+
+    <op:define prefix="FINACT"
+              share="FingerAction.share.xml"
+              template="FingerAction.templ.xml"
+              ModuleType="4"
+              NumChannels="10" />
 
     <op:define prefix="LOG"
               share="../lib/OFM-LogicModule/src/Logikmodul.share.xml"
@@ -42,8 +49,15 @@
               NumChannels="1"
               KoOffset="400"
               ModuleType="3" >
-      <op:verify File="../lib/OFM-VirtualButton/library.json" ModuleVersion="0.3" />
+    <op:verify File="../lib/OFM-VirtualButton/library.json" ModuleVersion="0.4" />
     </op:define>
 
-    <generate />
+    <generate>
+      <Dynamic>
+        <op:include href="../lib/OGM-Common/src/Common.share.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="BASE" />
+        <op:include href="FingerprintModule.share.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="FIN" />
+        <op:include href="../lib/OFM-LogicModule/src/Logikmodul.share.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="LOG" />
+        <op:include href="../lib/OFM-VirtualButton/src/VirtualButton.share.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="BTN" />
+      </Dynamic>
+    </generate>
 </KNX>
