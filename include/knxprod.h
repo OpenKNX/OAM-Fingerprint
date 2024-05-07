@@ -10,9 +10,9 @@
                                              
 #define MAIN_OpenKnxId 0xA6
 #define MAIN_ApplicationNumber 1
-#define MAIN_ApplicationVersion 17
-#define MAIN_ParameterSize 451
-#define MAIN_MaxKoNumber 519
+#define MAIN_ApplicationVersion 30
+#define MAIN_ParameterSize 25180
+#define MAIN_MaxKoNumber 3496
 #define MAIN_OrderNumber "OpenKnxFingerprint"
 #define BASE_ModuleVersion 17
 #define LOG_ModuleVersion 50
@@ -143,15 +143,32 @@
 // Speichern
 #define KoBASE_ManualSave                          (knx.getGroupObject(BASE_KoManualSave))
 
-#define FIN_VisibleChannels                     46      // uint16_t
-#define FIN_FingerprintScanner                  48      // 2 Bits, Bit 7-6
+#define FIN_VisibleActions                      46      // uint16_t
+#define FIN_AuthDelayBase                       48      // 2 Bits, Bit 7-6
+#define     FIN_AuthDelayBaseMask 0xC0
+#define     FIN_AuthDelayBaseShift 6
+#define FIN_AuthDelayTime                       48      // 14 Bits, Bit 13-0
+#define     FIN_AuthDelayTimeMask 0x3FFF
+#define     FIN_AuthDelayTimeShift 0
+#define FIN_FingerprintScanner                  50      // 2 Bits, Bit 7-6
 #define     FIN_FingerprintScannerMask 0xC0
 #define     FIN_FingerprintScannerShift 6
+#define FIN_FingerprintColor                    50      // 3 Bits, Bit 5-3
+#define     FIN_FingerprintColorMask 0x38
+#define     FIN_FingerprintColorShift 3
 
 // Verfügbare Aktionen
-#define ParamFIN_VisibleChannels                     (knx.paramWord(FIN_VisibleChannels))
+#define ParamFIN_VisibleActions                      (knx.paramWord(FIN_VisibleActions))
+// Zeitbasis
+#define ParamFIN_AuthDelayBase                       ((knx.paramByte(FIN_AuthDelayBase) & FIN_AuthDelayBaseMask) >> FIN_AuthDelayBaseShift)
+// Zeit
+#define ParamFIN_AuthDelayTime                       (knx.paramWord(FIN_AuthDelayTime) & FIN_AuthDelayTimeMask)
+// Zeit (in Millisekunden)
+#define ParamFIN_AuthDelayTimeMS                     (paramDelay(knx.paramWord(FIN_AuthDelayTime)))
 // Fingerprint Scanner
 #define ParamFIN_FingerprintScanner                  ((knx.paramByte(FIN_FingerprintScanner) & FIN_FingerprintScannerMask) >> FIN_FingerprintScannerShift)
+// Blinkfarbe während der Authorisierung
+#define ParamFIN_FingerprintColor                    ((knx.paramByte(FIN_FingerprintColor) & FIN_FingerprintColorMask) >> FIN_FingerprintColorShift)
 
 #define FIN_KoTouched 21
 #define FIN_KoLock 26
@@ -233,16 +250,19 @@
 // Datenaustausch zwischen Fingerprints
 #define KoFIN_Sync                                (knx.getGroupObject(FIN_KoSync))
 
-#define FIN_ChannelCount 10
+#define FIN_ChannelCount 999
 
 // Parameter per channel
-#define FIN_ParamBlockOffset 47
+#define FIN_ParamBlockOffset 51
 #define FIN_ParamBlockSize 21
 #define FIN_ParamCalcIndex(index) (index + FIN_ParamBlockOffset + _channelIndex * FIN_ParamBlockSize)
 
 #define FIN_ActionInactive                       0      // 1 Bit, Bit 7
 #define     FIN_ActionInactiveMask 0x80
 #define     FIN_ActionInactiveShift 7
+#define FIN_ActionAuthenticate                   0      // 1 Bit, Bit 6
+#define     FIN_ActionAuthenticateMask 0x40
+#define     FIN_ActionAuthenticateShift 6
 #define FIN_ActionActionType                     0      // 2 Bits, Bit 5-4
 #define     FIN_ActionActionTypeMask 0x30
 #define     FIN_ActionActionTypeShift 4
@@ -258,6 +278,8 @@
 
 // deaktivieren
 #define ParamFIN_ActionInactive                      ((bool)(knx.paramByte(FIN_ParamCalcIndex(FIN_ActionInactive)) & FIN_ActionInactiveMask))
+// Authentifizierungs-Aktion
+#define ParamFIN_ActionAuthenticate                  ((bool)(knx.paramByte(FIN_ParamCalcIndex(FIN_ActionAuthenticate)) & FIN_ActionAuthenticateMask))
 // Aktionstyp
 #define ParamFIN_ActionActionType                    ((knx.paramByte(FIN_ParamCalcIndex(FIN_ActionActionType)) & FIN_ActionActionTypeMask) >> FIN_ActionActionTypeShift)
 // Zeitbasis
@@ -274,7 +296,7 @@
 
 // Communication objects per channel (multiple occurrence)
 #define FIN_KoBlockOffset 500
-#define FIN_KoBlockSize 2
+#define FIN_KoBlockSize 3
 
 #define FIN_KoCalcNumber(index) (index + FIN_KoBlockOffset + _channelIndex * FIN_KoBlockSize)
 #define FIN_KoCalcIndex(number) ((number >= FIN_KoCalcNumber(0) && number < FIN_KoCalcNumber(FIN_KoBlockSize)) ? (number - FIN_KoBlockOffset) % FIN_KoBlockSize : -1)
@@ -282,21 +304,24 @@
 
 #define FIN_KoActionSwitch 0
 #define FIN_KoActionState 1
+#define FIN_KoActionCall 2
 
 // Ausgang
 #define KoFIN_ActionSwitch                        (knx.getGroupObject(FIN_KoCalcNumber(FIN_KoActionSwitch)))
 // Eingang
 #define KoFIN_ActionState                         (knx.getGroupObject(FIN_KoCalcNumber(FIN_KoActionState)))
+// Eingang
+#define KoFIN_ActionCall                          (knx.getGroupObject(FIN_KoCalcNumber(FIN_KoActionCall)))
 
-#define FINACT_FingerActionCount                   257      // uint16_t
+#define FINACT_FingerActionCount                   21030      // uint16_t
 
 // Verfügbare Zuordnungen
 #define ParamFINACT_FingerActionCount                   (knx.paramWord(FINACT_FingerActionCount))
 
-#define FINACT_ChannelCount 10
+#define FINACT_ChannelCount 999
 
 // Parameter per channel
-#define FINACT_ParamBlockOffset 259
+#define FINACT_ParamBlockOffset 21032
 #define FINACT_ParamBlockSize 4
 #define FINACT_ParamCalcIndex(index) (index + FINACT_ParamBlockOffset + _channelIndex * FINACT_ParamBlockSize)
 
@@ -308,125 +333,125 @@
 // Scanner Finger ID
 #define ParamFINACT_faFingerId                          (knx.paramWord(FINACT_ParamCalcIndex(FINACT_faFingerId)))
 
-#define LOG_BuzzerInstalled                     299      // 1 Bit, Bit 7
+#define LOG_BuzzerInstalled                     25028      // 1 Bit, Bit 7
 #define     LOG_BuzzerInstalledMask 0x80
 #define     LOG_BuzzerInstalledShift 7
-#define LOG_LedInstalled                        299      // 1 Bit, Bit 6
+#define LOG_LedInstalled                        25028      // 1 Bit, Bit 6
 #define     LOG_LedInstalledMask 0x40
 #define     LOG_LedInstalledShift 6
-#define LOG_VacationKo                          299      // 1 Bit, Bit 5
+#define LOG_VacationKo                          25028      // 1 Bit, Bit 5
 #define     LOG_VacationKoMask 0x20
 #define     LOG_VacationKoShift 5
-#define LOG_HolidayKo                           299      // 1 Bit, Bit 4
+#define LOG_HolidayKo                           25028      // 1 Bit, Bit 4
 #define     LOG_HolidayKoMask 0x10
 #define     LOG_HolidayKoShift 4
-#define LOG_VacationRead                        299      // 1 Bit, Bit 3
+#define LOG_VacationRead                        25028      // 1 Bit, Bit 3
 #define     LOG_VacationReadMask 0x08
 #define     LOG_VacationReadShift 3
-#define LOG_HolidaySend                         299      // 1 Bit, Bit 2
+#define LOG_HolidaySend                         25028      // 1 Bit, Bit 2
 #define     LOG_HolidaySendMask 0x04
 #define     LOG_HolidaySendShift 2
-#define LOG_Neujahr                             300      // 1 Bit, Bit 7
+#define LOG_Neujahr                             25029      // 1 Bit, Bit 7
 #define     LOG_NeujahrMask 0x80
 #define     LOG_NeujahrShift 7
-#define LOG_DreiKoenige                         300      // 1 Bit, Bit 6
+#define LOG_DreiKoenige                         25029      // 1 Bit, Bit 6
 #define     LOG_DreiKoenigeMask 0x40
 #define     LOG_DreiKoenigeShift 6
-#define LOG_Weiberfastnacht                     300      // 1 Bit, Bit 5
+#define LOG_Weiberfastnacht                     25029      // 1 Bit, Bit 5
 #define     LOG_WeiberfastnachtMask 0x20
 #define     LOG_WeiberfastnachtShift 5
-#define LOG_Rosenmontag                         300      // 1 Bit, Bit 4
+#define LOG_Rosenmontag                         25029      // 1 Bit, Bit 4
 #define     LOG_RosenmontagMask 0x10
 #define     LOG_RosenmontagShift 4
-#define LOG_Fastnachtsdienstag                  300      // 1 Bit, Bit 3
+#define LOG_Fastnachtsdienstag                  25029      // 1 Bit, Bit 3
 #define     LOG_FastnachtsdienstagMask 0x08
 #define     LOG_FastnachtsdienstagShift 3
-#define LOG_Aschermittwoch                      300      // 1 Bit, Bit 2
+#define LOG_Aschermittwoch                      25029      // 1 Bit, Bit 2
 #define     LOG_AschermittwochMask 0x04
 #define     LOG_AschermittwochShift 2
-#define LOG_Frauentag                           300      // 1 Bit, Bit 1
+#define LOG_Frauentag                           25029      // 1 Bit, Bit 1
 #define     LOG_FrauentagMask 0x02
 #define     LOG_FrauentagShift 1
-#define LOG_Gruendonnerstag                     300      // 1 Bit, Bit 0
+#define LOG_Gruendonnerstag                     25029      // 1 Bit, Bit 0
 #define     LOG_GruendonnerstagMask 0x01
 #define     LOG_GruendonnerstagShift 0
-#define LOG_Karfreitag                          301      // 1 Bit, Bit 7
+#define LOG_Karfreitag                          25030      // 1 Bit, Bit 7
 #define     LOG_KarfreitagMask 0x80
 #define     LOG_KarfreitagShift 7
-#define LOG_Ostersonntag                        301      // 1 Bit, Bit 6
+#define LOG_Ostersonntag                        25030      // 1 Bit, Bit 6
 #define     LOG_OstersonntagMask 0x40
 #define     LOG_OstersonntagShift 6
-#define LOG_Ostermontag                         301      // 1 Bit, Bit 5
+#define LOG_Ostermontag                         25030      // 1 Bit, Bit 5
 #define     LOG_OstermontagMask 0x20
 #define     LOG_OstermontagShift 5
-#define LOG_TagDerArbeit                        301      // 1 Bit, Bit 4
+#define LOG_TagDerArbeit                        25030      // 1 Bit, Bit 4
 #define     LOG_TagDerArbeitMask 0x10
 #define     LOG_TagDerArbeitShift 4
-#define LOG_Himmelfahrt                         301      // 1 Bit, Bit 3
+#define LOG_Himmelfahrt                         25030      // 1 Bit, Bit 3
 #define     LOG_HimmelfahrtMask 0x08
 #define     LOG_HimmelfahrtShift 3
-#define LOG_Pfingstsonntag                      301      // 1 Bit, Bit 2
+#define LOG_Pfingstsonntag                      25030      // 1 Bit, Bit 2
 #define     LOG_PfingstsonntagMask 0x04
 #define     LOG_PfingstsonntagShift 2
-#define LOG_Pfingstmontag                       301      // 1 Bit, Bit 1
+#define LOG_Pfingstmontag                       25030      // 1 Bit, Bit 1
 #define     LOG_PfingstmontagMask 0x02
 #define     LOG_PfingstmontagShift 1
-#define LOG_Fronleichnam                        301      // 1 Bit, Bit 0
+#define LOG_Fronleichnam                        25030      // 1 Bit, Bit 0
 #define     LOG_FronleichnamMask 0x01
 #define     LOG_FronleichnamShift 0
-#define LOG_Friedensfest                        302      // 1 Bit, Bit 7
+#define LOG_Friedensfest                        25031      // 1 Bit, Bit 7
 #define     LOG_FriedensfestMask 0x80
 #define     LOG_FriedensfestShift 7
-#define LOG_MariaHimmelfahrt                    302      // 1 Bit, Bit 6
+#define LOG_MariaHimmelfahrt                    25031      // 1 Bit, Bit 6
 #define     LOG_MariaHimmelfahrtMask 0x40
 #define     LOG_MariaHimmelfahrtShift 6
-#define LOG_DeutscheEinheit                     302      // 1 Bit, Bit 5
+#define LOG_DeutscheEinheit                     25031      // 1 Bit, Bit 5
 #define     LOG_DeutscheEinheitMask 0x20
 #define     LOG_DeutscheEinheitShift 5
-#define LOG_Nationalfeiertag                    303      // 1 Bit, Bit 1
+#define LOG_Nationalfeiertag                    25032      // 1 Bit, Bit 1
 #define     LOG_NationalfeiertagMask 0x02
 #define     LOG_NationalfeiertagShift 1
-#define LOG_Reformationstag                     302      // 1 Bit, Bit 4
+#define LOG_Reformationstag                     25031      // 1 Bit, Bit 4
 #define     LOG_ReformationstagMask 0x10
 #define     LOG_ReformationstagShift 4
-#define LOG_Allerheiligen                       302      // 1 Bit, Bit 3
+#define LOG_Allerheiligen                       25031      // 1 Bit, Bit 3
 #define     LOG_AllerheiligenMask 0x08
 #define     LOG_AllerheiligenShift 3
-#define LOG_BussBettag                          302      // 1 Bit, Bit 2
+#define LOG_BussBettag                          25031      // 1 Bit, Bit 2
 #define     LOG_BussBettagMask 0x04
 #define     LOG_BussBettagShift 2
-#define LOG_MariaEmpfaengnis                    303      // 1 Bit, Bit 0
+#define LOG_MariaEmpfaengnis                    25032      // 1 Bit, Bit 0
 #define     LOG_MariaEmpfaengnisMask 0x01
 #define     LOG_MariaEmpfaengnisShift 0
-#define LOG_Advent1                             302      // 1 Bit, Bit 1
+#define LOG_Advent1                             25031      // 1 Bit, Bit 1
 #define     LOG_Advent1Mask 0x02
 #define     LOG_Advent1Shift 1
-#define LOG_Advent2                             302      // 1 Bit, Bit 0
+#define LOG_Advent2                             25031      // 1 Bit, Bit 0
 #define     LOG_Advent2Mask 0x01
 #define     LOG_Advent2Shift 0
-#define LOG_Advent3                             303      // 1 Bit, Bit 7
+#define LOG_Advent3                             25032      // 1 Bit, Bit 7
 #define     LOG_Advent3Mask 0x80
 #define     LOG_Advent3Shift 7
-#define LOG_Advent4                             303      // 1 Bit, Bit 6
+#define LOG_Advent4                             25032      // 1 Bit, Bit 6
 #define     LOG_Advent4Mask 0x40
 #define     LOG_Advent4Shift 6
-#define LOG_Heiligabend                         303      // 1 Bit, Bit 5
+#define LOG_Heiligabend                         25032      // 1 Bit, Bit 5
 #define     LOG_HeiligabendMask 0x20
 #define     LOG_HeiligabendShift 5
-#define LOG_Weihnachtstag1                      303      // 1 Bit, Bit 4
+#define LOG_Weihnachtstag1                      25032      // 1 Bit, Bit 4
 #define     LOG_Weihnachtstag1Mask 0x10
 #define     LOG_Weihnachtstag1Shift 4
-#define LOG_Weihnachtstag2                      303      // 1 Bit, Bit 3
+#define LOG_Weihnachtstag2                      25032      // 1 Bit, Bit 3
 #define     LOG_Weihnachtstag2Mask 0x08
 #define     LOG_Weihnachtstag2Shift 3
-#define LOG_Silvester                           303      // 1 Bit, Bit 2
+#define LOG_Silvester                           25032      // 1 Bit, Bit 2
 #define     LOG_SilvesterMask 0x04
 #define     LOG_SilvesterShift 2
-#define LOG_BuzzerSilent                        304      // uint16_t
-#define LOG_BuzzerNormal                        306      // uint16_t
-#define LOG_BuzzerLoud                          308      // uint16_t
-#define LOG_VisibleChannels                     310      // uint8_t
-#define LOG_LedMapping                          311      // 3 Bits, Bit 7-5
+#define LOG_BuzzerSilent                        25033      // uint16_t
+#define LOG_BuzzerNormal                        25035      // uint16_t
+#define LOG_BuzzerLoud                          25037      // uint16_t
+#define LOG_VisibleChannels                     25039      // uint8_t
+#define LOG_LedMapping                          25040      // 3 Bits, Bit 7-5
 #define     LOG_LedMappingMask 0xE0
 #define     LOG_LedMappingShift 5
 
@@ -537,7 +562,7 @@
 #define LOG_ChannelCount 1
 
 // Parameter per channel
-#define LOG_ParamBlockOffset 312
+#define LOG_ParamBlockOffset 25041
 #define LOG_ParamBlockSize 84
 #define LOG_ParamCalcIndex(index) (index + LOG_ParamBlockOffset + _channelIndex * LOG_ParamBlockSize)
 
@@ -2203,10 +2228,10 @@
 // Ausgang
 #define KoLOG_KOfO                                (knx.getGroupObject(LOG_KoCalcNumber(LOG_KoKOfO)))
 
-#define BTN_ReactionTimeMultiClick              396      // 8 Bits, Bit 7-0
-#define BTN_ReactionTimeLong                    397      // 8 Bits, Bit 7-0
-#define BTN_ReactionTimeExtraLong               398      // 8 Bits, Bit 7-0
-#define BTN_VisibleChannels                     399      // uint8_t
+#define BTN_ReactionTimeMultiClick              25125      // 8 Bits, Bit 7-0
+#define BTN_ReactionTimeLong                    25126      // 8 Bits, Bit 7-0
+#define BTN_ReactionTimeExtraLong               25127      // 8 Bits, Bit 7-0
+#define BTN_VisibleChannels                     25128      // uint8_t
 
 // Mehrfach-Klick
 #define ParamBTN_ReactionTimeMultiClick              (knx.paramByte(BTN_ReactionTimeMultiClick))
@@ -2220,7 +2245,7 @@
 #define BTN_ChannelCount 1
 
 // Parameter per channel
-#define BTN_ParamBlockOffset 400
+#define BTN_ParamBlockOffset 25129
 #define BTN_ParamBlockSize 51
 #define BTN_ParamCalcIndex(index) (index + BTN_ParamBlockOffset + _channelIndex * BTN_ParamBlockSize)
 
@@ -2787,7 +2812,7 @@
 #define BASE_KommentarModuleModuleParamSize 0
 #define BASE_KommentarModuleSubmodulesParamSize 0
 #define BASE_KommentarModuleParamSize 0
-#define BASE_KommentarModuleParamOffset 451
+#define BASE_KommentarModuleParamOffset 25180
 #define BASE_KommentarModuleCalcIndex(index, m1) (index + BASE_KommentarModuleParamOffset + _channelIndex * BASE_KommentarModuleCount * BASE_KommentarModuleParamSize + m1 * BASE_KommentarModuleParamSize)
 
 

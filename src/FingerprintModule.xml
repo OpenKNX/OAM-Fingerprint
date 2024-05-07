@@ -4,8 +4,8 @@
 
   <op:ETS OpenKnxId="0xA6"
     ApplicationNumber="0x01"
-    ApplicationVersion="1.0"
-    ReplacesVersions="0.15"
+    ApplicationVersion="1.14"
+    ReplacesVersions="1.13"
     ApplicationRevision="0"
     ProductName="Fingerabdruckleser"
     ApplicationName="AB-Finger-Logic-Button"
@@ -20,19 +20,20 @@
       <op:verify File="../lib/OGM-Common/library.json" ModuleVersion="1.1" />
     </op:define>
 
+  <!-- for FIN, we have to stay with ModuleType 2!!! -->
     <op:define prefix="FIN"
-              share="FingerprintModule.share.xml"
-              template="FingerprintModule.templ.xml"
-              ModuleType="2"
-              KoSingleOffset="20"
-              KoOffset="500"
-              NumChannels="10" />
+    share="FingerprintModule.share.xml"
+    template="FingerprintModule.templ.xml"
+    ModuleType="2"
+    KoSingleOffset="20"
+    KoOffset="500"
+    NumChannels="999" />
 
     <op:define prefix="FINACT"
-              share="FingerAction.share.xml"
-              template="FingerAction.templ.xml"
-              ModuleType="4"
-              NumChannels="10" />
+    share="FingerAction.share.xml"
+    template="FingerAction.templ.xml"
+    ModuleType="4"
+    NumChannels="999" />
 
     <op:define prefix="LOG"
               share="../lib/OFM-LogicModule/src/Logikmodul.share.xml"

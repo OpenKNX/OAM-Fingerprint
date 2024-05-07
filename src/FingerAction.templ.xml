@@ -9,14 +9,51 @@
             <Parameters>
               <Union SizeInBit="32">
                 <Memory CodeSegment="%AID%_RS-04-00000" Offset="0" BitOffset="0" />
-                <Parameter Id="%AID%_UP-%T%%CCC%001" Name="fa%C%ActionId" ParameterType="%AID%_PT-Action" Offset="0" BitOffset="0" Text="Aktion" Value="1" />
+                <Parameter Id="%AID%_UP-%T%%CCC%001" Name="fa%C%ActionId" ParameterType="%AID%_PT-Action" Offset="0" BitOffset="0" Text="Aktion" Value="0" />
                 <Parameter Id="%AID%_UP-%T%%CCC%002" Name="fa%C%FingerId" ParameterType="%AID%_PT-FingerId" Offset="2" BitOffset="0" Text="Scanner Finger ID" Value="0" />
+                <!-- <Parameter Id="%AID%_UP-%T%%CCC%004" Name="fa%C%FingerIdR503" ParameterType="%AID%_PT-FingerIdR503" Offset="2" BitOffset="0" Text="Scanner Finger ID" Value="0" />
+                <Parameter Id="%AID%_UP-%T%%CCC%005" Name="fa%C%FingerIdR503S" ParameterType="%AID%_PT-FingerIdR503S" Offset="2" BitOffset="0" Text="Scanner Finger ID" Value="0" /> -->
               </Union>
+              <Parameter Id="%AID%_P-%T%%CCC%003" Name="fa%C%FingerActionInfo" ParameterType="%AID%_PT-Text80Byte" Text="Finger-Aktion-Info" Value="" Access="Read" />
             </Parameters>
             <ParameterRefs>
               <ParameterRef Id="%AID%_UP-%T%%CCC%001_R-%T%%CCC%00101" RefId="%AID%_UP-%T%%CCC%001" />
               <ParameterRef Id="%AID%_UP-%T%%CCC%002_R-%T%%CCC%00201" RefId="%AID%_UP-%T%%CCC%002" />
+              <ParameterRef Id="%AID%_P-%T%%CCC%003_R-%T%%CCC%00301" RefId="%AID%_P-%T%%CCC%003" />
+              <!-- <ParameterRef Id="%AID%_UP-%T%%CCC%004_R-%T%%CCC%00401" RefId="%AID%_UP-%T%%CCC%004" />
+              <ParameterRef Id="%AID%_UP-%T%%CCC%005_R-%T%%CCC%00501" RefId="%AID%_UP-%T%%CCC%005" /> -->
             </ParameterRefs>
+            <ParameterCalculations>
+              <ParameterCalculation Id="%AID%_PC-%T%%CCC%001" Language="VBScript" Name="ClearFingerActionInfo%C%" LRTransformationFunc="FIN_dummy" RLTransformationFunc="FIN_clear">
+                <LParameters>
+                  <ParameterRefRef RefId="%AID%_P-%T%%CCC%003_R-%T%%CCC%00301" AliasName="FingerActionInfo" />
+                </LParameters>
+                <RParameters>
+                  <ParameterRefRef RefId="%AID%_UP-%T%%CCC%001_R-%T%%CCC%00101" />
+                  <ParameterRefRef RefId="%AID%_UP-%T%%CCC%002_R-%T%%CCC%00201" />
+                  <!-- <ParameterRefRef RefId="%AID%_UP-%T%%CCC%004_R-%T%%CCC%00401" />
+                  <ParameterRefRef RefId="%AID%_UP-%T%%CCC%005_R-%T%%CCC%00501" /> -->
+                </RParameters>
+              </ParameterCalculation>
+              <!-- <ParameterCalculation Id="%AID%_PC-%T%%CCC%002" Language="VBScript" Name="SyncFingerId" LRTransformationFunc="FIN_syncFingerIdLR" RLTransformationFunc="FIN_syncFingerIdRL">
+                <LParameters>
+                  <ParameterRefRef RefId="%AID%_UP-%T%%CCC%002_R-%T%%CCC%00201" AliasName="R503Pro" />
+                </LParameters>
+                <RParameters>
+                  <ParameterRefRef RefId="%AID%_UP-2000002_R-200000201" AliasName="Scanner" />
+                  <ParameterRefRef RefId="%AID%_UP-%T%%CCC%004_R-%T%%CCC%00401" AliasName="R503S" />
+                  <ParameterRefRef RefId="%AID%_UP-%T%%CCC%005_R-%T%%CCC%00501" AliasName="R503" />
+                </RParameters>
+              </ParameterCalculation> -->
+            </ParameterCalculations>
+            <ParameterValidations>
+              <ParameterValidation Id="%AID%_PV-%T%%CCC%001" Name="CheckFingerIdRange" ValidationFunc="FIN_checkFingerIdRange">
+                <Parameters>
+                  <ParameterRefRef RefId="%AID%_UP-2000002_R-200000201" AliasName="Scanner" />
+                  <ParameterRefRef RefId="%AID%_UP-%T%%CCC%002_R-%T%%CCC%00201" AliasName="FingerID" />
+                </Parameters>
+              </ParameterValidation>
+            </ParameterValidations>
           </Static>
           <Dynamic>
             <ChannelIndependentBlock>
@@ -27,20 +64,37 @@
                       <Row Id="%AID%_PB-nnn_R-1" />
                     </Rows>
                     <Columns>
-                      <Column Id="%AID%_PB-nnn_C-1" Width="10%" />
-                      <Column Id="%AID%_PB-nnn_C-2" Width="20%" />
-                      <Column Id="%AID%_PB-nnn_C-3" Width="20%" />
-                      <Column Id="%AID%_PB-nnn_C-4" Width="25%" />
+                      <Column Id="%AID%_PB-nnn_C-1" Width="8%" />
+                      <Column Id="%AID%_PB-nnn_C-2" Width="12%" />
+                      <Column Id="%AID%_PB-nnn_C-3" Width="12%" />
+                      <Column Id="%AID%_PB-nnn_C-4" Width="23%" />
+                      <Column Id="%AID%_PB-nnn_C-5" Width="80%" />
+                      <!-- <Column Id="%AID%_PB-nnn_C-6" Width="12%" /> -->
                     </Columns>
-                    <ParameterSeparator Id="%AID%_PS-nnn" Text="%C%." Cell="1,1"/>
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="%C%." Cell="1,1" />
                     <ParameterRefRef RefId="%AID%_UP-%T%%CCC%001_R-%T%%CCC%00101" Cell="1,2" />
                     <choose ParamRefId="%AID%_UP-%T%%CCC%001_R-%T%%CCC%00101">
                       <when test="!=0">
+                        <!-- Be careful, here we use an absolute ModuleNumber ignorig %T% -->
+                        <!-- <choose ParamRefId="%AID%_UP-2000002_R-200000201"> -->
+                        <!-- <when test="0"> -->
+                        <!-- <ParameterRefRef RefId="%AID%_UP-%T%%CCC%005_R-%T%%CCC%00501" Cell="1,3" /> -->
+                        <!-- <ParameterRefRef RefId="%AID%_UP-%T%%CCC%002_R-%T%%CCC%00201" Cell="1,6" /> -->
+                        <!-- <Assign SourceParamRefRef="%AID%_UP-%T%%CCC%005_R-%T%%CCC%00501" TargetParamRefRef="%AID%_UP-%T%%CCC%002_R-%T%%CCC%00201" /> -->
+                        <!-- </when> -->
+                        <!-- <when test="1"> -->
+                        <!-- <ParameterRefRef RefId="%AID%_UP-%T%%CCC%004_R-%T%%CCC%00401" Cell="1,3" /> -->
+                        <!-- <ParameterRefRef RefId="%AID%_UP-%T%%CCC%002_R-%T%%CCC%00201" Cell="1,6" /> -->
+                        <!-- <Assign SourceParamRefRef="%AID%_UP-%T%%CCC%004_R-%T%%CCC%00401" TargetParamRefRef="%AID%_UP-%T%%CCC%002_R-%T%%CCC%00201" /> -->
+                        <!-- </when> -->
+                        <!-- <when test="2"> -->
                         <ParameterRefRef RefId="%AID%_UP-%T%%CCC%002_R-%T%%CCC%00201" Cell="1,3" />
-                        <Button Id="%AID%_B-%T%%CCC%001" Text="Finger Zuweisen" Cell="1,4" EventHandler="FIN_assignFingerId" EventHandlerParameters="{ &quot;Channel&quot;: %C% }" />
+                        <!-- </when> -->
+                        <!-- </choose> -->
+                        <Button Id="%AID%_B-%T%%CCC%002" Text="Info holen" Cell="1,4" EventHandler="FIN_checkFingerAction" EventHandlerParameters="{ &quot;Channel&quot;: %C% }" />
+                        <ParameterRefRef RefId="%AID%_P-%T%%CCC%003_R-%T%%CCC%00301" Cell="1,5" />
                       </when>
                     </choose>
-                    <!-- <Button Id="%AID%_B-%T%%CCC%002" Text="Löschen" Cell="1,3" /> -->
                   </ParameterBlock>
                 </when>
               </choose>

@@ -86,10 +86,71 @@ function FIN_searchUser(device, online, progress, context) {
     parPersonFinger.value = 2;
 }
 
+function FIN_sort(device, online, progress, context) {
+    var parFingerActionCount = device.getParameterByName("FINACT_FingerActionCount");
+    // first get rid of zero lines
+    var endIndex = parFingerActionCount.value;
+    var startIndex = 0;
+    while (endIndex - 1 > startIndex + 1) {
+        do {
+            endIndex--;
+            var parEndAction = device.getParameterByName("FINACT_fa" + endIndex + "ActionId");
+        } while (parEndAction.value == 0);
+        do {
+            startIndex++;
+            var parStartAction = device.getParameterByName("FINACT_fa" + startIndex + "ActionId");
+        } while (parStartAction.value != 0);
+        // now startIndex points to a zero entry and endIndex to a non-zero entry, we move end to start
+        if (endIndex > startIndex) {
+            var parStartFinger = device.getParameterByName("FINACT_fa" + startIndex + "FingerId");
+            var parEndFinger = device.getParameterByName("FINACT_fa" + endIndex + "FingerId");
+            parStartAction.value = parEndAction.value;
+            parStartFinger.value = parEndFinger.value;
+            parEndAction.value = 0;
+            parEndFinger.value = 0;
+        }
+    }
+    // now do bubble sort
+    do {
+        var continueSort = false;
+        for (var current = 1; current < parFingerActionCount.value; current++) {
+            var parCurrAction = device.getParameterByName("FINACT_fa" + current + "ActionId");
+            var parNextAction = device.getParameterByName("FINACT_fa" + (current + 1) + "ActionId");
+            var parCurrFinger = device.getParameterByName("FINACT_fa" + current + "FingerId");
+            var parNextFinger = device.getParameterByName("FINACT_fa" + (current + 1) + "FingerId");
+            if (parNextAction.value == 0) { break; }
+            var swap = (parCurrAction.value > parNextAction.value || (parCurrAction.value == parNextAction.value && parCurrFinger.value > parNextFinger.value));
+            if (swap) {
+                continueSort = true;
+                var tmpAction = parCurrAction.value;
+                var tmpFinger = parCurrFinger.value;
+                parCurrAction.value = parNextAction.value;
+                parCurrFinger.value = parNextFinger.value;
+                parNextAction.value = tmpAction;
+                parNextFinger.value = tmpFinger;
+            }
+        }
+    } while (continueSort);
+}
+
 function FIN_assignFingerId(device, online, progress, context) {
     var parFingerId = device.getParameterByName("FINACT_FingerId");
-    var parTargetId = device.getParameterByName("FINACT_fa" + context.Channel + "FingerId");
+    var parFingerActionLine = device.getParameterByName("FINACT_FingerActionLine");
+    var parTargetId = device.getParameterByName("FINACT_fa" + parFingerActionLine.value + "FingerId");
     parTargetId.value = parFingerId.value;
+}
+
+function FIN_checkFingerAction(device, online, progress, context) {
+    var parActionId = device.getParameterByName("FINACT_fa" + context.Channel + "ActionId");
+    var parFingerId = device.getParameterByName("FINACT_fa" + context.Channel + "FingerId");
+    var parFingerActionInfo = device.getParameterByName("FINACT_fa" + context.Channel + "FingerActionInfo");
+    var parVisibleActions = device.getParameterByName("FIN_VisibleActions");
+    if (parActionId.value <= parVisibleActions.value) {
+        var parActionDescription = device.getParameterByName("FIN_Action" + parActionId.value + "Description");
+        parFingerActionInfo.value = (parActionDescription.value + "; Waldemar; Zeigefinger rechts").substring(0, 80);
+    } else {
+        parFingerActionInfo.value = "Aktion ist nicht definiert, Finger wurde nicht ermittelt";
+    }
 }
 
 // function FIN_calcFingerIdsToDataBlock(device, input, output, context) {
@@ -144,7 +205,67 @@ function FIN_assignFingerId(device, online, progress, context) {
 //     device.getParameterByName("FIN_DataBlock").value = dataBlock;
 // }
 
-// function FIN_dummy(input, output, context) { }
+function FIN_clear(input, output, context) {
+    output.FingerActionInfo = "";
+}
+
+// function FIN_syncR503Pro(input, output, context) {
+//     if (input.R503Pro.value <= 149) {
+//         if (output.R503S.value != input.R503Pro.value)
+//             output.R503S.value = input.R503Pro.value;
+//         if (output.R503.value != input.R503Pro.value)
+//             output.R503.value = input.R503Pro.value;
+//     } else if (input.R503Pro.value <= 199) {
+//         if (output.R503.value != input.R503Pro.value)
+//             output.R503.value = input.R503Pro.value;
+//     }
+// }
+
+// function FIN_syncR503(input, output, context) {
+//     if (output.R503Pro.value != input.R503.value)
+//         output.R503Pro.value = input.R503.value;
+// }
+
+// function FIN_syncR503S(input, output, context) {
+//     if (output.R503Pro.value != input.R503S.value)
+//         output.R503Pro.value = input.R503S.value;
+// }
+
+function FIN_syncFingerIdLR(input, output, context) {
+    info("syncFingerIdLR");
+    info(output.Scanner);
+    info(input.R503Pro);
+    info(output.R503S);
+    info(output.R503);
+    if (output.Scanner == 0 && input.R503Pro <= 149)
+        output.R503S = input.R503Pro;
+    else if (output.Scanner == 1 && input.R503Pro <= 199)
+        output.R503 = input.R503Pro;
+}
+
+function FIN_syncFingerIdRL(input, output, context) {
+    info("syncFingerIdRL");
+    info(input.Scanner);
+    info(output.R503Pro);
+    info(input.R503S);
+    info(input.R503);
+    if (input.Scanner == 0)
+        output.R503Pro = input.R503S;
+    else if (input.Scanner == 1)
+        output.R503Pro = input.R503;
+
+}
+
+function FIN_checkFingerIdRange(input, changed, prevValue, context) {
+    // if (changed == "FingerID") {
+    var limit = [149, 199, 1499];
+    if (input.FingerID > limit[input.Scanner])
+        return "FingerId ist " + input.FingerID + ", aber der Fingerscanner kann nur " + limit[input.Scanner] + " Finger verwalten.";
+    // }
+    return true;
+}
+
+function FIN_dummy(input, output, context) { }
 
 function FIN_enrollFinger(device, online, progress, context) {
     progress.setText("Fingerprint: Finger ID " + fingerId + " anlernen...");
