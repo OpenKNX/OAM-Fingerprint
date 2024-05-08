@@ -7,15 +7,17 @@
 #define PWR_PIN 1
 #define TOUCH_PIN 2
 
-/*#define LOCK_PIN 27
-#define UNLOCK_PIN 26
-#define LED_GREEN_PIN 28
-#define LED_RED_PIN 29*/
-
-#define LOCK_PIN 29
+#define LOCK_PIN 26
 #define UNLOCK_PIN 27
-#define LED_GREEN_PIN 26
-#define LED_RED_PIN 28
+#define LED_GREEN_PIN 24
+#define LED_RED_PIN 25
+
+#define EXT0 14
+#define EXT1 15
+#define EXT2 28 // ADC
+#define EXT3 18
+#define EXT4 29 // ADC
+#define EXT5 19
 
 #define CAPTURE_RETRIES_TOUCH_TIMEOUT 500
 #define CAPTURE_RETRIES_LOCK_TIMEOUT 3000
