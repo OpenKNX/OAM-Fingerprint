@@ -50,7 +50,7 @@
               NumChannels="1"
               KoOffset="400"
               ModuleType="3" >
-    <op:verify File="../lib/OFM-VirtualButton/library.json" ModuleVersion="0.4" />
+    <op:verify File="../lib/OFM-VirtualButton/library.json" ModuleVersion="0.3" />
     </op:define>
 
     <generate>

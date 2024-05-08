@@ -115,7 +115,7 @@ void FingerprintModule::loop()
                     KoFIN_ScanSuccessData.valueNoSend(false, Dpt(15, 0, 4));                     // encryption (not used for now)
                     KoFIN_ScanSuccessData.value((uint8_t)0, Dpt(15, 0, 5));                      // index of access identification code (not used)
 
-                    for (uint8_t i = 0; i < ParamFIN_VisibleChannels; i++)
+                    for (uint8_t i = 0; i < ParamFIN_VisibleActions; i++)
                     {
                         _channels[i]->processScan(findFingerResult.location);
                     }

@@ -216,9 +216,7 @@
                     <ParameterRefRef RefId="%AID%_P-%T%000007_R-%T%00000701" IndentLevel="1" />
                   </when>
                 </choose>
-                <!-- <Argument Id="M-00FA_A-A401-04-D0F8_MD-2_A-3" Name="argChan" Allocates="1" /> -->
                 <Button Id="%AID%_B-%T%000001" Text="Anlernen" Name="enrollFinger" EventHandler="FIN_enrollFinger" EventHandlerOnline="ConnectionOriented" />
-                <!-- <Button Id="%AID%_MD-%TT%%CC%101_B-%TT%%CC%101" Text="" EventHandlerOnline="ConnectionOriented" EventHandler="writeMeter" EventHandlerParameters="{ &quot;Module&quot;: %TT%, &quot;Channel&quot;: %C% }" Cell="1,4" Icon="pencil" /> -->
 
                 <ComObjectRefRef RefId="%AID%_O-%T%000001_R-%T%00000101" />
                 <ComObjectRefRef RefId="%AID%_O-%T%000006_R-%T%00000601" />
