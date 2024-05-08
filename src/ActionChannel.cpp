@@ -20,21 +20,11 @@ void ActionChannel::processInputKo(GroupObject &ko)
             break;
     }
 
-/*
-    for (size_t i = 0; i < ParamFINACT_FingerActionCount; i++)
-    {
-        knx.paramWord(FINACT_faFingerId + FINACT_ParamBlockOffset + i * FINACT_ParamBlockSize);
 
-        knx.paramWord(FINACT_faActionId + FINACT_ParamBlockOffset + i * FINACT_ParamBlockSize);
-    }
-*/
 }
 
 void ActionChannel::processScan(uint16_t location)
 {
-    //if (FIN_ChannelFingerId != location)
-    //    return;
-    
     if (!ParamFIN_ActionAuthenticate || KoFIN_ActionCall.value(DPT_Switch))
     {
 

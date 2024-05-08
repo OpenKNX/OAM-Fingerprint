@@ -8,6 +8,7 @@ function FIN_searchFingerId(device, online, progress, context) {
 function FIN_searchUser(device, online, progress, context) {
     var parPersonName = device.getParameterByName("FINACT_PersonName");
     var parPersonFinger = device.getParameterByName("FINACT_PersonFinger");
+    var parFingerId = device.getParameterByName("FINACT_FingerId");
     parPersonName.value = "Waldemar";
     parPersonFinger.value = 2;
 }
@@ -131,4 +132,23 @@ function FIN_enrollFinger(device, online, progress, context) {
 
     online.disconnect();
     progress.setText("Fingerprint: Finger ID " + fingerId + " angelernt.");
+}
+
+function FIN_deleteFinger(device, online, progress, context) {
+    progress.setText("Fingerprint: Finger ID " + fingerId + " löschen...");
+    online.connect();
+
+    // internal function ID
+    var data = [2];
+
+    var fingerId = device.getParameterByName("FIN_FingerId").value;
+    data = data.concat((fingerId & 0x0000ff00) >> 8, (fingerId & 0x000000ff));
+
+    var resp = online.invokeFunctionProperty(160, 3, data);
+    if (resp[0] != 0) {
+        throw new Error("Fingerprint: Es ist ein unbekannter Fehler aufgetreten!");
+    }
+
+    online.disconnect();
+    progress.setText("Fingerprint: Finger ID " + fingerId + " gelöscht.");
 }

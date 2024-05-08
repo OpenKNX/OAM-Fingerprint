@@ -20,6 +20,10 @@
 #define CAPTURE_RETRIES_TOUCH_TIMEOUT 500
 #define CAPTURE_RETRIES_LOCK_TIMEOUT 3000
 
+#define MAX_FINGERS 1500
+
+#define FIN_CaclStorageOffset(fingerId) (fingerId - 1) * 29 + 1 // first byte free for storage format version
+
 class FingerprintModule : public OpenKNX::Module
 {
   public:
@@ -45,6 +49,9 @@ class FingerprintModule : public OpenKNX::Module
     void setFingerprintPower(bool on);
     void updateLockLeds(bool showGreenWhenUnlock = true);
     void handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
+    void handleFunctionPropertyDeleteFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
+    void handleFunctionPropertySearchPersonByFingerId(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
+    void handleFunctionPropertySearchFingerIdByPerson(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
     static void delayCallback(uint32_t period);
 
     OpenKNX::Flash::Driver *_fingerprintStorage = nullptr;

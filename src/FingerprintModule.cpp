@@ -115,9 +115,17 @@ void FingerprintModule::loop()
                     KoFIN_ScanSuccessData.valueNoSend(false, Dpt(15, 0, 4));                     // encryption (not used for now)
                     KoFIN_ScanSuccessData.value((uint8_t)0, Dpt(15, 0, 5));                      // index of access identification code (not used)
 
-                    for (uint8_t i = 0; i < ParamFIN_VisibleActions; i++)
+                    for (size_t i = 0; i < ParamFINACT_FingerActionCount; i++)
                     {
-                        _channels[i]->processScan(findFingerResult.location);
+                        uint16_t fingerId = knx.paramWord(FINACT_faFingerId + FINACT_ParamBlockOffset + i * FINACT_ParamBlockSize);
+                        if (fingerId == findFingerResult.location)
+                        {
+                            uint16_t actionId = knx.paramWord(FINACT_faActionId + FINACT_ParamBlockOffset + i * FINACT_ParamBlockSize);
+                            if (actionId < FIN_VisibleActions)
+                                _channels[actionId]->processScan(findFingerResult.location);
+                            else
+                                logInfoP("Invalid ActionId: %d", actionId);
+                        }
                     }
                 }
                 else
@@ -377,14 +385,14 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
     switch (lAsap)
     {
         case FIN_KoEnrollNext:
-        case FIN_KoEnrollSlotId:
-        case FIN_KoEnrollSlotData:
+        case FIN_KoEnrollId:
+        case FIN_KoEnrollData:
             if (lAsap == FIN_KoEnrollNext)
             {
                 location = finger.getNextFreeLocation();
                 logInfoP("Next availabe location: %d", location);
             }
-            else if (lAsap == FIN_KoEnrollSlotId)
+            else if (lAsap == FIN_KoEnrollId)
             {
                 location = iKo.value(Dpt(7, 1));
                 logInfoP("Location provided: %d", location);
@@ -397,9 +405,9 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
 
             enrollFinger(location);
             break;
-        case FIN_KoDeleteSlotId:
-        case FIN_KoDeleteSlotData:
-            if (lAsap == FIN_KoDeleteSlotId)
+        case FIN_KoDeleteId:
+        case FIN_KoDeleteData:
+            if (lAsap == FIN_KoDeleteId)
             {
                 location = iKo.value(Dpt(7, 1));
                 logInfoP("Location provided: %d", location);
@@ -436,6 +444,15 @@ bool FingerprintModule::processFunctionProperty(uint8_t objectIndex, uint8_t pro
         case 1:
             handleFunctionPropertyEnrollFinger(data, resultData, resultLength);
             return true;
+        case 2:
+            handleFunctionPropertyDeleteFinger(data, resultData, resultLength);
+            return true;
+        case 11:
+            handleFunctionPropertySearchPersonByFingerId(data, resultData, resultLength);
+            return true;
+        case 12:
+            handleFunctionPropertySearchFingerIdByPerson(data, resultData, resultLength);
+            return true;
     }
 
     return false;
@@ -445,33 +462,157 @@ void FingerprintModule::handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_
 {
     logInfoP("Function property: Enroll request");
 
-    uint16_t location = (data[1] << 8) | data[2];
-    logDebugP("location: %d", location);
+    uint16_t fingerId = (data[1] << 8) | data[2];
+    logDebugP("fingerId: %d", fingerId);
 
     uint8_t personFinger = data[3];
     logDebugP("personFinger: %d", personFinger);
 
-    char personName[29] = {};
+    char personName[28] = {};
     for (size_t i = 0; i < 28; i++)
     {
         memcpy(personName + i, data + 4 + i, 1);
         if (personName[i] == 0) // null termination
             break;
     }
-    logDebugP("personFinger: %s", personName);
+    logDebugP("personName: %s", personName);
 
-    uint32_t storageOffset = location * 32 - 1;
-    // first byte stays free for future usage
-    _fingerprintStorage->writeWord(storageOffset + 1, location);
-    _fingerprintStorage->writeByte(storageOffset + 3, personFinger); // only 4 bits used
-    _fingerprintStorage->write(storageOffset + 4, *personName, 28);
+    uint32_t storageOffset = FIN_CaclStorageOffset(fingerId);
+    _fingerprintStorage->writeByte(storageOffset, personFinger); // only 4 bits used
+    _fingerprintStorage->write(storageOffset + 1, *personName, 28);
     _fingerprintStorage->commit();
 
-    //bool success = enrollFinger(location);
+    //bool success = enrollFinger(fingerId);
     bool success = true;
     
     resultData[0] = success ? 0 : 1;
     resultLength = 1;
+}
+
+void FingerprintModule::handleFunctionPropertyDeleteFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
+{
+    logInfoP("Function property: Delete request");
+
+    uint16_t fingerId = (data[1] << 8) | data[2];
+    logDebugP("fingerId: %d", fingerId);
+
+    char personName[28] = {}; // empty
+
+    uint32_t storageOffset = FIN_CaclStorageOffset(fingerId);
+    _fingerprintStorage->writeByte(storageOffset, 0); // "0" for not set
+    _fingerprintStorage->write(storageOffset + 1, *personName, 28);
+    _fingerprintStorage->commit();
+
+    bool success = deleteFinger(fingerId);
+    
+    resultData[0] = success ? 0 : 1;
+    resultLength = 1;
+}
+
+void FingerprintModule::handleFunctionPropertySearchPersonByFingerId(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
+{
+    logInfoP("Function property: Search person by FingerId");
+    logIndentUp();
+
+    uint16_t fingerId = (data[1] << 8) | data[2];
+    logDebugP("fingerId: %d", fingerId);
+
+    uint8_t* personName[28] = {};
+
+    uint32_t storageOffset = FIN_CaclStorageOffset(fingerId);
+    uint8_t personFinger = _fingerprintStorage->readByte(storageOffset);
+    if (personFinger > 0)
+    {
+        _fingerprintStorage->read(storageOffset + 1, *personName, 28);
+
+        logDebugP("Found:");
+        logIndentUp();
+        logDebugP("personFinger: %d", personFinger);
+        logDebugP("personName: %s", personName);
+        logIndentDown();
+
+        resultData[0] = 1;
+        resultData[1] = personFinger;
+        resultLength = 2;
+        for (size_t i = 0; i < 28; i++)
+        {
+            memcpy(resultData + 2 + i, personName + i, 1);
+            resultLength++;
+
+            if (personName[i] == 0) // null termination
+                break;
+        }
+    }
+    else
+    {
+        logDebugP("Not found.");
+
+        resultData[0] = 0;
+        resultLength = 1;
+    }
+
+    logIndentDown();
+}
+
+void FingerprintModule::handleFunctionPropertySearchFingerIdByPerson(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
+{
+    logInfoP("Function property: Search FingerId(s) by person");
+    logIndentUp();
+
+    uint8_t searchPersonFinger = data[1];
+    logDebugP("searchPersonFinger: %d", searchPersonFinger); // can be "0" if only by name should be searched
+
+    char searchPersonName[28] = {};
+    uint8_t searchPersonNameLength = 28;
+    for (size_t i = 0; i < 28; i++)
+    {
+        memcpy(searchPersonName + i, data + 2 + i, 1);
+        if (searchPersonName[i] == 0) // null termination
+        {
+            searchPersonNameLength = i + 1;
+            break;
+        }
+    }
+    logDebugP("searchPersonName: %s", searchPersonName);
+
+    uint32_t storageOffset = 0;
+    uint8_t personFinger = 0;
+    uint8_t* personName[28] = {};
+    uint8_t foundCount = 0;
+    for (size_t fingerId = 0; fingerId < MAX_FINGERS; fingerId++)
+    {
+        storageOffset = FIN_CaclStorageOffset(fingerId);
+        if (searchPersonFinger > 0)
+        {
+            personFinger = _fingerprintStorage->readByte(storageOffset);
+            if (searchPersonFinger != personFinger)
+                continue;
+        }
+
+        _fingerprintStorage->read(storageOffset + 1, *personName, 28);
+        if (memcmp(personName, searchPersonName, searchPersonNameLength) == 0)
+        {
+            logDebugP("Found:");
+            logIndentUp();
+            logDebugP("personFinger: %d", personFinger);
+            logDebugP("personName: %s", personName);
+            logIndentDown();
+
+            resultData[1 + foundCount * 31] = fingerId >> 8;
+            resultData[1 + foundCount * 31 + 1] = fingerId;
+            resultData[1 + foundCount * 31 + 2] = personFinger;
+            memcpy(resultData + 1 + foundCount * 31 + 3, personName, 28);
+
+            foundCount++;
+            if (foundCount == 10)
+                break; // we return max. 10 results
+        }
+    }
+    
+    resultData[0] = foundCount > 0;
+    resultLength = 1 + foundCount * 31;
+
+    logIndentDown();
 }
 
 void FingerprintModule::processAfterStartupDelay()
