@@ -89,7 +89,7 @@
             </ParameterTypes>
             <Parameters>
               <Parameter Id="%AID%_P-%T%000003" Name="PersonName" ParameterType="%AID%_PT-Text16Byte" Text="Name der Person" Value="" />
-              <Parameter Id="%AID%_P-%T%000004" Name="PersonFinger" ParameterType="%AID%_PT-Finger" Text="Finger der Person" Value="0" />
+              <Parameter Id="%AID%_P-%T%000004" Name="PersonFinger" ParameterType="%AID%_PT-Finger" Text="Finger der Person" Value="1" />
               <Parameter Id="%AID%_P-%T%000005" Name="FingerIdR503" ParameterType="%AID%_PT-FingerIdR503" Text="Scanner Finger ID" Value="0" />
               <Parameter Id="%AID%_P-%T%000006" Name="FingerIdR503S" ParameterType="%AID%_PT-FingerIdR503S" Text="Scanner Finger ID" Value="0" />
               <Parameter Id="%AID%_P-%T%000007" Name="FingerId" ParameterType="%AID%_PT-FingerId" Text="Scanner Finger ID" Value="0" />
@@ -247,9 +247,9 @@
                 <Button Id="%AID%_B-%T%000002" Text="Löschen" Name="deleteFinger" EventHandler="FIN_deleteFinger" EventHandlerOnline="ConnectionOriented" />
 
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="Zusatzfunktionen" UIHint="Headline" />
-                <ParameterRefRef RefId="%AID%_P-%T%000011_R-%T%00001101" IndentLevel="1" />
-                <ParameterRefRef RefId="%AID%_P-%T%000012_R-%T%00001201" IndentLevel="1" />
-                <ParameterRefRef RefId="%AID%_P-%T%000013_R-%T%00001301" IndentLevel="1" />
+                <ParameterRefRef RefId="%AID%_UP-%T%000011_R-%T%00001101" IndentLevel="1" />
+                <ParameterRefRef RefId="%AID%_UP-%T%000012_R-%T%00001201" IndentLevel="1" />
+                <ParameterRefRef RefId="%AID%_UP-%T%000013_R-%T%00001301" IndentLevel="1" />
 
                 <!-- Lock -->
                 <ComObjectRefRef RefId="%AID%_O-%T%000006_R-%T%00000601" />
