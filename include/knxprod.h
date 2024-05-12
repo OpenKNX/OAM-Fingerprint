@@ -186,6 +186,7 @@
 #define ParamFIN_EnableExternalControl               ((bool)(knx.paramByte(FIN_EnableExternalControl) & FIN_EnableExternalControlMask))
 
 #define FIN_KoTouched 21
+#define FIN_KoTouchedNoAction 22
 #define FIN_KoLock 26
 #define FIN_KoLockStatus 27
 #define FIN_KoScanSuccess 31
@@ -214,8 +215,10 @@
 #define FIN_KoActionRemoveFingerId 62
 #define FIN_KoSync 66
 
-// Ausgang Berührung
+// Ausgang Berührung (sofort, immer)
 #define KoFIN_Touched                             (knx.getGroupObject(FIN_KoTouched))
+// Ausgang Berührung (verzögert, wenn keine Aktion zugeordnet)
+#define KoFIN_TouchedNoAction                     (knx.getGroupObject(FIN_KoTouchedNoAction))
 // Sperre
 #define KoFIN_Lock                                (knx.getGroupObject(FIN_KoLock))
 // Status der Sperre
