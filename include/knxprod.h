@@ -211,8 +211,9 @@
 #define FIN_KoDeleteFailed 56
 #define FIN_KoDeleteFailedId 57
 #define FIN_KoDeleteFailedData 58
-#define FIN_KoActionAddFingerId 61
-#define FIN_KoActionRemoveFingerId 62
+#define FIN_KoInputFingerId 61
+#define FIN_KoActionAddFingerId 62
+#define FIN_KoActionRemoveFingerId 63
 #define FIN_KoSync 66
 
 // Ausgang Berührung (sofort, immer)
@@ -267,6 +268,8 @@
 #define KoFIN_DeleteFailedId                      (knx.getGroupObject(FIN_KoDeleteFailedId))
 // Löschung fehlgeschlagen (Zutrittsdaten)
 #define KoFIN_DeleteFailedData                    (knx.getGroupObject(FIN_KoDeleteFailedData))
+// Eingang Finger ID
+#define KoFIN_InputFingerId                       (knx.getGroupObject(FIN_KoInputFingerId))
 // Finger ID zu Aktion hinzufügen
 #define KoFIN_ActionAddFingerId                   (knx.getGroupObject(FIN_KoActionAddFingerId))
 // Finger ID von Aktion entfernen

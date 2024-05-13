@@ -38,12 +38,11 @@ void FingerprintModule::setup()
     digitalWrite(LED_GREEN_PIN, HIGH);
     finger.setLed(Fingerprint::State::Success);
 
-// hängt!?
-    /*for (uint8_t i = 0; i < ParamFIN_VisibleChannels; i++)
+    for (uint16_t i = 0; i < ParamFIN_VisibleActions; i++)
     {
         _channels[i] = new ActionChannel(i);
         _channels[i]->setup();
-    }*/
+    }
 
     resetLedsTimer = millis();
     logInfoP("Fingerprint module ready.");
@@ -105,35 +104,7 @@ void FingerprintModule::loop()
                 if (findFingerResult.found)
                 {
                     logInfoP("Finger found in location %d", findFingerResult.location);
-                    KoFIN_ScanSuccess.value(true, DPT_Switch);
-                    KoFIN_ScanSuccessId.value(findFingerResult.location, Dpt(7, 1));
-
-                    KoFIN_ScanSuccessData.valueNoSend(findFingerResult.location, Dpt(15, 0, 0)); // access identification code
-                    KoFIN_ScanSuccessData.valueNoSend(false, Dpt(15, 0, 1));                     // detection error
-                    KoFIN_ScanSuccessData.valueNoSend(true, Dpt(15, 0, 2));                      // permission accepted
-                    KoFIN_ScanSuccessData.valueNoSend(false, Dpt(15, 0, 3));                     // read direction (not used)
-                    KoFIN_ScanSuccessData.valueNoSend(false, Dpt(15, 0, 4));                     // encryption (not used for now)
-                    KoFIN_ScanSuccessData.value((uint8_t)0, Dpt(15, 0, 5));                      // index of access identification code (not used)
-
-                    bool actionFound = false;
-                    for (size_t i = 0; i < ParamFINACT_FingerActionCount; i++)
-                    {
-                        uint16_t fingerId = knx.paramWord(FINACT_faFingerId + FINACT_ParamBlockOffset + i * FINACT_ParamBlockSize);
-                        if (fingerId == findFingerResult.location)
-                        {
-                            uint16_t actionId = knx.paramWord(FINACT_faActionId + FINACT_ParamBlockOffset + i * FINACT_ParamBlockSize);
-                            if (actionId < FIN_VisibleActions)
-                            {
-                                _channels[actionId]->processScan(findFingerResult.location);
-                                actionFound = true;
-                            }
-                            else
-                                logInfoP("Invalid ActionId: %d", actionId);
-                        }
-                    }
-
-                    if (!actionFound)
-                        KoFIN_TouchedNoAction.value(true, DPT_Switch);
+                    processScanSuccess(findFingerResult.location);
                 }
                 else
                 {
@@ -267,6 +238,9 @@ void FingerprintModule::loop()
         digitalWrite(LED_GREEN_PIN, LOW);
         resetLedsTimer = 0;
     }
+
+    for (uint16_t i = 0; i < ParamFIN_VisibleActions; i++)
+        _channels[i]->loop();
 }
 
 void FingerprintModule::updateLockLeds(bool showGreenWhenUnlock)
@@ -290,6 +264,39 @@ void FingerprintModule::updateLockLeds(bool showGreenWhenUnlock)
 
         digitalWrite(LED_RED_PIN, LOW);
     }
+}
+
+void FingerprintModule::processScanSuccess(uint16_t location)
+{
+    KoFIN_ScanSuccess.value(true, DPT_Switch);
+    KoFIN_ScanSuccessId.value(location, Dpt(7, 1));
+
+    KoFIN_ScanSuccessData.valueNoSend(location, Dpt(15, 0, 0)); // access identification code
+    KoFIN_ScanSuccessData.valueNoSend(false, Dpt(15, 0, 1));    // detection error
+    KoFIN_ScanSuccessData.valueNoSend(true, Dpt(15, 0, 2));     // permission accepted
+    KoFIN_ScanSuccessData.valueNoSend(false, Dpt(15, 0, 3));    // read direction (not used)
+    KoFIN_ScanSuccessData.valueNoSend(false, Dpt(15, 0, 4));    // encryption (not used for now)
+    KoFIN_ScanSuccessData.value((uint8_t)0, Dpt(15, 0, 5));     // index of access identification code (not used)
+
+    bool actionFound = false;
+    for (size_t i = 0; i < ParamFINACT_FingerActionCount; i++)
+    {
+        uint16_t fingerId = knx.paramWord(FINACT_faFingerId + FINACT_ParamBlockOffset + i * FINACT_ParamBlockSize);
+        if (fingerId == location)
+        {
+            uint16_t actionId = knx.paramWord(FINACT_faActionId + FINACT_ParamBlockOffset + i * FINACT_ParamBlockSize);
+            if (actionId < FIN_VisibleActions)
+            {
+                _channels[actionId]->processScan(location);
+                actionFound = true;
+            }
+            else
+                logInfoP("Invalid ActionId: %d", actionId);
+        }
+    }
+
+    if (!actionFound)
+        KoFIN_TouchedNoAction.value(true, DPT_Switch);
 }
 
 bool FingerprintModule::enrollFinger(uint16_t location)
@@ -437,6 +444,12 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
             lockRequested = isLocked;
             updateLockLeds();
             break;
+        case FIN_KoInputFingerId:
+            location = iKo.value(Dpt(7, 1));
+            logInfoP("FingerID received: %d", location);
+
+            processScanSuccess(location);
+            break;
     }
 }
 
@@ -484,6 +497,7 @@ void FingerprintModule::handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_
     logDebugP("personName: %s", personName);
 
     uint32_t storageOffset = FIN_CaclStorageOffset(fingerId);
+    logDebugP("storageOffset: %d", storageOffset);
     _fingerprintStorage->writeByte(storageOffset, personFinger); // only 4 bits used
     _fingerprintStorage->write(storageOffset + 1, *personName, 28);
     _fingerprintStorage->commit();
