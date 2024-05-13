@@ -12,7 +12,6 @@ const std::string FingerprintModule::version()
 
 void FingerprintModule::setup()
 {
-    OpenKNX::Flash::Driver _fingerprintStorage;
     _fingerprintStorage.init("fingerprint", FINGERPRINT_FLASH_OFFSET, FINGERPRINT_FLASH_SIZE);
 
     finger = Fingerprint(delayCallback, FINGERPRINT_PASSWORD);
@@ -498,9 +497,9 @@ void FingerprintModule::handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_
 
     uint32_t storageOffset = FIN_CaclStorageOffset(fingerId);
     logDebugP("storageOffset: %d", storageOffset);
-    _fingerprintStorage->writeByte(storageOffset, personFinger); // only 4 bits used
-    _fingerprintStorage->write(storageOffset + 1, *personName, 28);
-    _fingerprintStorage->commit();
+    _fingerprintStorage.writeByte(storageOffset, personFinger); // only 4 bits used
+    _fingerprintStorage.write(storageOffset + 1, *personName, 28);
+    _fingerprintStorage.commit();
 
     //bool success = enrollFinger(fingerId);
     bool success = true;
@@ -519,9 +518,9 @@ void FingerprintModule::handleFunctionPropertyDeleteFinger(uint8_t *data, uint8_
     char personName[28] = {}; // empty
 
     uint32_t storageOffset = FIN_CaclStorageOffset(fingerId);
-    _fingerprintStorage->writeByte(storageOffset, 0); // "0" for not set
-    _fingerprintStorage->write(storageOffset + 1, *personName, 28);
-    _fingerprintStorage->commit();
+    _fingerprintStorage.writeByte(storageOffset, 0); // "0" for not set
+    _fingerprintStorage.write(storageOffset + 1, *personName, 28);
+    _fingerprintStorage.commit();
 
     bool success = deleteFinger(fingerId);
     
@@ -540,10 +539,10 @@ void FingerprintModule::handleFunctionPropertySearchPersonByFingerId(uint8_t *da
     uint8_t* personName[28] = {};
 
     uint32_t storageOffset = FIN_CaclStorageOffset(fingerId);
-    uint8_t personFinger = _fingerprintStorage->readByte(storageOffset);
+    uint8_t personFinger = _fingerprintStorage.readByte(storageOffset);
     if (personFinger > 0)
     {
-        _fingerprintStorage->read(storageOffset + 1, *personName, 28);
+        _fingerprintStorage.read(storageOffset + 1, *personName, 28);
 
         logDebugP("Found:");
         logIndentUp();
@@ -604,12 +603,12 @@ void FingerprintModule::handleFunctionPropertySearchFingerIdByPerson(uint8_t *da
         storageOffset = FIN_CaclStorageOffset(fingerId);
         if (searchPersonFinger > 0)
         {
-            personFinger = _fingerprintStorage->readByte(storageOffset);
+            personFinger = _fingerprintStorage.readByte(storageOffset);
             if (searchPersonFinger != personFinger)
                 continue;
         }
 
-        _fingerprintStorage->read(storageOffset + 1, *personName, 28);
+        _fingerprintStorage.read(storageOffset + 1, *personName, 28);
         if (memcmp(personName, searchPersonName, searchPersonNameLength) == 0)
         {
             logDebugP("Found:");
