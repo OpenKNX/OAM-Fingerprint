@@ -1,8 +1,13 @@
 #pragma once
 
+//#define CALC_TEMPLATE_CHECKUM
+#define TEMPLATE_SIZE 1536
+
 #include "Adafruit_Fingerprint.h"
 #include "OpenKNX.h"
-#include "crc16.h"
+#ifdef CALC_TEMPLATE_CHECKUM
+    #include "crc16.h"
+#endif
 #include <string>
 #include <functional>
 
@@ -11,8 +16,6 @@
 #else
     #define mySerial Serial1
 #endif
-
-#define TEMPLATE_SIZE 1536
 
 class Fingerprint
 {

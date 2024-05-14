@@ -203,6 +203,7 @@ Fingerprint::FindFingerResult Fingerprint::findFingerprint()
     {
         setLed(ScanMatch);
 
+#ifdef CALC_TEMPLATE_CHECKUM
         u_int16_t location = _finger.fingerID;
         GetNotepadPageIndexResult getNotepadPageIndexResult = _getNotepadPageIndex(location);
         u_int8_t page = getNotepadPageIndexResult.page;
@@ -221,6 +222,7 @@ Fingerprint::FindFingerResult Fingerprint::findFingerprint()
         findFingerResult.found = true;
         findFingerResult.location = location;
         findFingerResult.checksum = checksum;
+#endif
 
         logIndentDown();
         return findFingerResult;
@@ -229,7 +231,9 @@ Fingerprint::FindFingerResult Fingerprint::findFingerprint()
     {
         findFingerResult.found = false;
         findFingerResult.location = 0;
+#ifdef CALC_TEMPLATE_CHECKUM
         findFingerResult.checksum = 0;
+#endif
     }
 
     logDebugP("No match");
@@ -396,6 +400,7 @@ bool Fingerprint::sendTemplate(uint8_t *templateData)
     return p == FINGERPRINT_OK;
 }
 
+#ifdef CALC_TEMPLATE_CHECKUM
 bool Fingerprint::writeCrc(uint16_t location, uint8_t *templateData, uint32_t secret)
 {
     logDebugP("Calculate and store CRC:");
@@ -428,6 +433,7 @@ bool Fingerprint::writeCrc(uint16_t location, uint8_t *templateData, uint32_t se
     logIndentDown();
     return p == FINGERPRINT_OK;
 }
+#endif
 
 bool Fingerprint::storeTemplate(uint16_t location)
 {
@@ -532,6 +538,7 @@ bool Fingerprint::emptyDatabase(void)
     return success;
 }
 
+#ifdef CALC_TEMPLATE_CHECKUM
 Fingerprint::GetNotepadPageIndexResult Fingerprint::_getNotepadPageIndex(u_int16_t templateLocation)
 {
     u_int16_t globalIndex = templateLocation * 2;
@@ -543,6 +550,7 @@ Fingerprint::GetNotepadPageIndexResult Fingerprint::_getNotepadPageIndex(u_int16
     getNotepadPageIndexResult.index = index;
     return getNotepadPageIndexResult;
 }
+#endif
 
 void Fingerprint::_delayCallbackDefault(uint32_t period)
 {
