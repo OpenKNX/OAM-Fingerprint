@@ -110,14 +110,14 @@ void FingerprintModule::loop()
                     finger.setLed(Fingerprint::ScanNoMatch);
 
                     logInfoP("Finger not found");
-                    KoFIN_ScanFailed.value(true, DPT_Switch);
+                    KoFIN_ScanSuccess.value(true, DPT_Switch);
 
-                    KoFIN_ScanFailedData.valueNoSend((uint32_t)0, Dpt(15, 1, 0)); // access identification code (unknown)
-                    KoFIN_ScanFailedData.valueNoSend(true, Dpt(15, 1, 1));        // detection error
-                    KoFIN_ScanFailedData.valueNoSend(false, Dpt(15, 1, 2));       // permission accepted
-                    KoFIN_ScanFailedData.valueNoSend(false, Dpt(15, 1, 3));       // read direction (not used)
-                    KoFIN_ScanFailedData.valueNoSend(false, Dpt(15, 1, 4));       // encryption (not used for now)
-                    KoFIN_ScanFailedData.value((uint8_t)0, Dpt(15, 1, 5));        // index of access identification code (not used)
+                    KoFIN_ScanSuccessData.valueNoSend((uint32_t)0, Dpt(15, 1, 0)); // access identification code (unknown)
+                    KoFIN_ScanSuccessData.valueNoSend(true, Dpt(15, 1, 1));        // detection error
+                    KoFIN_ScanSuccessData.valueNoSend(false, Dpt(15, 1, 2));       // permission accepted
+                    KoFIN_ScanSuccessData.valueNoSend(false, Dpt(15, 1, 3));       // read direction (not used)
+                    KoFIN_ScanSuccessData.valueNoSend(false, Dpt(15, 1, 4));       // encryption (not used for now)
+                    KoFIN_ScanSuccessData.value((uint8_t)0, Dpt(15, 1, 5));        // index of access identification code (not used)
                 }
 
                 resetLedsTimer = delayTimerInit();
@@ -345,15 +345,15 @@ bool FingerprintModule::enrollFinger(uint16_t location)
     else
     {
         logInfoP("Enrolling template failed.");
-        KoFIN_EnrollFailed.value(true, DPT_Switch);
+        KoFIN_EnrollSuccess.value(true, DPT_Switch);
         KoFIN_EnrollFailedId.value(location, Dpt(7, 1));
 
-        KoFIN_EnrollFailed.valueNoSend(location, Dpt(15, 1, 0)); // access identification code
-        KoFIN_EnrollFailed.valueNoSend(true, Dpt(15, 1, 1));     // detection error
-        KoFIN_EnrollFailed.valueNoSend(false, Dpt(15, 1, 2));    // permission accepted
-        KoFIN_EnrollFailed.valueNoSend(false, Dpt(15, 1, 3));    // read direction (not used)
-        KoFIN_EnrollFailed.valueNoSend(false, Dpt(15, 1, 4));    // encryption (not used for now)
-        KoFIN_EnrollFailed.value((uint8_t)0, Dpt(15, 1, 5));     // index of access identification code (not used)
+        KoFIN_EnrollSuccessData.valueNoSend(location, Dpt(15, 1, 0)); // access identification code
+        KoFIN_EnrollSuccessData.valueNoSend(true, Dpt(15, 1, 1));     // detection error
+        KoFIN_EnrollSuccessData.valueNoSend(false, Dpt(15, 1, 2));    // permission accepted
+        KoFIN_EnrollSuccessData.valueNoSend(false, Dpt(15, 1, 3));    // read direction (not used)
+        KoFIN_EnrollSuccessData.valueNoSend(false, Dpt(15, 1, 4));    // encryption (not used for now)
+        KoFIN_EnrollSuccessData.value((uint8_t)0, Dpt(15, 1, 5));     // index of access identification code (not used)
     }
 
     logIndentDown();
@@ -384,15 +384,15 @@ bool FingerprintModule::deleteFinger(uint16_t location)
     else
     {
         logInfoP("Deleting template failed.");
-        KoFIN_DeleteFailed.value(true, DPT_Switch);
+        KoFIN_DeleteSuccess.value(true, DPT_Switch);
         KoFIN_DeleteFailedId.value(location, Dpt(7, 1));
 
-        KoFIN_DeleteFailed.valueNoSend(location, Dpt(15, 1, 0)); // access identification code
-        KoFIN_DeleteFailed.valueNoSend(true, Dpt(15, 1, 1));     // detection error
-        KoFIN_DeleteFailed.valueNoSend(false, Dpt(15, 1, 2));    // permission accepted
-        KoFIN_DeleteFailed.valueNoSend(false, Dpt(15, 1, 3));    // read direction (not used)
-        KoFIN_DeleteFailed.valueNoSend(false, Dpt(15, 1, 4));    // encryption (not used for now)
-        KoFIN_DeleteFailed.value((uint8_t)0, Dpt(15, 1, 5));     // index of access identification code (not used)
+        KoFIN_DeleteSuccessData.valueNoSend(location, Dpt(15, 1, 0)); // access identification code
+        KoFIN_DeleteSuccessData.valueNoSend(true, Dpt(15, 1, 1));     // detection error
+        KoFIN_DeleteSuccessData.valueNoSend(false, Dpt(15, 1, 2));    // permission accepted
+        KoFIN_DeleteSuccessData.valueNoSend(false, Dpt(15, 1, 3));    // read direction (not used)
+        KoFIN_DeleteSuccessData.valueNoSend(false, Dpt(15, 1, 4));    // encryption (not used for now)
+        KoFIN_DeleteSuccessData.value((uint8_t)0, Dpt(15, 1, 5));     // index of access identification code (not used)
     }
 
     logIndentDown();

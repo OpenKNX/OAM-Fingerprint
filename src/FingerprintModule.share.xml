@@ -101,8 +101,9 @@
                 <Parameter Id="%AID%_UP-%T%000002" Name="FingerprintScanner" ParameterType="%AID%_PT-FingerprintScanner" Offset="4" BitOffset="0" Text="Fingerprint Scanner" Value="0" />
                 <Parameter Id="%AID%_UP-%T%000010" Name="FingerprintColor" ParameterType="%AID%_PT-FingerprintColor" Offset="4" BitOffset="2" Text="Blinkfarbe während der Authorisierung" Value="2" />
                 <Parameter Id="%AID%_UP-%T%000011" Name="EnableRawData" Offset="3" BitOffset="4" ParameterType="%AID%_PT-OnOffYesNo" Text="Rohdaten auf den Bus senden" Value="0" />
-                <Parameter Id="%AID%_UP-%T%000012" Name="EnableSync" Offset="3" BitOffset="4" ParameterType="%AID%_PT-OnOffYesNo" Text="Synchronisation mehrerer Scanner aktivieren" Value="0" />
-                <Parameter Id="%AID%_UP-%T%000013" Name="EnableExternalControl" Offset="3" BitOffset="4" ParameterType="%AID%_PT-OnOffYesNo" Text="Externe Kontrolle ermöglichen" Value="0" />
+                <Parameter Id="%AID%_UP-%T%000012" Name="EnableSync" Offset="3" BitOffset="5" ParameterType="%AID%_PT-OnOffYesNo" Text="Synchronisation mehrerer Scanner aktivieren" Value="0" />
+                <Parameter Id="%AID%_UP-%T%000013" Name="EnableExternalControl" Offset="3" BitOffset="6" ParameterType="%AID%_PT-OnOffYesNo" Text="Externe Kontrolle ermöglichen" Value="0" />
+                <Parameter Id="%AID%_UP-%T%000014" Name="EnableAccessData" Offset="3" BitOffset="7" ParameterType="%AID%_PT-OnOffYesNo" Text="Zutrittsdaten KOs aktivieren" Value="0" />
               </Union>
             </Parameters>
             <ParameterRefs>
@@ -119,6 +120,7 @@
               <ParameterRef Id="%AID%_UP-%T%000011_R-%T%00001101" RefId="%AID%_UP-%T%000011" />
               <ParameterRef Id="%AID%_UP-%T%000012_R-%T%00001201" RefId="%AID%_UP-%T%000012" />
               <ParameterRef Id="%AID%_UP-%T%000013_R-%T%00001301" RefId="%AID%_UP-%T%000013" />
+              <ParameterRef Id="%AID%_UP-%T%000014_R-%T%00001401" RefId="%AID%_UP-%T%000014" />
             </ParameterRefs>
             <ComObjectTable>
               <ComObject Id="%AID%_O-%T%000001" Name="Touched"              Number="1"  ObjectSize="1 Bit"    Text="Berührung (sofort, immer)" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
@@ -128,25 +130,19 @@
               <ComObject Id="%AID%_O-%T%000011" Name="ScanSuccess"          Number="11" ObjectSize="1 Bit"    Text="Scan: Erfolg" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
               <ComObject Id="%AID%_O-%T%000012" Name="ScanSuccessId"        Number="12" ObjectSize="2 Bytes"  Text="Scan: ID" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-7-1" />
               <ComObject Id="%AID%_O-%T%000013" Name="ScanSuccessData"      Number="13" ObjectSize="4 Bytes"  Text="Scan: Zutrittsdaten" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-15-0" />
-              <ComObject Id="%AID%_O-%T%000014" Name="ScanFailed"           Number="14" ObjectSize="1 Bit"    Text="#Scan fehlgeschlagen???" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
-              <ComObject Id="%AID%_O-%T%000015" Name="ScanFailedData"       Number="15" ObjectSize="4 Bytes"  Text="#Scan fehlgeschlagen (Zutrittsdaten)" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-15-0" />
               <ComObject Id="%AID%_O-%T%000021" Name="EnrollNext"           Number="21" ObjectSize="1 Bit"    Text="Lerne an: Nächste freie ID" FunctionText="Trigger" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
               <ComObject Id="%AID%_O-%T%000022" Name="EnrollId"             Number="22" ObjectSize="2 Bytes"  Text="Lerne an: ID (verfügbare Slots: R503S: 0-149, R503: 0-199, R503Pro: 0-1499)" FunctionText="Trigger" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-7-1" />
               <ComObject Id="%AID%_O-%T%000023" Name="EnrollData"           Number="23" ObjectSize="4 Bytes"  Text="Lerne an: Zutrittsdaten (verfügbare Slots: R503S: 0-149, R503: 0-199, R503Pro: 0-1499)" FunctionText="Trigger" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-15-0" />
               <ComObject Id="%AID%_O-%T%000024" Name="EnrollSuccess"        Number="24" ObjectSize="1 Bit"    Text="Anlernen: Erfolg" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
               <ComObject Id="%AID%_O-%T%000025" Name="EnrollSuccessId"      Number="25" ObjectSize="2 Bytes"  Text="Anlernen: Erfolg ID" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-7-1" />
               <ComObject Id="%AID%_O-%T%000026" Name="EnrollSuccessData"    Number="26" ObjectSize="4 Bytes"  Text="Anlernen: Zutrittsdaten" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-15-0" />
-              <ComObject Id="%AID%_O-%T%000027" Name="EnrollFailed"         Number="27" ObjectSize="1 Bit"    Text="#Anlernen: Fehlgeschlagen???" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
-              <ComObject Id="%AID%_O-%T%000028" Name="EnrollFailedId"       Number="28" ObjectSize="2 Bytes"  Text="Anlernen: Fehlgeschlagen ID" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-7-1" />
-              <ComObject Id="%AID%_O-%T%000029" Name="EnrollFailedData"     Number="29" ObjectSize="4 Bytes"  Text="#Anlernen fehlgeschlagen (Zutrittsdaten)" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-15-0" />
+              <ComObject Id="%AID%_O-%T%000027" Name="EnrollFailedId"       Number="27" ObjectSize="2 Bytes"  Text="Anlernen: Fehlgeschlagen ID" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-7-1" />
               <ComObject Id="%AID%_O-%T%000031" Name="DeleteId"             Number="31" ObjectSize="2 Bytes"  Text="Lösche: ID" FunctionText="Trigger" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-7-1" />
               <ComObject Id="%AID%_O-%T%000032" Name="DeleteData"           Number="32" ObjectSize="4 Bytes"  Text="Lösche: Zutrittsdaten" FunctionText="Trigger" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-15-0" />
               <ComObject Id="%AID%_O-%T%000033" Name="DeleteSuccess"        Number="33" ObjectSize="1 Bit"    Text="Löschen: Erfolg" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
               <ComObject Id="%AID%_O-%T%000034" Name="DeleteSuccessId"      Number="34" ObjectSize="2 Bytes"  Text="Löschen: Erfolg ID" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-7-1" />
               <ComObject Id="%AID%_O-%T%000035" Name="DeleteSuccessData"    Number="35" ObjectSize="4 Bytes"  Text="Löschen: Zutrittsdaten" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-15-0" />
-              <ComObject Id="%AID%_O-%T%000036" Name="DeleteFailed"         Number="36" ObjectSize="1 Bit"    Text="#Löschung fehlgeschlagen???" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
-              <ComObject Id="%AID%_O-%T%000037" Name="DeleteFailedId"       Number="37" ObjectSize="2 Bytes"  Text="Löschen: Fehlgeschlagen ID" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-7-1" />
-              <ComObject Id="%AID%_O-%T%000038" Name="DeleteFailedData"     Number="38" ObjectSize="4 Bytes"  Text="#Löschung fehlgeschlagen (Zutrittsdaten)" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-15-0" />
+              <ComObject Id="%AID%_O-%T%000036" Name="DeleteFailedId"       Number="36" ObjectSize="2 Bytes"  Text="Löschen: Fehlgeschlagen ID" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-7-1" />
               <ComObject Id="%AID%_O-%T%000041" Name="ExternFingerId"       Number="41" ObjectSize="2 Bytes"  Text="Externe Finger ID" FunctionText="Trigger" ReadFlag="Enabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-7-1" />
               <ComObject Id="%AID%_O-%T%000042" Name="ActionAddFingerId"    Number="42" ObjectSize="4 Bytes"  Text="Finger ID zu Aktion hinzufügen" FunctionText="Trigger" ReadFlag="Enabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPT-12" />
               <ComObject Id="%AID%_O-%T%000043" Name="ActionRemoveFingerId" Number="43" ObjectSize="4 Bytes"  Text="Finger ID von Aktion entfernen" FunctionText="Trigger" ReadFlag="Enabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPT-12" />
@@ -154,13 +150,12 @@
             </ComObjectTable> <!-- Zutrittsdaten verstecken -->
             <ComObjectRefs>
               <ComObjectRef Id="%AID%_O-%T%000001_R-%T%00000101" RefId="%AID%_O-%T%000001" />
+              <ComObjectRef Id="%AID%_O-%T%000002_R-%T%00000201" RefId="%AID%_O-%T%000002" />
               <ComObjectRef Id="%AID%_O-%T%000006_R-%T%00000601" RefId="%AID%_O-%T%000006" />
               <ComObjectRef Id="%AID%_O-%T%000007_R-%T%00000701" RefId="%AID%_O-%T%000007" />
               <ComObjectRef Id="%AID%_O-%T%000011_R-%T%00001101" RefId="%AID%_O-%T%000011" />
               <ComObjectRef Id="%AID%_O-%T%000012_R-%T%00001201" RefId="%AID%_O-%T%000012" />
               <ComObjectRef Id="%AID%_O-%T%000013_R-%T%00001301" RefId="%AID%_O-%T%000013" />
-              <ComObjectRef Id="%AID%_O-%T%000014_R-%T%00001401" RefId="%AID%_O-%T%000014" />
-              <ComObjectRef Id="%AID%_O-%T%000015_R-%T%00001501" RefId="%AID%_O-%T%000015" />
               <ComObjectRef Id="%AID%_O-%T%000021_R-%T%00002101" RefId="%AID%_O-%T%000021" />
               <ComObjectRef Id="%AID%_O-%T%000022_R-%T%00002201" RefId="%AID%_O-%T%000022" />
               <ComObjectRef Id="%AID%_O-%T%000023_R-%T%00002301" RefId="%AID%_O-%T%000023" />
@@ -168,16 +163,12 @@
               <ComObjectRef Id="%AID%_O-%T%000025_R-%T%00002501" RefId="%AID%_O-%T%000025" />
               <ComObjectRef Id="%AID%_O-%T%000026_R-%T%00002601" RefId="%AID%_O-%T%000026" />
               <ComObjectRef Id="%AID%_O-%T%000027_R-%T%00002701" RefId="%AID%_O-%T%000027" />
-              <ComObjectRef Id="%AID%_O-%T%000028_R-%T%00002801" RefId="%AID%_O-%T%000028" />
-              <ComObjectRef Id="%AID%_O-%T%000029_R-%T%00002901" RefId="%AID%_O-%T%000029" />
               <ComObjectRef Id="%AID%_O-%T%000031_R-%T%00003101" RefId="%AID%_O-%T%000031" />
               <ComObjectRef Id="%AID%_O-%T%000032_R-%T%00003201" RefId="%AID%_O-%T%000032" />
               <ComObjectRef Id="%AID%_O-%T%000033_R-%T%00003301" RefId="%AID%_O-%T%000033" />
               <ComObjectRef Id="%AID%_O-%T%000034_R-%T%00003401" RefId="%AID%_O-%T%000034" />
               <ComObjectRef Id="%AID%_O-%T%000035_R-%T%00003501" RefId="%AID%_O-%T%000035" />
               <ComObjectRef Id="%AID%_O-%T%000036_R-%T%00003601" RefId="%AID%_O-%T%000036" />
-              <ComObjectRef Id="%AID%_O-%T%000037_R-%T%00003701" RefId="%AID%_O-%T%000037" />
-              <ComObjectRef Id="%AID%_O-%T%000038_R-%T%00003801" RefId="%AID%_O-%T%000038" />
               <ComObjectRef Id="%AID%_O-%T%000041_R-%T%00004101" RefId="%AID%_O-%T%000041" />
               <ComObjectRef Id="%AID%_O-%T%000042_R-%T%00004201" RefId="%AID%_O-%T%000042" />
               <ComObjectRef Id="%AID%_O-%T%000043_R-%T%00004301" RefId="%AID%_O-%T%000043" />
@@ -251,6 +242,11 @@
 
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="Zusatzfunktionen" UIHint="Headline" />
                 <ParameterRefRef RefId="%AID%_UP-%T%000011_R-%T%00001101" IndentLevel="1" />
+                <choose ParamRefId="%AID%_UP-%T%000011_R-%T%00001101">
+                  <when test="1">
+                    <ParameterRefRef RefId="%AID%_UP-%T%000014_R-%T%00001401" IndentLevel="2" />
+                  </when>
+                </choose>
                 <ParameterRefRef RefId="%AID%_UP-%T%000012_R-%T%00001201" IndentLevel="1" />
                 <ParameterRefRef RefId="%AID%_UP-%T%000013_R-%T%00001301" IndentLevel="1" />
 
@@ -262,23 +258,24 @@
                 <choose ParamRefId="%AID%_UP-%T%000011_R-%T%00001101">
                   <when test="1">
                     <ComObjectRefRef RefId="%AID%_O-%T%000001_R-%T%00000101" />
+                    <ComObjectRefRef RefId="%AID%_O-%T%000002_R-%T%00000201" />
                     <ComObjectRefRef RefId="%AID%_O-%T%000011_R-%T%00001101" />
                     <ComObjectRefRef RefId="%AID%_O-%T%000012_R-%T%00001201" />
-                    <ComObjectRefRef RefId="%AID%_O-%T%000013_R-%T%00001301" />
-                    <ComObjectRefRef RefId="%AID%_O-%T%000014_R-%T%00001401" />
-                    <ComObjectRefRef RefId="%AID%_O-%T%000015_R-%T%00001501" />
                     <ComObjectRefRef RefId="%AID%_O-%T%000024_R-%T%00002401" />
                     <ComObjectRefRef RefId="%AID%_O-%T%000025_R-%T%00002501" />
-                    <ComObjectRefRef RefId="%AID%_O-%T%000026_R-%T%00002601" />
                     <ComObjectRefRef RefId="%AID%_O-%T%000027_R-%T%00002701" />
-                    <ComObjectRefRef RefId="%AID%_O-%T%000028_R-%T%00002801" />
-                    <ComObjectRefRef RefId="%AID%_O-%T%000029_R-%T%00002901" />
                     <ComObjectRefRef RefId="%AID%_O-%T%000033_R-%T%00003301" />
                     <ComObjectRefRef RefId="%AID%_O-%T%000034_R-%T%00003401" />
-                    <ComObjectRefRef RefId="%AID%_O-%T%000035_R-%T%00003501" />
                     <ComObjectRefRef RefId="%AID%_O-%T%000036_R-%T%00003601" />
-                    <ComObjectRefRef RefId="%AID%_O-%T%000037_R-%T%00003701" />
-                    <ComObjectRefRef RefId="%AID%_O-%T%000038_R-%T%00003801" />
+
+                    <!-- access data -->
+                    <choose ParamRefId="%AID%_UP-%T%000014_R-%T%00001401">
+                      <when test="1">
+                        <ComObjectRefRef RefId="%AID%_O-%T%000013_R-%T%00001301" />
+                        <ComObjectRefRef RefId="%AID%_O-%T%000026_R-%T%00002601" />
+                        <ComObjectRefRef RefId="%AID%_O-%T%000035_R-%T%00003501" />
+                      </when>
+                    </choose>
                   </when>
                 </choose>
 
