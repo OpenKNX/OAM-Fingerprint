@@ -20,7 +20,7 @@
                 <Memory CodeSegment="%AID%_RS-04-00000" Offset="0" BitOffset="0" />
                 <Parameter Id="%AID%_UP-%T%000001" Name="FingerActionCount" ParameterType="%AID%_PT-FINACTNumChannels" Offset="0" BitOffset="0" Text="Verfügbare Zuordnungen" Value="1" SuffixText=" von %N%" />
               </Union>
-              <Parameter Id="%AID%_P-%T%000003" Name="PersonName" ParameterType="%AID%_PT-Text16Byte" Text="Name der Person" Value="" />
+              <Parameter Id="%AID%_P-%T%000003" Name="PersonName" ParameterType="%AID%_PT-Text28Byte" Text="Name der Person" Value="" />
               <Parameter Id="%AID%_P-%T%000004" Name="PersonFinger" ParameterType="%AID%_PT-Finger" Text="Finger der Person" Value="1" />
               <Parameter Id="%AID%_P-%T%000005" Name="FingerId" ParameterType="%AID%_PT-FingerId" Text="Scanner Finger ID" Value="0" />
               <Parameter Id="%AID%_P-%T%000006" Name="FingerActionLine" ParameterType="%AID%_PT-FINACTNumChannels" Text="Zeile für Zuweisung" Value="1" />
