@@ -6,3 +6,4 @@
 *.debug.xml
 *.knxprod
 src/*.baggages/*
+release
