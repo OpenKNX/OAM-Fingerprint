@@ -450,6 +450,11 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
 
             processScanSuccess(location);
             break;
+        default:
+        {
+            for (uint16_t i = 0; i < ParamFIN_VisibleActions; i++)
+                _channels[i]->processInputKo(iKo);
+        }
     }
 }
 

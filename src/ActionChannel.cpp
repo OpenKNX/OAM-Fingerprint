@@ -20,7 +20,7 @@ void ActionChannel::loop()
 
     if (_stairLightTime > 0 && delayCheck(_stairLightTime, ParamFIN_ActionDelayTimeMS))
     {
-        KoFIN_ActionState.value(false, DPT_Switch);
+        KoFIN_ActionSwitch.value(false, DPT_Switch);
         _stairLightTime = 0;
     }
 }
@@ -49,6 +49,7 @@ void ActionChannel::processScan(uint16_t location)
                 break;
             case 2: // toggle
                 KoFIN_ActionSwitch.value(!KoFIN_ActionState.value(DPT_Switch), DPT_Switch);
+                KoFIN_ActionState.value(KoFIN_ActionSwitch.value(DPT_Switch), DPT_Switch);
                 break;
             case 3: // stair light
                 KoFIN_ActionSwitch.value(true, DPT_Switch);
