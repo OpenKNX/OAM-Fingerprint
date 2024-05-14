@@ -1,9 +1,7 @@
 #include "OpenKNX.h"
+#include "Fingerprint.h"
 
 #define ACTION_CALL_TIMEOUT 3000
-
-// forward declaration
-class Fingerprint;
 
 class ActionChannel : public OpenKNX::Channel
 {
@@ -12,9 +10,9 @@ class ActionChannel : public OpenKNX::Channel
         uint32_t _stairLightTime = 0;
 
     public:
-        ActionChannel(uint8_t index);
+        ActionChannel(uint8_t index, Fingerprint finger);
         const std::string name() override;
-        static Fingerprint *finger;
+        Fingerprint _finger;
 
         void loop();
         void processInputKo(GroupObject &ko) override;

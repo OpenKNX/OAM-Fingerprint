@@ -1,11 +1,9 @@
 #include "ActionChannel.h"
-#include "Fingerprint.h"
 
-Fingerprint *ActionChannel::finger = nullptr;
-
-ActionChannel::ActionChannel(uint8_t index)
+ActionChannel::ActionChannel(uint8_t index, Fingerprint finger)
 {
     _channelIndex = index;
+    _finger = finger;
 }
 
 const std::string ActionChannel::name()
@@ -18,7 +16,7 @@ void ActionChannel::loop()
     if (_actionCallResetTime > 0 && delayCheck(_actionCallResetTime, ACTION_CALL_TIMEOUT))
     {
         KoFIN_ActionCall.value(false, DPT_Switch);
-        finger->setLed(Fingerprint::State::None);
+        _finger.setLed(Fingerprint::State::None);
         _actionCallResetTime = 0;
     }
 
@@ -37,7 +35,7 @@ void ActionChannel::processInputKo(GroupObject &ko)
             if (ko.value(DPT_Switch))
             {
                 _actionCallResetTime = millis();
-                finger->setLed(Fingerprint::State::WaitForFinger);
+                _finger.setLed(Fingerprint::State::WaitForFinger);
             }
             break;
     }

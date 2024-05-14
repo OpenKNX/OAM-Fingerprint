@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Adafruit_Fingerprint.h"
 #include "OpenKNX.h"
 #include "crc16.h"
@@ -11,8 +13,6 @@
 #endif
 
 #define TEMPLATE_SIZE 1536
-
-//typedef void (*fingerprint_delay_fptr_t)(uint32_t);
 
 class Fingerprint
 {
