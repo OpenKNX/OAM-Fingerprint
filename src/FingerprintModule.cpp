@@ -16,6 +16,7 @@ void FingerprintModule::setup()
     _fingerprintStorage.init("fingerprint", FINGERPRINT_FLASH_OFFSET, FINGERPRINT_FLASH_SIZE);
 
     finger = Fingerprint(delayCallback, FINGERPRINT_PASSWORD);
+    ActionChannel::finger = &finger; // tmp
 
     pinMode(LED_GREEN_PIN, OUTPUT);
     pinMode(LED_RED_PIN, OUTPUT);

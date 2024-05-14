@@ -2,6 +2,9 @@
 
 #define ACTION_CALL_TIMEOUT 3000
 
+// forward declaration
+class Fingerprint;
+
 class ActionChannel : public OpenKNX::Channel
 {
     private:
@@ -11,6 +14,7 @@ class ActionChannel : public OpenKNX::Channel
     public:
         ActionChannel(uint8_t index);
         const std::string name() override;
+        static Fingerprint *finger;
 
         void loop();
         void processInputKo(GroupObject &ko) override;
