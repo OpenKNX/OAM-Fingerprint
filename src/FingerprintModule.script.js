@@ -210,3 +210,20 @@ function FIN_deleteFinger(device, online, progress, context) {
     online.disconnect();
     progress.setText("Fingerprint: Finger ID " + parFingerId + " gelöscht.");
 }
+
+function FIN_resetScanner(device, online, progress, context) {
+    progress.setText("Fingerprint: Alle Finger löschen...");
+    online.connect();
+
+    // internal function ID
+    var data = [2];
+    data = data.concat((parFingerId & 0x0000ff00) >> 8, (parFingerId & 0x000000ff));
+
+    var resp = online.invokeFunctionProperty(160, 3, data);
+    if (resp[0] != 0) {
+        throw new Error("Fingerprint: Es ist ein unbekannter Fehler aufgetreten!");
+    }
+
+    online.disconnect();
+    progress.setText("Fingerprint: Alle finger gelöscht.");
+}

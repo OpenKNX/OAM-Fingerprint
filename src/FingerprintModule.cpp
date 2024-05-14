@@ -296,7 +296,7 @@ void FingerprintModule::processScanSuccess(uint16_t location, bool external)
             uint16_t actionId = knx.paramWord(FINACT_faActionId + FINACT_ParamBlockOffset + i * FINACT_ParamBlockSize) - 1;
             if (actionId < FIN_VisibleActions)
             {
-                _channels[actionId]->processScan(location);
+                _channels[actionId]->processScan(location); // #ToDo: when not executed, not green
                 actionFound = true;
             }
             else

@@ -93,6 +93,7 @@
               <Parameter Id="%AID%_P-%T%000005" Name="FingerIdR503" ParameterType="%AID%_PT-FingerIdR503" Text="Scanner Finger ID" Value="0" />
               <Parameter Id="%AID%_P-%T%000006" Name="FingerIdR503S" ParameterType="%AID%_PT-FingerIdR503S" Text="Scanner Finger ID" Value="0" />
               <Parameter Id="%AID%_P-%T%000007" Name="FingerId" ParameterType="%AID%_PT-FingerId" Text="Scanner Finger ID" Value="0" />
+              <Parameter Id="%AID%_P-%T%000015" Name="ResetScanner" ParameterType="%AID%_PT-OnOffYesNo" Text="Alle Finger löschen?" Value="0" />
               <Union SizeInBit="40">
                 <Memory CodeSegment="%AID%_RS-04-00000" Offset="0" BitOffset="0" />
                 <Parameter Id="%AID%_UP-%T%000001" Name="VisibleActions" ParameterType="%AID%_PT-FINNumChannels" Offset="0" BitOffset="0" Text="Verfügbare Aktionen" Value="3" SuffixText=" von %N%" />
@@ -121,6 +122,7 @@
               <ParameterRef Id="%AID%_UP-%T%000012_R-%T%00001201" RefId="%AID%_UP-%T%000012" />
               <ParameterRef Id="%AID%_UP-%T%000013_R-%T%00001301" RefId="%AID%_UP-%T%000013" />
               <ParameterRef Id="%AID%_UP-%T%000014_R-%T%00001401" RefId="%AID%_UP-%T%000014" />
+              <ParameterRef Id="%AID%_P-%T%000015_R-%T%00001501" RefId="%AID%_P-%T%000015" />
             </ParameterRefs>
             <ComObjectTable>
               <ComObject Id="%AID%_O-%T%000001" Name="Touched"              Number="1"  ObjectSize="1 Bit"    Text="Berührung (sofort, immer)" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
@@ -239,6 +241,7 @@
                   </when>
                 </choose>
                 <Button Id="%AID%_B-%T%000002" Text="Löschen" Name="deleteFinger" EventHandler="FIN_deleteFinger" EventHandlerOnline="ConnectionOriented" />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
 
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="Zusatzfunktionen" UIHint="Headline" />
                 <ParameterRefRef RefId="%AID%_UP-%T%000011_R-%T%00001101" IndentLevel="1" />
@@ -297,6 +300,16 @@
                     <ComObjectRefRef RefId="%AID%_O-%T%000041_R-%T%00004101" />
                     <ComObjectRefRef RefId="%AID%_O-%T%000042_R-%T%00004201" />
                     <ComObjectRefRef RefId="%AID%_O-%T%000043_R-%T%00004301" />
+                  </when>
+                </choose>
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
+
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Gefährliche Funktionen" UIHint="Headline" />
+                <ParameterRefRef RefId="%AID%_P-%T%000015_R-%T%00001501" IndentLevel="1" />
+                <choose ParamRefId="%AID%_P-%T%000015_R-%T%00001501">
+                  <when test="1">
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Wenn Sie diese Funktion ausführen, werden alle gespeicherten Finger gelöscht und müssen neu angelernt werden." UIHint="Error" />
+                    <Button Id="%AID%_B-%T%00003" Text="Jetzt löschen" Name="resetScanner" EventHandler="FIN_resetScanner" EventHandlerOnline="ConnectionOriented" />
                   </when>
                 </choose>
               </ParameterBlock>

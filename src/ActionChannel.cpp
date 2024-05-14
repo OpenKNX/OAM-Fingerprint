@@ -18,6 +18,7 @@ void ActionChannel::loop()
         KoFIN_ActionCall.value(false, DPT_Switch);
         _finger.setLed(Fingerprint::State::None);
         _actionCallResetTime = 0;
+        _authenticateActive = false;
     }
 
     if (_stairLightTime > 0 && delayCheck(_stairLightTime, ParamFIN_ActionDelayTimeMS))
@@ -34,6 +35,7 @@ void ActionChannel::processInputKo(GroupObject &ko)
         case FIN_KoActionCall:
             if (ko.value(DPT_Switch))
             {
+                _authenticateActive = true;
                 _actionCallResetTime = delayTimerInit();
                 _finger.setLed(Fingerprint::State::WaitForFinger);
             }
@@ -43,6 +45,9 @@ void ActionChannel::processInputKo(GroupObject &ko)
 
 void ActionChannel::processScan(uint16_t location)
 {
+    if (_authenticateActive && !ParamFIN_ActionAuthenticate)
+        return;
+
     if (!ParamFIN_ActionAuthenticate || KoFIN_ActionCall.value(DPT_Switch))
     {
         switch (ParamFIN_ActionActionType)
@@ -67,6 +72,7 @@ void ActionChannel::processScan(uint16_t location)
             KoFIN_ActionCall.value(false, DPT_Switch);
             // finger->setLed(Fingerprint::State::None); do not use here
             _actionCallResetTime = 0;
+            _authenticateActive = false;
         }
     }
 }
