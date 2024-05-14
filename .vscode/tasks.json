@@ -89,10 +89,21 @@
             "problemMatcher": []
         },
         {
-            "label": "Build-Release",
+            "label": "Build-Release R503",
             "type": "shell",
             "command": "scripts/Build-Release.ps1", 
             "args": [
+                "ReleaseR503"
+            ],
+            "problemMatcher": [],
+            "group": "test"
+        },
+        {
+            "label": "Build-Release R503Pro",
+            "type": "shell",
+            "command": "scripts/Build-Release.ps1", 
+            "args": [
+                "ReleaseR503Pro"
             ],
             "problemMatcher": [],
             "group": "test"

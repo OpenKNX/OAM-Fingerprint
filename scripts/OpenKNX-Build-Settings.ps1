@@ -1,7 +1,7 @@
 # set product names, allows mapping of (devel) name in Project to a more consistent name in release
-$settings = lib/OGM-Common/scripts/build/OpenKNX-Build-Settings.ps1 $args[0] "DummyModule" "DummyModule"
+$settings = lib/OGM-Common/scripts/build/OpenKNX-Build-Settings.ps1 $args[0] "FingerprintModule" "FingerprintModule"
 
-$settings.sourceName="DummyModule"  
-$settings.targetName="DummyModule"
+$settings.sourceName="FingerprintModule"  
+$settings.targetName="FingerprintModule"
 
 Return $settings

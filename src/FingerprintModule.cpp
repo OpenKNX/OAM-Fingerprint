@@ -443,7 +443,7 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
             lockRequested = isLocked;
             updateLockLeds();
             break;
-        case FIN_KoInputFingerId:
+        case FIN_KoExternFingerId:
             location = iKo.value(Dpt(7, 1));
             logInfoP("FingerID received: %d", location);
 
