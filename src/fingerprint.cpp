@@ -76,6 +76,8 @@ bool Fingerprint::setLed(State state)
         case ScanMatch:
         case Success:
             return _finger.LEDcontrol(FINGERPRINT_LED_ON, 0, FINGERPRINT_LED_GREEN, 0) == FINGERPRINT_OK;
+        case ScanMatchNoAction:
+            return _finger.LEDcontrol(FINGERPRINT_LED_ON, 0, FINGERPRINT_LED_YELLOW, 0) == FINGERPRINT_OK;
         case ScanNoMatch:
         case Failed:
             return _finger.LEDcontrol(FINGERPRINT_LED_ON, 0, FINGERPRINT_LED_RED, 0) == FINGERPRINT_OK;
@@ -201,7 +203,7 @@ Fingerprint::FindFingerResult Fingerprint::findFingerprint()
     p = _finger.fingerSearch();
     if (p == FINGERPRINT_OK)
     {
-        setLed(ScanMatch);
+        //setLed(ScanMatch);
 
 #ifdef CALC_TEMPLATE_CHECKUM
         u_int16_t location = _finger.fingerID;
@@ -237,7 +239,7 @@ Fingerprint::FindFingerResult Fingerprint::findFingerprint()
     }
 
     logDebugP("No match");
-    setLed(ScanNoMatch);
+    //setLed(ScanNoMatch);
 
     logIndentDown();
     return findFingerResult;

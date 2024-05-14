@@ -107,6 +107,8 @@ void FingerprintModule::loop()
                 }
                 else
                 {
+                    finger.setLed(Fingerprint::ScanNoMatch);
+
                     logInfoP("Finger not found");
                     KoFIN_ScanFailed.value(true, DPT_Switch);
 
@@ -265,7 +267,7 @@ void FingerprintModule::updateLockLeds(bool showGreenWhenUnlock)
     }
 }
 
-void FingerprintModule::processScanSuccess(uint16_t location)
+void FingerprintModule::processScanSuccess(uint16_t location, bool external)
 {
     KoFIN_ScanSuccess.value(true, DPT_Switch);
     KoFIN_ScanSuccessId.value(location, Dpt(7, 1));
@@ -294,8 +296,18 @@ void FingerprintModule::processScanSuccess(uint16_t location)
         }
     }
 
-    if (!actionFound)
+    if (actionFound)
+    {
+        if (!external)
+            finger.setLed(Fingerprint::ScanMatch);
+    }
+    else
+    {
+        if (external)
+            finger.setLed(Fingerprint::ScanMatchNoAction);
+        
         KoFIN_TouchedNoAction.value(true, DPT_Switch);
+    }
 }
 
 bool FingerprintModule::enrollFinger(uint16_t location)
@@ -447,7 +459,7 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
             location = iKo.value(Dpt(7, 1));
             logInfoP("FingerID received: %d", location);
 
-            processScanSuccess(location);
+            processScanSuccess(location, true);
             break;
         default:
         {

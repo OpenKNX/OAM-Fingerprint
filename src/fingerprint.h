@@ -27,6 +27,7 @@ class Fingerprint
         None,
         ScanFinger,
         ScanMatch,
+        ScanMatchNoAction,
         ScanNoMatch,
         EnrollCreateModel,
         WaitForFinger,

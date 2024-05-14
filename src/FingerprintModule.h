@@ -46,7 +46,7 @@ class FingerprintModule : public OpenKNX::Module
     static void interruptTouched();
     static void interruptUnlock();
     static void interruptLock();
-    void processScanSuccess(uint16_t location);
+    void processScanSuccess(uint16_t location, bool external = false);
     bool enrollFinger(uint16_t location);
     bool deleteFinger(uint16_t location);
     void setFingerprintPower(bool on);
