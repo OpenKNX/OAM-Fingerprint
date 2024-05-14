@@ -311,7 +311,7 @@ void FingerprintModule::processScanSuccess(uint16_t location, bool external)
     }
     else
     {
-        if (external)
+        if (!external)
             finger.setLed(Fingerprint::ScanMatchNoAction);
         
         KoFIN_TouchedNoAction.value(true, DPT_Switch);
