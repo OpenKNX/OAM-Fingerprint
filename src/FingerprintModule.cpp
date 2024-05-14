@@ -43,7 +43,7 @@ void FingerprintModule::setup()
         _channels[i]->setup();
     }
 
-    resetLedsTimer = millis();
+    resetLedsTimer = delayTimerInit();
     logInfoP("Fingerprint module ready.");
 }
 
@@ -93,8 +93,8 @@ void FingerprintModule::loop()
 
         KoFIN_Touched.value(true, DPT_Switch);
 
-        unsigned long captureStart = millis();
-        while (millis() - captureStart < CAPTURE_RETRIES_TOUCH_TIMEOUT)
+        unsigned long captureStart = delayTimerInit();
+        while (!delayCheck(captureStart, CAPTURE_RETRIES_TOUCH_TIMEOUT))
         {
             if (finger.hasFinger())
             {
@@ -120,7 +120,7 @@ void FingerprintModule::loop()
                     KoFIN_ScanFailedData.value((uint8_t)0, Dpt(15, 1, 5));        // index of access identification code (not used)
                 }
 
-                resetLedsTimer = millis();
+                resetLedsTimer = delayTimerInit();
                 break;
             }
         }
@@ -162,9 +162,9 @@ void FingerprintModule::loop()
         {
             logInfoP("Locking, waiting for finger...");
 
-            unsigned long captureStart = millis();
+            unsigned long captureStart = delayTimerInit();
             finger.setLed(Fingerprint::State::WaitForFinger);
-            while (millis() - captureStart < CAPTURE_RETRIES_LOCK_TIMEOUT)
+            while (!delayCheck(captureStart, CAPTURE_RETRIES_LOCK_TIMEOUT))
             {
                 if (finger.hasFinger())
                 {
@@ -178,7 +178,7 @@ void FingerprintModule::loop()
                     else
                     {
                         logInfoP("Finger could not be identified.");
-                        resetLedsTimer = millis();
+                        resetLedsTimer = delayTimerInit();
                     }
 
                     break;
@@ -189,9 +189,9 @@ void FingerprintModule::loop()
         {
             logInfoP("Unlocking, waiting for finger...");
 
-            unsigned long captureStart = millis();
+            unsigned long captureStart = delayTimerInit();
             finger.setLed(Fingerprint::State::WaitForFinger);
-            while (millis() - captureStart < CAPTURE_RETRIES_LOCK_TIMEOUT)
+            while (!delayCheck(captureStart, CAPTURE_RETRIES_LOCK_TIMEOUT))
             {
                 if (finger.hasFinger())
                 {
@@ -205,7 +205,7 @@ void FingerprintModule::loop()
                     else
                     {
                         logInfoP("Finger could not be identified.");
-                        resetLedsTimer = millis();
+                        resetLedsTimer = delayTimerInit();
                     }
 
                     break;
@@ -233,7 +233,7 @@ void FingerprintModule::loop()
         touched = false;
     }
 
-    if (resetLedsTimer > 0 && millis() > resetLedsTimer + 1000)
+    if (resetLedsTimer > 0 && delayCheck(resetLedsTimer, LED_RESET_TIMEOUT))
     {
         finger.setLed(Fingerprint::State::None);
         digitalWrite(LED_GREEN_PIN, LOW);
@@ -256,7 +256,7 @@ void FingerprintModule::updateLockLeds(bool showGreenWhenUnlock)
         if (showGreenWhenUnlock)
         {
             digitalWrite(LED_GREEN_PIN, HIGH);
-            resetLedsTimer = millis();
+            resetLedsTimer = delayTimerInit();
         }
         else
         {
@@ -357,7 +357,7 @@ bool FingerprintModule::enrollFinger(uint16_t location)
     }
 
     logIndentDown();
-    resetLedsTimer = millis();
+    resetLedsTimer = delayTimerInit();
 
     return success;
 }
@@ -396,7 +396,7 @@ bool FingerprintModule::deleteFinger(uint16_t location)
     }
 
     logIndentDown();
-    resetLedsTimer = millis();
+    resetLedsTimer = delayTimerInit();
 
     return success;
 }
@@ -657,10 +657,10 @@ void FingerprintModule::processAfterStartupDelay()
 
 void FingerprintModule::delayCallback(uint32_t period)
 {
-    uint32_t start = millis();
+    uint32_t start = delayTimerInit();
     delayCallbackActive = true;
 
-    while (millis() - start < period)
+    while (!delayCheck(start, period))
         openknx.loop();
 
     openknx.common.skipLooptimeWarning();

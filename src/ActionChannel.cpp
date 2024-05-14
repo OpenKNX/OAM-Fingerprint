@@ -34,7 +34,7 @@ void ActionChannel::processInputKo(GroupObject &ko)
         case FIN_KoActionCall:
             if (ko.value(DPT_Switch))
             {
-                _actionCallResetTime = millis();
+                _actionCallResetTime = delayTimerInit();
                 _finger.setLed(Fingerprint::State::WaitForFinger);
             }
             break;
@@ -58,7 +58,7 @@ void ActionChannel::processScan(uint16_t location)
                 break;
             case 3: // stair light
                 KoFIN_ActionSwitch.value(true, DPT_Switch);
-                _stairLightTime = millis();
+                _stairLightTime = delayTimerInit();
                 break;
         }
 

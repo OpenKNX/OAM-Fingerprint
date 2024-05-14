@@ -324,13 +324,13 @@ uint8_t Adafruit_Fingerprint::get_template_buffer(int bufsize, uint8_t ref_buf[]
   int rcv_bt_len = (packet_len + 11) * div; // data packet contains 11 extra bytes(first->2-header,4-address,1-type,2-length,last->2-checksum) excpet the main data
   uint8_t bytesReceived[rcv_bt_len];
   memset(bytesReceived, 0xff, rcv_bt_len);
-  uint32_t starttime = millis();
+  uint32_t starttime = millis() == 0 ? 1 : millis();
   int i = 0;
   while (i < rcv_bt_len && (millis() - starttime) < 5000)
   {
     if (mySerial->available())
     {
-      starttime = millis();
+      starttime = millis() == 0 ? 1 : millis();
       bytesReceived[i++] = mySerial->read();
     }
   }

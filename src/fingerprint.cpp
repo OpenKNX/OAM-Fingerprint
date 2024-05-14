@@ -268,7 +268,7 @@ bool Fingerprint::createTemplate()
         }
 
         logIndentUp();
-        ulong start = millis();
+        ulong start = millis() == 0 ? 1 : millis();
         while (true)
         {
             p = _finger.getImage();
