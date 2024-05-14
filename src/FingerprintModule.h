@@ -20,6 +20,7 @@
 #define EXT5 19
 
 #define LED_RESET_TIMEOUT 1000
+#define ENROLL_REQUEST_DELAY 100
 #define CAPTURE_RETRIES_TOUCH_TIMEOUT 500
 #define CAPTURE_RETRIES_LOCK_TIMEOUT 3000
 
@@ -65,7 +66,9 @@ class FingerprintModule : public OpenKNX::Module
     bool scanerHasPower = false;
     bool lockRequested = false;
     bool isLocked = false;
-    unsigned long resetLedsTimer = 0;
+    uint32_t resetLedsTimer = 0;
+    uint32_t enrollRequested = 0;
+    uint16_t enrollRequestedLocation = 0;
     inline static bool delayCallbackActive = false;
 
     inline volatile static bool touched = false;

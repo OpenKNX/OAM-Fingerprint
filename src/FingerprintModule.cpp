@@ -126,6 +126,14 @@ void FingerprintModule::loop()
         }
     }
 
+    if (enrollRequested > 0 and delayCheck(enrollRequested, ENROLL_REQUEST_DELAY))
+    {
+        enrollFinger(enrollRequestedLocation);
+
+        enrollRequested = 0;
+        enrollRequestedLocation = 0;
+    }
+
     if (unlockTouched)
     {
         unlockTouched = false;
@@ -518,10 +526,12 @@ void FingerprintModule::handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_
     _fingerprintStorage.write(storageOffset + 1, *personName, 28);
     _fingerprintStorage.commit();
 
+    enrollRequested = delayTimerInit();
+    enrollRequestedLocation = fingerId;
+
     //bool success = enrollFinger(fingerId);
-    bool success = true;
     
-    resultData[0] = success ? 0 : 1;
+    resultData[0] = 0;
     resultLength = 1;
 }
 

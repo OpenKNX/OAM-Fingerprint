@@ -189,7 +189,7 @@ function FIN_enrollFinger(device, online, progress, context) {
     }
 
     online.disconnect();
-    progress.setText("Fingerprint: Finger ID " + parFingerId + " angelernt.");
+    progress.setText("Fingerprint: Finger ID " + parFingerId + " anlernen gestartet.");
 }
 
 function FIN_deleteFinger(device, online, progress, context) {
