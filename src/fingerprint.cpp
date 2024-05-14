@@ -205,8 +205,9 @@ Fingerprint::FindFingerResult Fingerprint::findFingerprint()
     {
         //setLed(ScanMatch);
 
-#ifdef CALC_TEMPLATE_CHECKUM
         u_int16_t location = _finger.fingerID;
+        
+#ifdef CALC_TEMPLATE_CHECKUM
         GetNotepadPageIndexResult getNotepadPageIndexResult = _getNotepadPageIndex(location);
         u_int8_t page = getNotepadPageIndexResult.page;
         u_int8_t index = getNotepadPageIndexResult.index;
@@ -219,12 +220,13 @@ Fingerprint::FindFingerResult Fingerprint::findFingerprint()
         checksumBytes[1] = content[index + 1];
         uint16_t checksum = ((unsigned short)checksumBytes[1] << 8) | (unsigned char)checksumBytes[0];
         logDebugP("page=%d, index=%d, checksumBytes=%d/%d, checksum=%d", page, index, checksumBytes[0], checksumBytes[1], checksum);
+        findFingerResult.checksum = checksum;
+#endif
+
         logDebugP("Match #%d with confidence %d", _finger.fingerID, _finger.confidence);
 
         findFingerResult.found = true;
         findFingerResult.location = location;
-        findFingerResult.checksum = checksum;
-#endif
 
         logIndentDown();
         return findFingerResult;
