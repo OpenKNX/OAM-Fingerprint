@@ -1,4 +1,7 @@
 #include "ActionChannel.h"
+#include "Fingerprint.h"
+
+Fingerprint *ActionChannel::finger = nullptr;
 
 ActionChannel::ActionChannel(uint8_t index)
 {
@@ -15,12 +18,13 @@ void ActionChannel::loop()
     if (_actionCallResetTime > 0 && delayCheck(_actionCallResetTime, ACTION_CALL_TIMEOUT))
     {
         KoFIN_ActionCall.value(false, DPT_Switch);
+        finger->setLed(Fingerprint::State::None);
         _actionCallResetTime = 0;
     }
 
     if (_stairLightTime > 0 && delayCheck(_stairLightTime, ParamFIN_ActionDelayTimeMS))
     {
-        KoFIN_ActionState.value(false, DPT_Switch);
+        KoFIN_ActionSwitch.value(false, DPT_Switch);
         _stairLightTime = 0;
     }
 }
@@ -30,8 +34,11 @@ void ActionChannel::processInputKo(GroupObject &ko)
     switch (FIN_KoCalcIndex(ko.asap()))
     {
         case FIN_KoActionCall:
-            KoFIN_ActionCall.value(true, DPT_Switch);
-            _actionCallResetTime = millis();
+            if (ko.value(DPT_Switch))
+            {
+                _actionCallResetTime = millis();
+                finger->setLed(Fingerprint::State::WaitForFinger);
+            }
             break;
     }
 }
@@ -45,18 +52,23 @@ void ActionChannel::processScan(uint16_t location)
             case 0: // action deactivated
                 break;
             case 1: // switch
-                KoFIN_ActionState.value(ParamFIN_ActionOnOff, DPT_Switch);
+                KoFIN_ActionSwitch.value(ParamFIN_ActionOnOff, DPT_Switch);
                 break;
             case 2: // toggle
-                KoFIN_ActionState.value(!KoFIN_ActionState.value(DPT_Switch), DPT_Switch);
+                KoFIN_ActionSwitch.value(!KoFIN_ActionState.value(DPT_Switch), DPT_Switch);
+                KoFIN_ActionState.value(KoFIN_ActionSwitch.value(DPT_Switch), DPT_Switch);
                 break;
             case 3: // stair light
-                KoFIN_ActionState.value(true, DPT_Switch);
+                KoFIN_ActionSwitch.value(true, DPT_Switch);
                 _stairLightTime = millis();
                 break;
         }
 
         if (KoFIN_ActionCall.value(DPT_Switch))
+        {
             KoFIN_ActionCall.value(false, DPT_Switch);
+            // finger->setLed(Fingerprint::State::None); do not use here
+            _actionCallResetTime = 0;
+        }
     }
 }
