@@ -12,24 +12,13 @@
                 <Parameter Id="%AID%_UP-%T%%CCC%001" Name="fa%C%ActionId" ParameterType="%AID%_PT-Action" Offset="0" BitOffset="0" Text="Aktion" Value="0" />
                 <Parameter Id="%AID%_UP-%T%%CCC%002" Name="fa%C%FingerId" ParameterType="%AID%_PT-FingerId" Offset="2" BitOffset="0" Text="Scanner Finger ID" Value="0" />
               </Union>
-              <Parameter Id="%AID%_P-%T%%CCC%003" Name="fa%C%FingerActionInfo" ParameterType="%AID%_PT-Text80Byte" Text="Finger-Aktion-Info" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%T%%CCC%003" Name="fa%C%FingerActionInfo" ParameterType="%AID%_PT-Text80Byte" Text="Finger-Aktion-Info" Value="" />
             </Parameters>
             <ParameterRefs>
               <ParameterRef Id="%AID%_UP-%T%%CCC%001_R-%T%%CCC%00101" RefId="%AID%_UP-%T%%CCC%001" />
               <ParameterRef Id="%AID%_UP-%T%%CCC%002_R-%T%%CCC%00201" RefId="%AID%_UP-%T%%CCC%002" />
               <ParameterRef Id="%AID%_P-%T%%CCC%003_R-%T%%CCC%00301" RefId="%AID%_P-%T%%CCC%003" />
             </ParameterRefs>
-            <ParameterCalculations>
-              <ParameterCalculation Id="%AID%_PC-%T%%CCC%001" Language="JavaScript" Name="ClearFingerActionInfo%C%" LRTransformationFunc="FIN_dummy" RLTransformationFunc="FIN_clear">
-                <LParameters>
-                  <ParameterRefRef RefId="%AID%_P-%T%%CCC%003_R-%T%%CCC%00301" AliasName="FingerActionInfo" />
-                </LParameters>
-                <RParameters>
-                  <ParameterRefRef RefId="%AID%_UP-%T%%CCC%001_R-%T%%CCC%00101" />
-                  <ParameterRefRef RefId="%AID%_UP-%T%%CCC%002_R-%T%%CCC%00201" />
-                </RParameters>
-              </ParameterCalculation>
-            </ParameterCalculations>
             <ParameterValidations>
               <ParameterValidation Id="%AID%_PV-%T%%CCC%001" Name="CheckFingerIdRange" ValidationFunc="FIN_checkFingerIdRange">
                 <Parameters>

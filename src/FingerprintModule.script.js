@@ -14,12 +14,17 @@ function FIN_sort(device, online, progress, context) {
         } while (parStartAction.value != 0);
         // now startIndex points to a zero entry and endIndex to a non-zero entry, we move end to start
         if (endIndex > startIndex) {
+            FingerActionInfo
             var parStartFinger = device.getParameterByName("FINACT_fa" + startIndex + "FingerId");
             var parEndFinger = device.getParameterByName("FINACT_fa" + endIndex + "FingerId");
+            var parStartInfo = device.getParameterByName("FINACT_fa" + startIndex + "FingerActionInfo");
+            var parEndInfo = device.getParameterByName("FINACT_fa" + endIndex + "FingerActionInfo");
             parStartAction.value = parEndAction.value;
             parStartFinger.value = parEndFinger.value;
+            parStartInfo.value = parEndInfo.value;
             parEndAction.value = 0;
             parEndFinger.value = 0;
+            parEndInfo.value = "";
         }
     }
     // now do bubble sort
@@ -34,12 +39,17 @@ function FIN_sort(device, online, progress, context) {
             var swap = (parCurrAction.value > parNextAction.value || (parCurrAction.value == parNextAction.value && parCurrFinger.value > parNextFinger.value));
             if (swap) {
                 continueSort = true;
+                var parCurrInfo = device.getParameterByName("FINACT_fa" + current + "FingerActionInfo");
+                var parNextInfo = device.getParameterByName("FINACT_fa" + (current + 1) + "FingerActionInfo");
                 var tmpAction = parCurrAction.value;
                 var tmpFinger = parCurrFinger.value;
+                var tmpInfo = parCurrInfo.value;
                 parCurrAction.value = parNextAction.value;
                 parCurrFinger.value = parNextFinger.value;
+                parCurrInfo.value = parNextInfo.value;
                 parNextAction.value = tmpAction;
                 parNextFinger.value = tmpFinger;
+                parNextInfo.value = tmpInfo;
             }
         }
     } while (continueSort);
@@ -63,10 +73,6 @@ function FIN_checkFingerAction(device, online, progress, context) {
     } else {
         parFingerActionInfo.value = "Aktion ist nicht definiert, Finger wurde nicht ermittelt";
     }
-}
-
-function FIN_clear(input, output, context) {
-    output.FingerActionInfo = "";
 }
 
 function FIN_checkFingerIdRange(input, changed, prevValue, context) {
