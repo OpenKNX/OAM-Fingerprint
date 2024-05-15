@@ -222,8 +222,7 @@ function FIN_resetScanner(device, online, progress, context) {
     online.connect();
 
     // internal function ID
-    var data = [2];
-    data = data.concat((parFingerId & 0x0000ff00) >> 8, (parFingerId & 0x000000ff));
+    var data = [3];
 
     var resp = online.invokeFunctionProperty(160, 3, data);
     if (resp[0] != 0) {
