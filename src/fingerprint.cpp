@@ -38,6 +38,8 @@ bool Fingerprint::init()
         return false;
     }
 
+    scannerReady = true;
+
     logInfoP("System parameters:");
     logIndentUp();
     logInfoP("Status register: %d", _finger.status_reg);
@@ -53,7 +55,6 @@ bool Fingerprint::init()
 #endif
     logIndentDown();
 
-    scannerReady = true;
     return true;
 }
 
