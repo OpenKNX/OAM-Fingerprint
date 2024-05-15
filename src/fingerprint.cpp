@@ -365,7 +365,6 @@ bool Fingerprint::createTemplate()
         case FINGERPRINT_OK:
             logDebugP("Created");
             setLed(Success);
-            _delayMs(1000);
             break;
         case FINGERPRINT_ENROLLMISMATCH:
             logDebugP("Prints did not match");
@@ -376,6 +375,7 @@ bool Fingerprint::createTemplate()
             setLed(Failed);
             break;
     }
+    _delayMs(1000);
     logIndentDown();
 
     logIndentDown();
