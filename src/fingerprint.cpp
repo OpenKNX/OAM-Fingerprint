@@ -78,6 +78,7 @@ bool Fingerprint::setLed(State state)
         case Success:
             return _finger.LEDcontrol(FINGERPRINT_LED_ON, 0, FINGERPRINT_LED_GREEN, 0) == FINGERPRINT_OK;
         case ScanMatchNoAction:
+        case DeleteNotFound:
             return _finger.LEDcontrol(FINGERPRINT_LED_ON, 0, FINGERPRINT_LED_YELLOW, 0) == FINGERPRINT_OK;
         case ScanNoMatch:
         case Failed:
@@ -133,6 +134,22 @@ bool Fingerprint::_listTemplates()
     else
     {
         logErrorP("Error getting template locations.");
+    }
+
+    return false;
+}
+
+bool Fingerprint::hasLocation(uint16_t location)
+{
+     if (!scannerReady)
+        return false;
+
+    _finger.getTemplateIndices();
+
+    for (size_t i = 0; i < _finger.templateCount; ++i)
+    {
+        if (_finger.templates[i] == location)
+            return true;
     }
 
     return false;
@@ -472,6 +489,12 @@ bool Fingerprint::deleteTemplate(uint16_t location)
 {
     if (!scannerReady)
         return false;
+
+    if (!hasLocation(location))
+    {
+        setLed(DeleteNotFound);
+        return false;
+    }
 
     setLed(Busy);
 
