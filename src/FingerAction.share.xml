@@ -20,10 +20,10 @@
                 <Memory CodeSegment="%AID%_RS-04-00000" Offset="0" BitOffset="0" />
                 <Parameter Id="%AID%_UP-%T%000001" Name="FingerActionCount" ParameterType="%AID%_PT-FINACTNumChannels" Offset="0" BitOffset="0" Text="Verfügbare Zuordnungen" Value="1" SuffixText=" von %N%" />
               </Union>
-              <Parameter Id="%AID%_P-%T%000003" Name="PersonName" ParameterType="%AID%_PT-Text28Byte" Text="Name der Person" Value="" />
-              <Parameter Id="%AID%_P-%T%000004" Name="PersonFinger" ParameterType="%AID%_PT-Finger" Text="Finger der Person" Value="1" />
-              <Parameter Id="%AID%_P-%T%000005" Name="FingerId" ParameterType="%AID%_PT-FingerId" Text="Scanner Finger ID" Value="0" />
-              <Parameter Id="%AID%_P-%T%000006" Name="FingerActionLine" ParameterType="%AID%_PT-FINACTNumChannels" Text="Zeile für Zuweisung" Value="1" />
+              <Parameter Id="%AID%_P-%T%000003" Name="PersonName" ParameterType="%AID%_PT-Text28Byte" Text="Name der Person" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%T%000004" Name="PersonFinger" ParameterType="%AID%_PT-Finger" Text="Finger der Person" Value="1" Access="Read" />
+              <Parameter Id="%AID%_P-%T%000005" Name="FingerId" ParameterType="%AID%_PT-FingerId" Text="Scanner Finger ID" Value="0" Access="Read" />
+              <Parameter Id="%AID%_P-%T%000006" Name="FingerActionLine" ParameterType="%AID%_PT-FINACTNumChannels" Text="Zeile für Zuweisung" Value="1" Access="Read" />
             </Parameters>
             <ParameterRefs>
               <ParameterRef Id="%AID%_UP-%T%000001_R-%T%00000101" RefId="%AID%_UP-%T%000001" />
@@ -36,6 +36,7 @@
           <Dynamic>
             <ChannelIndependentBlock>
               <ParameterBlock Id="%AID%_PB-nnn" Name="FingerAction" Text="Finger" Icon="fingerprint" HelpContext="Empty">
+                <!--
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="Personen und Finger suche" UIHint="Headline" />
                 <ParameterRefRef RefId="%AID%_P-%T%000003_R-%T%00000301" IndentLevel="1" />
                 <ParameterRefRef RefId="%AID%_P-%T%000004_R-%T%00000401" IndentLevel="1" />
@@ -69,6 +70,7 @@
                   <Button Id="%AID%_B-%T%000003" Text="zuweisen" Cell="1,5" EventHandler="FIN_assignFingerId" />
                 </ParameterBlock>
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
+                -->
                 <ParameterRefRef RefId="%AID%_UP-%T%000001_R-%T%00000101" />
                 <ParameterBlock Id="%AID%_PB-nnn" Inline="true" Layout="Grid">
                   <Rows>
@@ -78,7 +80,7 @@
                     <Column Id="%AID%_PB-nnn_C-1" Width="8%" />
                     <Column Id="%AID%_PB-nnn_C-2" Width="12%" />
                     <Column Id="%AID%_PB-nnn_C-3" Width="12%" />
-                    <Column Id="%AID%_PB-nnn_C-4" Width="23%" />
+                    <Column Id="%AID%_PB-nnn_C-4" Width="0%" />
                     <Column Id="%AID%_PB-nnn_C-5" Width="80%" />
                   </Columns>
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="Nr." UIHint="Headline" Cell="1,1" />
