@@ -163,7 +163,9 @@ function FIN_searchUser(device, online, progress, context) {
 }
 
 function FIN_enrollFinger(device, online, progress, context) {
-    var parFingerId = device.getParameterByName("FIN_FingerId").value;
+    var parFingerId = device.getParameterByName("FIN_EnrollFingerId").value;
+    var parPersonFinger = device.getParameterByName("FIN_EnrollPersonFinger").value;
+    var parPersonName = device.getParameterByName("FIN_EnrollPersonName").value;
 
     progress.setText("Fingerprint: Finger ID " + parFingerId + " anlernen...");
     online.connect();
@@ -174,11 +176,9 @@ function FIN_enrollFinger(device, online, progress, context) {
     data = data.concat((parFingerId & 0x0000ff00) >> 8, (parFingerId & 0x000000ff));
 
     // person finger
-    var parPersonFinger = device.getParameterByName("FIN_PersonFinger").value;
     data = data.concat((parPersonFinger & 0x000000ff));
 
     // person name
-    var parPersonName = device.getParameterByName("FIN_PersonName").value;
     for (var i = 0; i < parPersonName.length; ++i) {
         var code = parPersonName.charCodeAt(i);
         data = data.concat([code]);
@@ -199,7 +199,7 @@ function FIN_enrollFinger(device, online, progress, context) {
 }
 
 function FIN_deleteFinger(device, online, progress, context) {
-    var parFingerId = device.getParameterByName("FIN_FingerId").value;
+    var parFingerId = device.getParameterByName("FIN_DeleteFingerId").value;
 
     progress.setText("Fingerprint: Finger ID " + parFingerId + " löschen...");
     online.connect();
