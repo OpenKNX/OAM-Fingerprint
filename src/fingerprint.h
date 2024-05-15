@@ -32,6 +32,7 @@ class Fingerprint
         EnrollCreateModel,
         WaitForFinger,
         RemoveFinger,
+        DeleteNotFound,
         Success,
         Failed,
         Busy
@@ -55,6 +56,7 @@ class Fingerprint
     bool hasFinger();
 
     uint16_t getTemplateCount();
+    bool hasLocation(uint16_t location);
     uint16_t getNextFreeLocation();
     FindFingerResult findFingerprint();
     bool createTemplate();

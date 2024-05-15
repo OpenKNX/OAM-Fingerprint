@@ -55,14 +55,14 @@
                 <TypeRestriction Base="Value" SizeInBit="4">
                   <!-- Value "0" means not set. -->
                   <Enumeration Text="Daumen rechts" Value="1" Id="%ENID%" />
-                  <Enumeration Text="Daumen links" Value="2" Id="%ENID%" />
                   <Enumeration Text="Zeigefinger rechts" Value="3" Id="%ENID%" />
-                  <Enumeration Text="Zeigefinger links" Value="4" Id="%ENID%" />
                   <Enumeration Text="Mittelfinger rechts" Value="5" Id="%ENID%" />
-                  <Enumeration Text="Mittelfinger links" Value="6" Id="%ENID%" />
                   <Enumeration Text="Ringfinger rechts" Value="7" Id="%ENID%" />
-                  <Enumeration Text="Ringfinger links" Value="8" Id="%ENID%" />
                   <Enumeration Text="Kleiner Finger rechts" Value="9" Id="%ENID%" />
+                  <Enumeration Text="Daumen links" Value="2" Id="%ENID%" />
+                  <Enumeration Text="Zeigefinger links" Value="4" Id="%ENID%" />
+                  <Enumeration Text="Mittelfinger links" Value="6" Id="%ENID%" />
+                  <Enumeration Text="Ringfinger links" Value="8" Id="%ENID%" />
                   <Enumeration Text="Kleiner Finger links" Value="10" Id="%ENID%" />
                 </TypeRestriction>
               </ParameterType>
@@ -88,11 +88,14 @@
               </ParameterType>
             </ParameterTypes>
             <Parameters>
-              <Parameter Id="%AID%_P-%T%000003" Name="PersonName" ParameterType="%AID%_PT-Text28Byte" Text="Name der Person" Value="" />
-              <Parameter Id="%AID%_P-%T%000004" Name="PersonFinger" ParameterType="%AID%_PT-Finger" Text="Finger der Person" Value="1" />
-              <Parameter Id="%AID%_P-%T%000005" Name="FingerIdR503" ParameterType="%AID%_PT-FingerIdR503" Text="Scanner Finger ID" Value="0" />
-              <Parameter Id="%AID%_P-%T%000006" Name="FingerIdR503S" ParameterType="%AID%_PT-FingerIdR503S" Text="Scanner Finger ID" Value="0" />
-              <Parameter Id="%AID%_P-%T%000007" Name="FingerId" ParameterType="%AID%_PT-FingerId" Text="Scanner Finger ID" Value="0" />
+              <Parameter Id="%AID%_P-%T%000003" Name="EnrollPersonName" ParameterType="%AID%_PT-Text28Byte" Text="Name der Person" Value="" />
+              <Parameter Id="%AID%_P-%T%000004" Name="EnrollPersonFinger" ParameterType="%AID%_PT-Finger" Text="Finger der Person" Value="1" />
+              <Parameter Id="%AID%_P-%T%000005" Name="EnrollFingerIdR503" ParameterType="%AID%_PT-FingerIdR503" Text="Scanner Finger ID" Value="0" />
+              <Parameter Id="%AID%_P-%T%000006" Name="EnrollFingerIdR503S" ParameterType="%AID%_PT-FingerIdR503S" Text="Scanner Finger ID" Value="0" />
+              <Parameter Id="%AID%_P-%T%000007" Name="EnrollFingerId" ParameterType="%AID%_PT-FingerId" Text="Scanner Finger ID" Value="0" />
+              <Parameter Id="%AID%_P-%T%000016" Name="DeleteFingerIdR503" ParameterType="%AID%_PT-FingerIdR503" Text="Scanner Finger ID" Value="0" />
+              <Parameter Id="%AID%_P-%T%000017" Name="DeleteFingerIdR503S" ParameterType="%AID%_PT-FingerIdR503S" Text="Scanner Finger ID" Value="0" />
+              <Parameter Id="%AID%_P-%T%000018" Name="DeleteFingerId" ParameterType="%AID%_PT-FingerId" Text="Scanner Finger ID" Value="0" />
               <Parameter Id="%AID%_P-%T%000015" Name="ResetScanner" ParameterType="%AID%_PT-OnOffYesNo" Text="Alle Finger löschen?" Value="0" />
               <Union SizeInBit="40">
                 <Memory CodeSegment="%AID%_RS-04-00000" Offset="0" BitOffset="0" />
@@ -123,6 +126,9 @@
               <ParameterRef Id="%AID%_UP-%T%000013_R-%T%00001301" RefId="%AID%_UP-%T%000013" />
               <ParameterRef Id="%AID%_UP-%T%000014_R-%T%00001401" RefId="%AID%_UP-%T%000014" />
               <ParameterRef Id="%AID%_P-%T%000015_R-%T%00001501" RefId="%AID%_P-%T%000015" />
+              <ParameterRef Id="%AID%_P-%T%000016_R-%T%00001601" RefId="%AID%_P-%T%000016" />
+              <ParameterRef Id="%AID%_P-%T%000017_R-%T%00001701" RefId="%AID%_P-%T%000017" />
+              <ParameterRef Id="%AID%_P-%T%000018_R-%T%00001801" RefId="%AID%_P-%T%000018" />
             </ParameterRefs>
             <ComObjectTable>
               <ComObject Id="%AID%_O-%T%000001" Name="Touched"              Number="1"  ObjectSize="1 Bit"    Text="Berührung (sofort, immer)" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
@@ -229,15 +235,15 @@
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="Finger löschen" UIHint="Headline" />
                 <choose ParamRefId="%AID%_UP-%T%000002_R-%T%00000201">
                   <when test="0">
-                    <ParameterRefRef RefId="%AID%_P-%T%000005_R-%T%00000501" IndentLevel="1" />
-                    <Assign SourceParamRefRef="%AID%_P-%T%000005_R-%T%00000501" TargetParamRefRef="%AID%_P-%T%000007_R-%T%00000701" />
+                    <ParameterRefRef RefId="%AID%_P-%T%000016_R-%T%00001601" IndentLevel="1" />
+                    <Assign SourceParamRefRef="%AID%_P-%T%000016_R-%T%00001601" TargetParamRefRef="%AID%_P-%T%000018_R-%T%00001801" />
                   </when>
                   <when test="1">
-                    <ParameterRefRef RefId="%AID%_P-%T%000006_R-%T%00000601" IndentLevel="1" />
-                    <Assign SourceParamRefRef="%AID%_P-%T%000006_R-%T%00000601" TargetParamRefRef="%AID%_P-%T%000007_R-%T%00000701" />
+                    <ParameterRefRef RefId="%AID%_P-%T%000017_R-%T%00001701" IndentLevel="1" />
+                    <Assign SourceParamRefRef="%AID%_P-%T%000017_R-%T%00001701" TargetParamRefRef="%AID%_P-%T%000018_R-%T%00001801" />
                   </when>
                   <when test="2">
-                    <ParameterRefRef RefId="%AID%_P-%T%000007_R-%T%00000701" IndentLevel="1" />
+                    <ParameterRefRef RefId="%AID%_P-%T%000018_R-%T%00001801" IndentLevel="1" />
                   </when>
                 </choose>
                 <Button Id="%AID%_B-%T%000002" Text="Löschen" Name="deleteFinger" EventHandler="FIN_deleteFinger" EventHandlerOnline="ConnectionOriented" />

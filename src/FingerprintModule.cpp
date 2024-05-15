@@ -490,6 +490,9 @@ bool FingerprintModule::processFunctionProperty(uint8_t objectIndex, uint8_t pro
         case 2:
             handleFunctionPropertyDeleteFinger(data, resultData, resultLength);
             return true;
+        case 3:
+            handleFunctionPropertyResetScanner(data, resultData, resultLength);
+            return true;
         case 11:
             handleFunctionPropertySearchPersonByFingerId(data, resultData, resultLength);
             return true;
@@ -551,6 +554,24 @@ void FingerprintModule::handleFunctionPropertyDeleteFinger(uint8_t *data, uint8_
 
     bool success = deleteFinger(fingerId);
     
+    resultData[0] = success ? 0 : 1;
+    resultLength = 1;
+}
+
+void FingerprintModule::handleFunctionPropertyResetScanner(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
+{
+    logInfoP("Function property: Reset scanner");
+
+    char personData[29] = {}; // empty
+    for (size_t i = 0; i < MAX_FINGERS; i++)
+    {
+        uint32_t storageOffset = FIN_CaclStorageOffset(i);
+        _fingerprintStorage.write(storageOffset, *personData, 29);
+    }
+    _fingerprintStorage.commit();
+
+    bool success = finger.emptyDatabase();
+
     resultData[0] = success ? 0 : 1;
     resultLength = 1;
 }

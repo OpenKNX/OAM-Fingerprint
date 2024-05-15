@@ -14,12 +14,17 @@ function FIN_sort(device, online, progress, context) {
         } while (parStartAction.value != 0);
         // now startIndex points to a zero entry and endIndex to a non-zero entry, we move end to start
         if (endIndex > startIndex) {
+            FingerActionInfo
             var parStartFinger = device.getParameterByName("FINACT_fa" + startIndex + "FingerId");
             var parEndFinger = device.getParameterByName("FINACT_fa" + endIndex + "FingerId");
+            var parStartInfo = device.getParameterByName("FINACT_fa" + startIndex + "FingerActionInfo");
+            var parEndInfo = device.getParameterByName("FINACT_fa" + endIndex + "FingerActionInfo");
             parStartAction.value = parEndAction.value;
             parStartFinger.value = parEndFinger.value;
+            parStartInfo.value = parEndInfo.value;
             parEndAction.value = 0;
             parEndFinger.value = 0;
+            parEndInfo.value = "";
         }
     }
     // now do bubble sort
@@ -34,12 +39,17 @@ function FIN_sort(device, online, progress, context) {
             var swap = (parCurrAction.value > parNextAction.value || (parCurrAction.value == parNextAction.value && parCurrFinger.value > parNextFinger.value));
             if (swap) {
                 continueSort = true;
+                var parCurrInfo = device.getParameterByName("FINACT_fa" + current + "FingerActionInfo");
+                var parNextInfo = device.getParameterByName("FINACT_fa" + (current + 1) + "FingerActionInfo");
                 var tmpAction = parCurrAction.value;
                 var tmpFinger = parCurrFinger.value;
+                var tmpInfo = parCurrInfo.value;
                 parCurrAction.value = parNextAction.value;
                 parCurrFinger.value = parNextFinger.value;
+                parCurrInfo.value = parNextInfo.value;
                 parNextAction.value = tmpAction;
                 parNextFinger.value = tmpFinger;
+                parNextInfo.value = tmpInfo;
             }
         }
     } while (continueSort);
@@ -63,10 +73,6 @@ function FIN_checkFingerAction(device, online, progress, context) {
     } else {
         parFingerActionInfo.value = "Aktion ist nicht definiert, Finger wurde nicht ermittelt";
     }
-}
-
-function FIN_clear(input, output, context) {
-    output.FingerActionInfo = "";
 }
 
 function FIN_checkFingerIdRange(input, changed, prevValue, context) {
@@ -157,7 +163,9 @@ function FIN_searchUser(device, online, progress, context) {
 }
 
 function FIN_enrollFinger(device, online, progress, context) {
-    var parFingerId = device.getParameterByName("FIN_FingerId").value;
+    var parFingerId = device.getParameterByName("FIN_EnrollFingerId").value;
+    var parPersonFinger = device.getParameterByName("FIN_EnrollPersonFinger").value;
+    var parPersonName = device.getParameterByName("FIN_EnrollPersonName").value;
 
     progress.setText("Fingerprint: Finger ID " + parFingerId + " anlernen...");
     online.connect();
@@ -168,11 +176,9 @@ function FIN_enrollFinger(device, online, progress, context) {
     data = data.concat((parFingerId & 0x0000ff00) >> 8, (parFingerId & 0x000000ff));
 
     // person finger
-    var parPersonFinger = device.getParameterByName("FIN_PersonFinger").value;
     data = data.concat((parPersonFinger & 0x000000ff));
 
     // person name
-    var parPersonName = device.getParameterByName("FIN_PersonName").value;
     for (var i = 0; i < parPersonName.length; ++i) {
         var code = parPersonName.charCodeAt(i);
         data = data.concat([code]);
@@ -193,7 +199,7 @@ function FIN_enrollFinger(device, online, progress, context) {
 }
 
 function FIN_deleteFinger(device, online, progress, context) {
-    var parFingerId = device.getParameterByName("FIN_FingerId").value;
+    var parFingerId = device.getParameterByName("FIN_DeleteFingerId").value;
 
     progress.setText("Fingerprint: Finger ID " + parFingerId + " löschen...");
     online.connect();
@@ -216,8 +222,7 @@ function FIN_resetScanner(device, online, progress, context) {
     online.connect();
 
     // internal function ID
-    var data = [2];
-    data = data.concat((parFingerId & 0x0000ff00) >> 8, (parFingerId & 0x000000ff));
+    var data = [3];
 
     var resp = online.invokeFunctionProperty(160, 3, data);
     if (resp[0] != 0) {
