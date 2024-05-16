@@ -26,7 +26,7 @@
 
 #define MAX_FINGERS 1500
 
-#define FIN_CaclStorageOffset(fingerId) fingerId * 29 + 1 // first byte free for storage format version
+#define FIN_CaclStorageOffset(fingerId) fingerId * 29 + 4096 + 1 // first byte free for finger info storage format version
 
 class FingerprintModule : public OpenKNX::Module
 {
