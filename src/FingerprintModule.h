@@ -4,11 +4,11 @@
 #include "ActionChannel.h"
 #include "secrets.h"
 
-#define PWR_PIN 1
-#define TOUCH_PIN 2
+#define DISPLAY_PWR_PIN 1
+#define DISPLAY_TOUCH_PIN 2
 
-#define LOCK_PIN 26
-#define UNLOCK_PIN 27
+#define TOUCH_LEFT_PIN 26
+#define TOUCH_RIGHT_PIN 27
 #define LED_GREEN_PIN 24
 #define LED_RED_PIN 25
 
@@ -45,14 +45,13 @@ class FingerprintModule : public OpenKNX::Module
     // uint16_t flashSize() override;
 
   private:
-    static void interruptTouched();
-    static void interruptUnlock();
-    static void interruptLock();
+    static void interruptDisplayTouched();
+    static void interruptTouchLeft();
+    static void interruptTouchRight();
     void processScanSuccess(uint16_t location, bool external = false);
     bool enrollFinger(uint16_t location);
     bool deleteFinger(uint16_t location);
     void setFingerprintPower(bool on);
-    void updateLockLeds(bool showGreenWhenUnlock = true);
     void handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
     void handleFunctionPropertyDeleteFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
     void handleFunctionPropertyResetScanner(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
@@ -65,16 +64,12 @@ class FingerprintModule : public OpenKNX::Module
 
     Fingerprint finger;
     bool scanerHasPower = false;
-    bool lockRequested = false;
-    bool isLocked = false;
     uint32_t resetLedsTimer = 0;
     uint32_t enrollRequested = 0;
     uint16_t enrollRequestedLocation = 0;
     inline static bool delayCallbackActive = false;
 
     inline volatile static bool touched = false;
-    inline volatile static bool unlockTouched = false;
-    inline volatile static bool lockTouched = false;
 };
 
 extern FingerprintModule openknxFingerprintModule;

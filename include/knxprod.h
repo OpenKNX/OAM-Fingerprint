@@ -10,7 +10,7 @@
                                              
 #define MAIN_OpenKnxId 0xA6
 #define MAIN_ApplicationNumber 1
-#define MAIN_ApplicationVersion 34
+#define MAIN_ApplicationVersion 38
 #define MAIN_ParameterSize 25180
 #define MAIN_MaxKoNumber 3496
 #define MAIN_OrderNumber "OpenKnxFingerprint"
@@ -156,18 +156,21 @@
 #define FIN_FingerprintColor                    50      // 3 Bits, Bit 5-3
 #define     FIN_FingerprintColorMask 0x38
 #define     FIN_FingerprintColorShift 3
-#define FIN_EnableRawData                       49      // 1 Bit, Bit 3
-#define     FIN_EnableRawDataMask 0x08
-#define     FIN_EnableRawDataShift 3
-#define FIN_EnableSync                          49      // 1 Bit, Bit 2
-#define     FIN_EnableSyncMask 0x04
-#define     FIN_EnableSyncShift 2
-#define FIN_EnableExternalControl               49      // 1 Bit, Bit 1
-#define     FIN_EnableExternalControlMask 0x02
-#define     FIN_EnableExternalControlShift 1
-#define FIN_EnableAccessData                    49      // 1 Bit, Bit 0
-#define     FIN_EnableAccessDataMask 0x01
-#define     FIN_EnableAccessDataShift 0
+#define FIN_EnableRawData                       50      // 1 Bit, Bit 7
+#define     FIN_EnableRawDataMask 0x80
+#define     FIN_EnableRawDataShift 7
+#define FIN_EnableSync                          50      // 1 Bit, Bit 6
+#define     FIN_EnableSyncMask 0x40
+#define     FIN_EnableSyncShift 6
+#define FIN_EnableExternalControl               50      // 1 Bit, Bit 5
+#define     FIN_EnableExternalControlMask 0x20
+#define     FIN_EnableExternalControlShift 5
+#define FIN_EnableAccessData                    50      // 1 Bit, Bit 4
+#define     FIN_EnableAccessDataMask 0x10
+#define     FIN_EnableAccessDataShift 4
+#define FIN_EnableTouchPcb                      50      // 1 Bit, Bit 3
+#define     FIN_EnableTouchPcbMask 0x08
+#define     FIN_EnableTouchPcbShift 3
 
 // Verfügbare Aktionen
 #define ParamFIN_VisibleActions                      (knx.paramWord(FIN_VisibleActions))
@@ -189,6 +192,8 @@
 #define ParamFIN_EnableExternalControl               ((bool)(knx.paramByte(FIN_EnableExternalControl) & FIN_EnableExternalControlMask))
 // Zutrittsdaten KOs aktivieren
 #define ParamFIN_EnableAccessData                    ((bool)(knx.paramByte(FIN_EnableAccessData) & FIN_EnableAccessDataMask))
+// Touch-Frontplatine vorhanden
+#define ParamFIN_EnableTouchPcb                      ((bool)(knx.paramByte(FIN_EnableTouchPcb) & FIN_EnableTouchPcbMask))
 
 #define FIN_KoTouched 21
 #define FIN_KoTouchedNoAction 22
@@ -214,6 +219,10 @@
 #define FIN_KoActionAddFingerId 62
 #define FIN_KoActionRemoveFingerId 63
 #define FIN_KoSync 66
+#define FIN_KoTouchPcbButtonLeft 71
+#define FIN_KoTouchPcbButtonRight 72
+#define FIN_KoTouchPcbLedRed 73
+#define FIN_KoTouchPcbLedGreen 74
 
 // Berührung (sofort, immer)
 #define KoFIN_Touched                             (knx.getGroupObject(FIN_KoTouched))
@@ -263,6 +272,14 @@
 #define KoFIN_ActionRemoveFingerId                (knx.getGroupObject(FIN_KoActionRemoveFingerId))
 // Datenaustausch zwischen Fingerprints
 #define KoFIN_Sync                                (knx.getGroupObject(FIN_KoSync))
+// Touch-Front: Taste links
+#define KoFIN_TouchPcbButtonLeft                  (knx.getGroupObject(FIN_KoTouchPcbButtonLeft))
+// Touch-Front: Taste rechts
+#define KoFIN_TouchPcbButtonRight                 (knx.getGroupObject(FIN_KoTouchPcbButtonRight))
+// Touch-Front: LED rot
+#define KoFIN_TouchPcbLedRed                      (knx.getGroupObject(FIN_KoTouchPcbLedRed))
+// Touch-Front: LED grün
+#define KoFIN_TouchPcbLedGreen                    (knx.getGroupObject(FIN_KoTouchPcbLedGreen))
 
 #define FIN_ChannelCount 999
 

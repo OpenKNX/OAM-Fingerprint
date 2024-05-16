@@ -7,7 +7,13 @@
         <ApplicationProgram Id="%AID%" ApplicationNumber="200" ApplicationVersion="1" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="FIN" LoadProcedureStyle="MergedProcedure" PeiType="0" DefaultLanguage="de" DynamicTableManagement="false" Linkable="false" MinEtsVersion="4.0">
           <Static>
             <ParameterTypes>
-              <!-- Number of channels (module specific) -->
+              <ParameterType Id="%AID%_PT-BTNInputs" Name="BTNInputs">
+                <TypeRestriction Base="Value" SizeInBit="16">
+                  <Enumeration Text="Externes KO" Value="0" Id="%ENID%" />
+                  <Enumeration Text="Touch-Front: Taste links" Value="51" Id="%ENID%" />
+                  <Enumeration Text="Touch-Front: Taste rechts" Value="52" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
               <ParameterType Id="%AID%_PT-FINNumChannels" Name="FINNumChannels">
                 <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="1" maxInclusive="%N%" />
               </ParameterType>
@@ -28,11 +34,6 @@
                   <Enumeration Text="Gelb" Value="5" Id="%ENID%" />
                   <Enumeration Text="Zyan" Value="6" Id="%ENID%" />
                   <Enumeration Text="White" Value="7" Id="%ENID%" />
-                </TypeRestriction>
-              </ParameterType>
-              <ParameterType Id="%AID%_PT-BTNInputs" Name="BTNInputs">
-                <TypeRestriction Base="Value" SizeInBit="16">
-                  <Enumeration Text="Externes KO" Value="0" Id="%ENID%" />
                 </TypeRestriction>
               </ParameterType>
               <ParameterType Id="%AID%_PT-Text28Byte" Name="Text28Byte">
@@ -104,10 +105,12 @@
                 <Parameter Id="%AID%_UP-%T%000009" Name="AuthDelayTime" ParameterType="%AID%_PT-DelayTime" Offset="2" BitOffset="2" Text="Zeit" Value="5" />
                 <Parameter Id="%AID%_UP-%T%000002" Name="FingerprintScanner" ParameterType="%AID%_PT-FingerprintScanner" Offset="4" BitOffset="0" Text="Fingerprint Scanner" Value="0" />
                 <Parameter Id="%AID%_UP-%T%000010" Name="FingerprintColor" ParameterType="%AID%_PT-FingerprintColor" Offset="4" BitOffset="2" Text="Blinkfarbe während der Authorisierung" Value="2" />
-                <Parameter Id="%AID%_UP-%T%000011" Name="EnableRawData" Offset="3" BitOffset="4" ParameterType="%AID%_PT-OnOffYesNo" Text="Rohdaten auf den Bus senden" Value="0" />
-                <Parameter Id="%AID%_UP-%T%000012" Name="EnableSync" Offset="3" BitOffset="5" ParameterType="%AID%_PT-OnOffYesNo" Text="Synchronisation mehrerer Scanner aktivieren" Value="0" />
-                <Parameter Id="%AID%_UP-%T%000013" Name="EnableExternalControl" Offset="3" BitOffset="6" ParameterType="%AID%_PT-OnOffYesNo" Text="Externe Kontrolle ermöglichen" Value="0" />
-                <Parameter Id="%AID%_UP-%T%000014" Name="EnableAccessData" Offset="3" BitOffset="7" ParameterType="%AID%_PT-OnOffYesNo" Text="Zutrittsdaten KOs aktivieren" Value="0" />
+                <!-- 4 bits free -->
+                <Parameter Id="%AID%_UP-%T%000011" Name="EnableRawData" Offset="4" BitOffset="0" ParameterType="%AID%_PT-OnOffYesNo" Text="Rohdaten auf den Bus senden" Value="0" />
+                <Parameter Id="%AID%_UP-%T%000012" Name="EnableSync" Offset="4" BitOffset="1" ParameterType="%AID%_PT-OnOffYesNo" Text="Synchronisation mehrerer Scanner aktivieren" Value="0" />
+                <Parameter Id="%AID%_UP-%T%000013" Name="EnableExternalControl" Offset="4" BitOffset="2" ParameterType="%AID%_PT-OnOffYesNo" Text="Externe Kontrolle ermöglichen" Value="0" />
+                <Parameter Id="%AID%_UP-%T%000014" Name="EnableAccessData" Offset="4" BitOffset="3" ParameterType="%AID%_PT-OnOffYesNo" Text="Zutrittsdaten KOs aktivieren" Value="0" />
+                <Parameter Id="%AID%_UP-%T%000019" Name="EnableTouchPcb" Offset="4" BitOffset="4" ParameterType="%AID%_PT-OnOffYesNo" Text="Touch-Frontplatine vorhanden" Value="0" />
               </Union>
             </Parameters>
             <ParameterRefs>
@@ -129,6 +132,7 @@
               <ParameterRef Id="%AID%_P-%T%000016_R-%T%00001601" RefId="%AID%_P-%T%000016" />
               <ParameterRef Id="%AID%_P-%T%000017_R-%T%00001701" RefId="%AID%_P-%T%000017" />
               <ParameterRef Id="%AID%_P-%T%000018_R-%T%00001801" RefId="%AID%_P-%T%000018" />
+              <ParameterRef Id="%AID%_UP-%T%000019_R-%T%00001901" RefId="%AID%_UP-%T%000019" />
             </ParameterRefs>
             <ComObjectTable>
               <ComObject Id="%AID%_O-%T%000001" Name="Touched"              Number="1"  ObjectSize="1 Bit"    Text="Berührung (sofort, immer)" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
@@ -155,7 +159,11 @@
               <ComObject Id="%AID%_O-%T%000042" Name="ActionAddFingerId"    Number="42" ObjectSize="4 Bytes"  Text="Finger ID zu Aktion hinzufügen" FunctionText="Trigger" ReadFlag="Enabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPT-12" />
               <ComObject Id="%AID%_O-%T%000043" Name="ActionRemoveFingerId" Number="43" ObjectSize="4 Bytes"  Text="Finger ID von Aktion entfernen" FunctionText="Trigger" ReadFlag="Enabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPT-12" />
               <ComObject Id="%AID%_O-%T%000046" Name="Sync"                 Number="46" ObjectSize="14 Bytes" Text="Datenaustausch zwischen Fingerprints" FunctionText="Synchronisation" ReadFlag="Enabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPT-16" />
-            </ComObjectTable> <!-- Zutrittsdaten verstecken -->
+              <ComObject Id="%AID%_O-%T%000051" Name="TouchPcbButtonLeft"   Number="51" ObjectSize="1 Bit"    Text="Touch-Front: Taste links" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="%AID%_O-%T%000052" Name="TouchPcbButtonRight"  Number="52" ObjectSize="1 Bit"    Text="Touch-Front: Taste rechts" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="%AID%_O-%T%000053" Name="TouchPcbLedRed"       Number="53" ObjectSize="1 Bit"    Text="Touch-Front: LED rot" FunctionText="Trigger" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="%AID%_O-%T%000054" Name="TouchPcbLedGreen"     Number="54" ObjectSize="1 Bit"    Text="Touch-Front: LED grün" FunctionText="Trigger" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+            </ComObjectTable>
             <ComObjectRefs>
               <ComObjectRef Id="%AID%_O-%T%000001_R-%T%00000101" RefId="%AID%_O-%T%000001" />
               <ComObjectRef Id="%AID%_O-%T%000002_R-%T%00000201" RefId="%AID%_O-%T%000002" />
@@ -181,6 +189,10 @@
               <ComObjectRef Id="%AID%_O-%T%000042_R-%T%00004201" RefId="%AID%_O-%T%000042" />
               <ComObjectRef Id="%AID%_O-%T%000043_R-%T%00004301" RefId="%AID%_O-%T%000043" />
               <ComObjectRef Id="%AID%_O-%T%000046_R-%T%00004601" RefId="%AID%_O-%T%000046" />
+              <ComObjectRef Id="%AID%_O-%T%000051_R-%T%00005101" RefId="%AID%_O-%T%000051" />
+              <ComObjectRef Id="%AID%_O-%T%000052_R-%T%00005201" RefId="%AID%_O-%T%000052" />
+              <ComObjectRef Id="%AID%_O-%T%000053_R-%T%00005301" RefId="%AID%_O-%T%000053" />
+              <ComObjectRef Id="%AID%_O-%T%000054_R-%T%00005401" RefId="%AID%_O-%T%000054" />
             </ComObjectRefs>
             <Script>
               <op:include href="FingerprintModule.script.js" type="script" />
@@ -250,6 +262,7 @@
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
 
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="Zusatzfunktionen" UIHint="Headline" />
+                <ParameterRefRef RefId="%AID%_UP-%T%000019_R-%T%00001901" IndentLevel="1" />
                 <ParameterRefRef RefId="%AID%_UP-%T%000011_R-%T%00001101" IndentLevel="1" />
                 <choose ParamRefId="%AID%_UP-%T%000011_R-%T%00001101">
                   <when test="1">
@@ -262,6 +275,16 @@
                 <!-- Lock -->
                 <ComObjectRefRef RefId="%AID%_O-%T%000006_R-%T%00000601" />
                 <ComObjectRefRef RefId="%AID%_O-%T%000007_R-%T%00000701" />
+
+                <!-- Touch-PCB -->
+                <choose ParamRefId="%AID%_UP-%T%000019_R-%T%00001901">
+                  <when test="1">
+                    <ComObjectRefRef RefId="%AID%_O-%T%000051_R-%T%00005101" />
+                    <ComObjectRefRef RefId="%AID%_O-%T%000052_R-%T%00005201" />
+                    <ComObjectRefRef RefId="%AID%_O-%T%000053_R-%T%00005301" />
+                    <ComObjectRefRef RefId="%AID%_O-%T%000054_R-%T%00005401" />
+                  </when>
+                </choose>
 
                 <!-- Raw data -->
                 <choose ParamRefId="%AID%_UP-%T%000011_R-%T%00001101">
