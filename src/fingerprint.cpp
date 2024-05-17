@@ -12,7 +12,7 @@ Fingerprint::Fingerprint(fingerprint_delay_fptr_t delayCallback, uint32_t overri
     _delayMs = delayCallback;
 }
 
-bool Fingerprint::init()
+bool Fingerprint::start()
 {
     scannerReady = false;
 
@@ -56,6 +56,11 @@ bool Fingerprint::init()
     logIndentDown();
 
     return true;
+}
+
+void Fingerprint::close()
+{
+    _finger.close();
 }
 
 std::string Fingerprint::logPrefix()

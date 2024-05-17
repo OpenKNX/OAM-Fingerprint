@@ -232,3 +232,46 @@ function FIN_resetScanner(device, online, progress, context) {
     online.disconnect();
     progress.setText("Fingerprint: Alle finger gelöscht.");
 }
+
+function FIN_setPassword(device, online, progress, context) {
+    var parPasswordOption = device.getParameterByName("FIN_PasswordOption").value;
+    var parPasswordNew = device.getParameterByName("FIN_PasswordNew").value;
+    var parPasswordOld = device.getParameterByName("FIN_PasswordOld").value;
+
+    progress.setText("Fingerprint: " + parPasswordOption == 1 ? "Passwort festsetzen..." : "Passwort ändern...");
+    online.connect();
+
+    var data = [21]; // internal function ID
+
+    // password option
+    data = data.concat((parPasswordOption & 0x000000ff));
+
+    // new password
+    for (var i = 0; i < parPasswordNew.length; ++i) {
+        var code = parPasswordNew.charCodeAt(i);
+        data = data.concat([code]);
+    }
+    data = data.concat(0); // null-terminated string
+
+    // change password
+    if (parPasswordOption == 2) {
+        // old password
+        for (var i = 0; i < parPasswordOld.length; ++i) {
+            var code = parPasswordOld.charCodeAt(i);
+            data = data.concat([code]);
+        }
+        data = data.concat(0); // null-terminated string
+    }
+
+    info(parPasswordOption);
+    info(parPasswordNew);
+    info(parPasswordOld);
+
+    var resp = online.invokeFunctionProperty(160, 3, data);
+    if (resp[0] != 0) {
+        throw new Error("Fingerprint: Es ist ein unbekannter Fehler aufgetreten!");
+    }
+
+    online.disconnect();
+    progress.setText("Fingerprint: " + parPasswordOption == 1 ? "Passwort festgesetzt..." : "Passwort geändert...");
+}
