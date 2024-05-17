@@ -50,7 +50,8 @@ class Fingerprint
     Fingerprint(uint32_t overridePassword = 0);
     Fingerprint(fingerprint_delay_fptr_t delayCallback, uint32_t overridePassword = 0);
 
-    bool init();
+    bool start();
+    void close();
     std::string logPrefix();
     bool setLed(State state);
     bool hasFinger();

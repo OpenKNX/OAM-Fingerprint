@@ -2,10 +2,9 @@
 #include "hardware.h"
 #include "Fingerprint.h"
 #include "ActionChannel.h"
-#include "secrets.h"
+#include "CRC32.h"
 
-#define DISPLAY_PWR_PIN 1
-#define DISPLAY_TOUCH_PIN 2
+#define SCANNER_TOUCH_PIN 2
 
 #define TOUCH_LEFT_PIN 26
 #define TOUCH_RIGHT_PIN 27
@@ -26,7 +25,17 @@
 
 #define MAX_FINGERS 1500
 
+#define FLASH_MAGIC_WORD 2912744758
 #define FIN_CaclStorageOffset(fingerId) fingerId * 29 + 4096 + 1 // first byte free for finger info storage format version
+
+#define FLASH_SCANNER_PASSWORD_OFFSET 5
+
+/*
+Flash Storage Layout:
+- 0-3: 4 bytes: int magic word
+-   4: 1 byte main storage version format (currently 0)
+- 5-8: 4 bytes: int fingerprint scanner password
+*/
 
 class FingerprintModule : public OpenKNX::Module
 {
@@ -48,13 +57,15 @@ class FingerprintModule : public OpenKNX::Module
     static void interruptDisplayTouched();
     static void interruptTouchLeft();
     static void interruptTouchRight();
+    void initFingerprintScanner();
+    void initFlash();
     void processScanSuccess(uint16_t location, bool external = false);
     bool enrollFinger(uint16_t location);
     bool deleteFinger(uint16_t location);
-    void setFingerprintPower(bool on);
     void handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
     void handleFunctionPropertyDeleteFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
     void handleFunctionPropertyResetScanner(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
+    void handleFunctionPropertySetPassword(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
     void handleFunctionPropertySearchPersonByFingerId(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
     void handleFunctionPropertySearchFingerIdByPerson(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
     static void delayCallback(uint32_t period);
@@ -63,7 +74,6 @@ class FingerprintModule : public OpenKNX::Module
     ActionChannel *_channels[FIN_ChannelCount];
 
     Fingerprint finger;
-    bool scanerHasPower = false;
     uint32_t resetLedsTimer = 0;
     uint32_t enrollRequested = 0;
     uint16_t enrollRequestedLocation = 0;

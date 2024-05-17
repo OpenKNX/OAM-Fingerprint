@@ -10,8 +10,8 @@
               <ParameterType Id="%AID%_PT-BTNInputs" Name="BTNInputs">
                 <TypeRestriction Base="Value" SizeInBit="16">
                   <Enumeration Text="Externes KO" Value="0" Id="%ENID%" />
-                  <Enumeration Text="Touch-Front: Taste links" Value="51" Id="%ENID%" />
-                  <Enumeration Text="Touch-Front: Taste rechts" Value="52" Id="%ENID%" />
+                  <Enumeration Text="Touch-Front: Taste links" Value="71" Id="%ENID%" />
+                  <Enumeration Text="Touch-Front: Taste rechts" Value="72" Id="%ENID%" />
                 </TypeRestriction>
               </ParameterType>
               <ParameterType Id="%AID%_PT-FINNumChannels" Name="FINNumChannels">
@@ -38,6 +38,16 @@
               </ParameterType>
               <ParameterType Id="%AID%_PT-Text28Byte" Name="Text28Byte">
                 <TypeText SizeInBit="224" />
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-PasswordOption" Name="PasswordOption">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Deaktiviert" Value="0" Id="%ENID%" />
+                  <Enumeration Text="Erstmalig festsetzen" Value="1" Id="%ENID%" />
+                  <Enumeration Text="Passwort ändern" Value="2" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-Text16Byte" Name="Text16Byte">
+                <TypeText SizeInBit="128" />
               </ParameterType>
               <ParameterType Id="%AID%_PT-DataBlock" Name="DataBlock">
                 <TypeText SizeInBit="65536" />
@@ -98,6 +108,9 @@
               <Parameter Id="%AID%_P-%T%000017" Name="DeleteFingerIdR503S" ParameterType="%AID%_PT-FingerIdR503S" Text="Scanner Finger ID" Value="0" />
               <Parameter Id="%AID%_P-%T%000018" Name="DeleteFingerId" ParameterType="%AID%_PT-FingerId" Text="Scanner Finger ID" Value="0" />
               <Parameter Id="%AID%_P-%T%000015" Name="ResetScanner" ParameterType="%AID%_PT-OnOffYesNo" Text="Alle Finger löschen?" Value="0" />
+              <Parameter Id="%AID%_P-%T%000020" Name="PasswordOption" ParameterType="%AID%_PT-PasswordOption" Text="Passwort" Value="0" />
+              <Parameter Id="%AID%_P-%T%000021" Name="PasswordNew" ParameterType="%AID%_PT-Text16Byte" Text="Neues Passwort" Value="" />
+              <Parameter Id="%AID%_P-%T%000022" Name="PasswordOld" ParameterType="%AID%_PT-Text16Byte" Text="Altes Passwort" Value="" />
               <Union SizeInBit="40">
                 <Memory CodeSegment="%AID%_RS-04-00000" Offset="0" BitOffset="0" />
                 <Parameter Id="%AID%_UP-%T%000001" Name="VisibleActions" ParameterType="%AID%_PT-FINNumChannels" Offset="0" BitOffset="0" Text="Verfügbare Aktionen" Value="3" SuffixText=" von %N%" />
@@ -133,6 +146,9 @@
               <ParameterRef Id="%AID%_P-%T%000017_R-%T%00001701" RefId="%AID%_P-%T%000017" />
               <ParameterRef Id="%AID%_P-%T%000018_R-%T%00001801" RefId="%AID%_P-%T%000018" />
               <ParameterRef Id="%AID%_UP-%T%000019_R-%T%00001901" RefId="%AID%_UP-%T%000019" />
+              <ParameterRef Id="%AID%_P-%T%000020_R-%T%00002001" RefId="%AID%_P-%T%000020" />
+              <ParameterRef Id="%AID%_P-%T%000021_R-%T%00002101" RefId="%AID%_P-%T%000021" />
+              <ParameterRef Id="%AID%_P-%T%000022_R-%T%00002201" RefId="%AID%_P-%T%000022" />
             </ParameterRefs>
             <ComObjectTable>
               <ComObject Id="%AID%_O-%T%000001" Name="Touched"              Number="1"  ObjectSize="1 Bit"    Text="Berührung (sofort, immer)" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
@@ -334,11 +350,26 @@
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
 
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="Gefährliche Funktionen" UIHint="Headline" />
+                <ParameterRefRef RefId="%AID%_P-%T%000020_R-%T%00002001" IndentLevel="1" />
+                <choose ParamRefId="%AID%_P-%T%000020_R-%T%00002001">
+                  <when test=">=1">
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Wenn Sie hier ein Passwort vergeben und dieses vergessen, wird das Fingerprint-Lesegerät unbrauchbar. Das Passwort kann nicht wiederhergestellt werden!" UIHint="Error" />
+                  </when>
+                  <when test="1">
+                    <ParameterRefRef RefId="%AID%_P-%T%000021_R-%T%00002101" IndentLevel="1" />
+                    <Button Id="%AID%_B-%T%00003" Text="Jetzt Passwort festsetzen" Name="setPassword" EventHandler="FIN_setPassword" EventHandlerOnline="ConnectionOriented" />
+                  </when>
+                  <when test="2">
+                    <ParameterRefRef RefId="%AID%_P-%T%000022_R-%T%00002201" IndentLevel="1" />
+                    <ParameterRefRef RefId="%AID%_P-%T%000021_R-%T%00002101" IndentLevel="1" />
+                    <Button Id="%AID%_B-%T%00004" Text="Jetzt Passwort ändern" Name="setPassword" EventHandler="FIN_setPassword" EventHandlerOnline="ConnectionOriented" />
+                  </when>
+                </choose>
                 <ParameterRefRef RefId="%AID%_P-%T%000015_R-%T%00001501" IndentLevel="1" />
                 <choose ParamRefId="%AID%_P-%T%000015_R-%T%00001501">
                   <when test="1">
                     <ParameterSeparator Id="%AID%_PS-nnn" Text="Wenn Sie diese Funktion ausführen, werden alle gespeicherten Finger gelöscht und müssen neu angelernt werden." UIHint="Error" />
-                    <Button Id="%AID%_B-%T%00003" Text="Jetzt löschen" Name="resetScanner" EventHandler="FIN_resetScanner" EventHandlerOnline="ConnectionOriented" />
+                    <Button Id="%AID%_B-%T%00005" Text="Jetzt löschen" Name="resetScanner" EventHandler="FIN_resetScanner" EventHandlerOnline="ConnectionOriented" />
                   </when>
                 </choose>
               </ParameterBlock>
@@ -346,8 +377,6 @@
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="Aktionen" UIHint="Headline" />
                 <ParameterRefRef RefId="%AID%_UP-%T%000001_R-%T%00000101" HelpContext="BASE-Verfuegbare-Kanaele" IndentLevel="1" />
                 <ParameterSeparator Id="%AID%_PS-52" Text="" UIHint="HorizontalRuler" />
-                <ParameterSeparator Id="%AID%_PS-nnn" Text="D*)  Deaktiviert die Aktion, ohne die Parameter und KO-Zuordnungen zu löschen" />
-                <ParameterSeparator Id="%AID%_PS-nnn" Text="A**) Authentifizierungs-Aktion, wird durch einen entsprechenden Finger freigeschaltet" />
                 <ParameterBlock Id="%AID%_PB-nnn" Inline="true" Layout="Grid">
                   <Rows>
                     <Row Id="%AID%_PB-nnn_R-1" />
@@ -367,6 +396,8 @@
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="Weitere Argumente" UIHint="Headline" Cell="1,6" />
                 </ParameterBlock>
                 <op:include href="FingerprintModule.templ.xml" xpath="//Dynamic/ChannelIndependentBlock/*" type="template" prefix="FIN" IsInner="true" />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="D*)  Deaktiviert die Aktion, ohne die Parameter und KO-Zuordnungen zu löschen" />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="A**) Authentifizierungs-Aktion, wird durch einen entsprechenden Finger freigeschaltet" />
               </ParameterBlock>
               <op:include href="FingerAction.share.xml" xpath="//Dynamic/ChannelIndependentBlock/*" prefix="FINACT" />
             </Channel>

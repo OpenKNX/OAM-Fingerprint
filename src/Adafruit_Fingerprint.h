@@ -180,6 +180,7 @@ public:
   Adafruit_Fingerprint(Stream *serial, uint32_t password = 0x0);
 
   void begin(uint32_t baud, int8_t rxPin = -1, int8_t txPin = -1);
+  void close();
 
   boolean verifyPassword(void);
   uint8_t getParameters(void);

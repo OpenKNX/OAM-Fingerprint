@@ -12,30 +12,11 @@ const std::string FingerprintModule::version()
 
 void FingerprintModule::setup()
 {
-    _fingerprintStorage.init("fingerprint", FINGERPRINT_FLASH_OFFSET, FINGERPRINT_FLASH_SIZE);
+    logInfoP("Setup fingerprint module");
+    logIndentUp();
 
-    finger = Fingerprint(delayCallback, FINGERPRINT_PASSWORD);
-
-    pinMode(LED_GREEN_PIN, OUTPUT);
-    pinMode(LED_RED_PIN, OUTPUT);
-
-    digitalWrite(LED_RED_PIN, HIGH);
-
-    pinMode(TOUCH_LEFT_PIN, INPUT);
-    pinMode(TOUCH_RIGHT_PIN, INPUT);
-
-    pinMode(DISPLAY_TOUCH_PIN, INPUT_PULLDOWN);
-    attachInterrupt(digitalPinToInterrupt(DISPLAY_TOUCH_PIN), FingerprintModule::interruptDisplayTouched, FALLING);
-
-    attachInterrupt(digitalPinToInterrupt(TOUCH_LEFT_PIN), FingerprintModule::interruptTouchLeft, CHANGE);
-    attachInterrupt(digitalPinToInterrupt(TOUCH_RIGHT_PIN), FingerprintModule::interruptTouchRight, CHANGE);
-
-    pinMode(DISPLAY_PWR_PIN, OUTPUT_4MA);
-    setFingerprintPower(true);
-
-    digitalWrite(LED_RED_PIN, LOW);
-    digitalWrite(LED_GREEN_PIN, HIGH);
-    finger.setLed(Fingerprint::State::Success);
+    initFlash();
+    initFingerprintScanner();
 
     for (uint16_t i = 0; i < ParamFIN_VisibleActions; i++)
     {
@@ -43,8 +24,61 @@ void FingerprintModule::setup()
         _channels[i]->setup();
     }
 
+    pinMode(LED_GREEN_PIN, OUTPUT);
+    pinMode(LED_RED_PIN, OUTPUT);
+    digitalWrite(LED_RED_PIN, HIGH);
+
+    pinMode(SCANNER_TOUCH_PIN, INPUT_PULLDOWN);
+    attachInterrupt(digitalPinToInterrupt(SCANNER_TOUCH_PIN), FingerprintModule::interruptDisplayTouched, FALLING);
+
+    pinMode(TOUCH_LEFT_PIN, INPUT);
+    pinMode(TOUCH_RIGHT_PIN, INPUT);
+    attachInterrupt(digitalPinToInterrupt(TOUCH_LEFT_PIN), FingerprintModule::interruptTouchLeft, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(TOUCH_RIGHT_PIN), FingerprintModule::interruptTouchRight, CHANGE);
+
+    logInfoP("Fingerprint start");
+    finger.start();
+
+    digitalWrite(LED_RED_PIN, LOW);
+    digitalWrite(LED_GREEN_PIN, HIGH);
+    finger.setLed(Fingerprint::State::Success);
+
     resetLedsTimer = delayTimerInit();
     logInfoP("Fingerprint module ready.");
+    logIndentDown();
+}
+
+void FingerprintModule::initFingerprintScanner()
+{
+    uint32_t scannerPassword = _fingerprintStorage.readInt(FLASH_SCANNER_PASSWORD_OFFSET);
+    logDebugP("Initialize scanner with password: %u", scannerPassword);
+    finger = Fingerprint(delayCallback, scannerPassword);
+}
+
+void FingerprintModule::initFlash()
+{
+    _fingerprintStorage.init("fingerprint", FINGERPRINT_FLASH_OFFSET, FINGERPRINT_FLASH_SIZE);
+    uint32_t magicWord = _fingerprintStorage.readInt(0);
+    if (magicWord != FLASH_MAGIC_WORD)
+    {
+        logInfoP("Flash contents invalid:");
+        logDebugP("Indentification code read: %u", magicWord);
+        logIndentUp();
+
+        uint8_t clearBuffer[FLASH_SECTOR_SIZE] = {};
+        for (size_t i = 0; i < FINGERPRINT_FLASH_SIZE / FLASH_SECTOR_SIZE; i++)
+            _fingerprintStorage.write(FLASH_SECTOR_SIZE * i, clearBuffer, FLASH_SECTOR_SIZE);
+        _fingerprintStorage.commit();
+        logDebugP("Flash cleared.");
+
+        _fingerprintStorage.writeInt(0, FLASH_MAGIC_WORD);
+        _fingerprintStorage.commit();
+        logDebugP("Indentification code written.");
+
+        logIndentDown();
+    }
+    else
+        logInfoP("Flash contents valid.");
 }
 
 void FingerprintModule::interruptDisplayTouched()
@@ -62,24 +96,6 @@ void FingerprintModule::interruptTouchRight()
     KoFIN_TouchPcbButtonRight.value(digitalRead(TOUCH_RIGHT_PIN) == HIGH, DPT_Switch);
 }
 
-void FingerprintModule::setFingerprintPower(bool on)
-{
-    if (scanerHasPower == on)
-    {
-        return;
-    }
-
-    digitalWrite(DISPLAY_PWR_PIN, on ? HIGH : LOW);
-    logInfoP("Fingerprint power: %s", (on ? "ON" : "OFF"));
-
-    if (on)
-    {
-        finger.init();
-    }
-
-    scanerHasPower = on;
-}
-
 void FingerprintModule::loop()
 {
     if (delayCallbackActive)
@@ -89,7 +105,6 @@ void FingerprintModule::loop()
     {
         touched = false;
         logInfoP("Touched");
-        setFingerprintPower(true);
 
         KoFIN_Touched.value(true, DPT_Switch);
 
@@ -378,6 +393,9 @@ bool FingerprintModule::processFunctionProperty(uint8_t objectIndex, uint8_t pro
         case 12:
             handleFunctionPropertySearchFingerIdByPerson(data, resultData, resultLength);
             return true;
+        case 21:
+            handleFunctionPropertySetPassword(data, resultData, resultLength);
+            return true;
     }
 
     return false;
@@ -451,6 +469,86 @@ void FingerprintModule::handleFunctionPropertyResetScanner(uint8_t *data, uint8_
 
     bool success = finger.emptyDatabase();
 
+    resultData[0] = success ? 0 : 1;
+    resultLength = 1;
+}
+
+void FingerprintModule::handleFunctionPropertySetPassword(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
+{
+    logInfoP("Function property: Set password");
+
+    uint8_t passwordOption = data[1];
+    logDebugP("passwordOption: %d", passwordOption);
+
+    uint8_t dataOffset = 1;
+
+    char newPassword[16] = {};
+    for (size_t i = 0; i < 16; i++)
+    {
+        dataOffset++;
+        memcpy(newPassword + i, data + dataOffset, 1);
+
+        if (newPassword[i] == 0) // null termination
+            break;
+    }
+
+    uint32_t newPasswordCrc;
+    if (newPassword[0] == 48 && // = "0"
+        newPassword[1] == 0)    // null termination
+        newPasswordCrc = 0;     // if user inputs only "0", we just use it as is without CRC
+    else
+        newPasswordCrc = CRC32::calculate(newPassword, 16);
+    logDebugP("newPassword: %s (crc: %u)", newPassword, newPasswordCrc);
+
+    // change password
+    uint32_t oldPasswordCrc = 0;
+    if (passwordOption == 2)
+    {
+        char oldPassword[16] = {};
+        for (size_t i = 0; i < 16; i++)
+        {
+            dataOffset++;
+            memcpy(oldPassword + i, data + dataOffset, 1);
+
+            if (oldPassword[i] == 0) // null termination
+                break;
+        }
+        oldPasswordCrc = CRC32::calculate(oldPassword, 16);
+        logDebugP("oldPassword: %s (crc: %u)", oldPassword, oldPasswordCrc);
+    }
+
+    uint32_t currentCrc = _fingerprintStorage.readInt(FLASH_SCANNER_PASSWORD_OFFSET);
+    logDebugP("currentCrc: %u", currentCrc);
+
+    bool success = false;
+    if (currentCrc == oldPasswordCrc)
+    {
+        logDebugP("Current matches old CRC.");
+        logIndentUp();
+        
+        logDebugP("Saving new password in flash.");
+        _fingerprintStorage.writeInt(FLASH_SCANNER_PASSWORD_OFFSET, newPasswordCrc);
+        _fingerprintStorage.commit();
+
+        logInfoP("Setting new fingerprint scanner password.");
+        logIndentUp();
+        success = finger.setPassword(newPasswordCrc);
+        resetLedsTimer = delayTimerInit();
+        logInfoP(success ? "Success." : "Failed.");
+        logIndentDown();
+        
+        if (success)
+        {
+            finger.close();
+            initFingerprintScanner();
+            finger.start();
+        }
+
+        logIndentDown();
+    }
+    else
+        logDebugP("Invalid old password provided.");
+    
     resultData[0] = success ? 0 : 1;
     resultLength = 1;
 }

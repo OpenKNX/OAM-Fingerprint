@@ -164,6 +164,26 @@ void Adafruit_Fingerprint::begin(uint32_t baudrate, int8_t rxPin, int8_t txPin) 
 
 /**************************************************************************/
 /*!
+    @brief  Closes serial interface
+*/
+/**************************************************************************/
+void Adafruit_Fingerprint::close() {
+#if defined(ARDUINO_ARCH_RP2040)
+  if (uartSerial) {
+    uartSerial->end();
+  }
+#else
+  if (hwSerial)
+    hwSerial->end();
+#endif
+#if defined(__AVR__) || defined(ESP8266) || defined(FREEDOM_E300_HIFIVE1)
+  if (swSerial)
+    swSerial->end();
+#endif
+}
+
+/**************************************************************************/
+/*!
     @brief  Verifies the sensors' access password (default password is
    0x0000000). A good way to also check if the sensors is active and responding
     @returns True if password is correct
