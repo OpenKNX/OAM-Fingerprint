@@ -16,6 +16,22 @@
             "group": "test"
         },
         {
+            "label": "OpenKNXproducer Documentation",
+            "type": "shell",
+            "command": "~/bin/OpenKNXproducer.exe",
+            "args": [
+                "baggages",
+                "--DocFileName",
+                "doc/Applikationsbeschreibung-Fingerprint.md",
+                "--BaggagesDir",
+                "src/Baggages/Help_de",
+                "--Prefix",
+                "FIN"
+            ],
+            "problemMatcher": [],
+            "group": "test"
+        },
+        {
             "label": "Generate Dependencies.txt",
             "type": "shell",
             "command": "lib/OGM-Common/scripts/setup/reusable/Build-Dependencies.ps1",
