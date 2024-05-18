@@ -111,6 +111,7 @@
               <Parameter Id="%AID%_P-%T%000020" Name="PasswordOption" ParameterType="%AID%_PT-PasswordOption" Text="Passwort" Value="0" />
               <Parameter Id="%AID%_P-%T%000021" Name="PasswordNew" ParameterType="%AID%_PT-Text16Byte" Text="Neues Passwort" Value="" />
               <Parameter Id="%AID%_P-%T%000022" Name="PasswordOld" ParameterType="%AID%_PT-Text16Byte" Text="Altes Passwort" Value="" />
+              <Parameter Id="%AID%_P-%T%000023" Name="PasswardAlreadySet" ParameterType="%AID%_PT-OnOffYesNo" Text="Passwort bereits gesetzt" Value="0" Access="None" />
               <Union SizeInBit="40">
                 <Memory CodeSegment="%AID%_RS-04-00000" Offset="0" BitOffset="0" />
                 <Parameter Id="%AID%_UP-%T%000001" Name="VisibleActions" ParameterType="%AID%_PT-FINNumChannels" Offset="0" BitOffset="0" Text="Verfügbare Aktionen" Value="3" SuffixText=" von %N%" />
@@ -149,6 +150,7 @@
               <ParameterRef Id="%AID%_P-%T%000020_R-%T%00002001" RefId="%AID%_P-%T%000020" />
               <ParameterRef Id="%AID%_P-%T%000021_R-%T%00002101" RefId="%AID%_P-%T%000021" />
               <ParameterRef Id="%AID%_P-%T%000022_R-%T%00002201" RefId="%AID%_P-%T%000022" />
+              <ParameterRef Id="%AID%_P-%T%000023_R-%T%00002301" RefId="%AID%_P-%T%000023" />
             </ParameterRefs>
             <ComObjectTable>
               <ComObject Id="%AID%_O-%T%000001" Name="Touched"              Number="1"  ObjectSize="1 Bit"    Text="Berührung (sofort, immer)" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
@@ -351,7 +353,15 @@
 
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="Gefährliche Funktionen" UIHint="Headline" />
                 <ParameterRefRef RefId="%AID%_P-%T%000020_R-%T%00002001" IndentLevel="1" />
+                <ParameterRefRef RefId="%AID%_P-%T%000023_R-%T%00002301" IndentLevel="1" />
                 <choose ParamRefId="%AID%_P-%T%000020_R-%T%00002001">
+                  <when test="0">
+                    <choose ParamRefId="%AID%_P-%T%000023_R-%T%00002301">
+                      <when test="1">
+                        <ParameterSeparator Id="%AID%_PS-nnn" Text="Zur Deaktivierung eines zuvor gesetzten Passwortes bitte die Auswahl 'Passwort ändern' wählen und dort als neues Passwort '0' setzen." UIHint="Information" />
+                      </when>
+                    </choose>
+                  </when>
                   <when test=">=1">
                     <ParameterSeparator Id="%AID%_PS-nnn" Text="Wenn Sie hier ein Passwort vergeben und dieses vergessen, wird das Fingerprint-Lesegerät unbrauchbar. Das Passwort kann nicht wiederhergestellt werden!" UIHint="Error" />
                   </when>

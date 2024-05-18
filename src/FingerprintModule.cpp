@@ -492,11 +492,9 @@ void FingerprintModule::handleFunctionPropertySetPassword(uint8_t *data, uint8_t
             break;
     }
 
-    uint32_t newPasswordCrc;
-    if (newPassword[0] == 48 && // = "0"
-        newPassword[1] == 0)    // null termination
-        newPasswordCrc = 0;     // if user inputs only "0", we just use it as is without CRC
-    else
+    uint32_t newPasswordCrc = 0;
+    if (newPassword[0] != 48 || // = "0": if user inputs only "0", we just use it as is without CRC
+        newPassword[1] != 0)    // null termination
         newPasswordCrc = CRC32::calculate(newPassword, 16);
     logDebugP("newPassword: %s (crc: %u)", newPassword, newPasswordCrc);
 
@@ -513,7 +511,10 @@ void FingerprintModule::handleFunctionPropertySetPassword(uint8_t *data, uint8_t
             if (oldPassword[i] == 0) // null termination
                 break;
         }
-        oldPasswordCrc = CRC32::calculate(oldPassword, 16);
+
+        if (oldPassword[0] != 48 || // = "0": if user inputs only "0", we just use it as is without CRC
+            oldPassword[1] != 0)    // null termination
+            oldPasswordCrc = CRC32::calculate(oldPassword, 16);
         logDebugP("oldPassword: %s (crc: %u)", oldPassword, oldPasswordCrc);
     }
 
@@ -525,10 +526,6 @@ void FingerprintModule::handleFunctionPropertySetPassword(uint8_t *data, uint8_t
     {
         logDebugP("Current matches old CRC.");
         logIndentUp();
-        
-        logDebugP("Saving new password in flash.");
-        _fingerprintStorage.writeInt(FLASH_SCANNER_PASSWORD_OFFSET, newPasswordCrc);
-        _fingerprintStorage.commit();
 
         logInfoP("Setting new fingerprint scanner password.");
         logIndentUp();
@@ -539,6 +536,10 @@ void FingerprintModule::handleFunctionPropertySetPassword(uint8_t *data, uint8_t
         
         if (success)
         {
+            logDebugP("Saving new password in flash.");
+            _fingerprintStorage.writeInt(FLASH_SCANNER_PASSWORD_OFFSET, newPasswordCrc);
+            _fingerprintStorage.commit();
+
             finger.close();
             initFingerprintScanner();
             finger.start();
