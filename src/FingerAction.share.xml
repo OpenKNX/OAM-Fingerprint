@@ -48,8 +48,8 @@
                     <Column Id="%AID%_PB-nnn_C-2" Width="27%" />
                     <Column Id="%AID%_PB-nnn_C-3" Width="27%" />
                   </Columns>
-                  <Button Id="%AID%_B-%T%000001" Text="Finger suchen" EventHandler="FIN_searchFingerId" Cell="1,2" Icon="arrow-down-bold" />
-                  <Button Id="%AID%_B-%T%000002" Text="Person suchen" EventHandler="FIN_searchUser" Cell="1,3" Icon="arrow-up-bold" />
+                  <Button Id="%AID%_B-%T%000001" Text="Finger suchen" EventHandler="FIN_searchFingerId" EventHandlerOnline="ConnectionOriented" Cell="1,2" Icon="arrow-down-bold" />
+                  <Button Id="%AID%_B-%T%000002" Text="Person suchen" EventHandler="FIN_searchUser" EventHandlerOnline="ConnectionOriented" Cell="1,3" Icon="arrow-up-bold" />
                 </ParameterBlock>
                 <ParameterBlock Id="%AID%_PB-nnn" Inline="true" Layout="Grid">
                   <Rows>

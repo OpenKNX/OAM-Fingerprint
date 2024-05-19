@@ -411,7 +411,7 @@ void FingerprintModule::handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_
     uint8_t personFinger = data[3];
     logDebugP("personFinger: %d", personFinger);
 
-    char personName[28] = {};
+    uint8_t personName[28] = {};
     for (size_t i = 0; i < 28; i++)
     {
         memcpy(personName + i, data + 4 + i, 1);
@@ -423,7 +423,7 @@ void FingerprintModule::handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_
     uint32_t storageOffset = FIN_CaclStorageOffset(fingerId);
     logDebugP("storageOffset: %d", storageOffset);
     _fingerprintStorage.writeByte(storageOffset, personFinger); // only 4 bits used
-    _fingerprintStorage.write(storageOffset + 1, *personName, 28);
+    _fingerprintStorage.write(storageOffset + 1, personName, 28);
     _fingerprintStorage.commit();
 
     enrollRequested = delayTimerInit();
@@ -562,13 +562,24 @@ void FingerprintModule::handleFunctionPropertySearchPersonByFingerId(uint8_t *da
     uint16_t fingerId = (data[1] << 8) | data[2];
     logDebugP("fingerId: %d", fingerId);
 
-    uint8_t* personName[28] = {};
+    if (!finger.hasLocation(fingerId))
+    {
+        logDebugP("Unrecognized by scanner!");
+        resultData[0] = 1;
+        resultLength = 1;
+
+        logIndentDown();
+        return;
+    }
+
+    uint8_t personName[28] = {};
 
     uint32_t storageOffset = FIN_CaclStorageOffset(fingerId);
+    logDebugP("storageOffset: %d", storageOffset);
     uint8_t personFinger = _fingerprintStorage.readByte(storageOffset);
     if (personFinger > 0)
     {
-        _fingerprintStorage.read(storageOffset + 1, *personName, 28);
+        _fingerprintStorage.read(storageOffset + 1, personName, 28);
 
         logDebugP("Found:");
         logIndentUp();
@@ -576,7 +587,7 @@ void FingerprintModule::handleFunctionPropertySearchPersonByFingerId(uint8_t *da
         logDebugP("personName: %s", personName);
         logIndentDown();
 
-        resultData[0] = 1;
+        resultData[0] = 0;
         resultData[1] = personFinger;
         resultLength = 2;
         for (size_t i = 0; i < 28; i++)
@@ -592,7 +603,7 @@ void FingerprintModule::handleFunctionPropertySearchPersonByFingerId(uint8_t *da
     {
         logDebugP("Not found.");
 
-        resultData[0] = 0;
+        resultData[0] = 1;
         resultLength = 1;
     }
 
@@ -614,15 +625,15 @@ void FingerprintModule::handleFunctionPropertySearchFingerIdByPerson(uint8_t *da
         memcpy(searchPersonName + i, data + 2 + i, 1);
         if (searchPersonName[i] == 0) // null termination
         {
-            searchPersonNameLength = i + 1;
+            searchPersonNameLength = i;
             break;
         }
     }
-    logDebugP("searchPersonName: %s", searchPersonName);
+    logDebugP("searchPersonName: %s (length: %u)", searchPersonName, searchPersonNameLength);
 
     uint32_t storageOffset = 0;
     uint8_t personFinger = 0;
-    uint8_t* personName[28] = {};
+    uint8_t personName[28] = {};
     uint8_t foundCount = 0;
     for (size_t fingerId = 0; fingerId < MAX_FINGERS; fingerId++)
     {
@@ -634,14 +645,21 @@ void FingerprintModule::handleFunctionPropertySearchFingerIdByPerson(uint8_t *da
                 continue;
         }
 
-        _fingerprintStorage.read(storageOffset + 1, *personName, 28);
+        _fingerprintStorage.read(storageOffset + 1, personName, 28);
         if (memcmp(personName, searchPersonName, searchPersonNameLength) == 0)
         {
             logDebugP("Found:");
             logIndentUp();
+            logDebugP("fingerId: %d", fingerId);
             logDebugP("personFinger: %d", personFinger);
             logDebugP("personName: %s", personName);
             logIndentDown();
+
+            if (!finger.hasLocation(fingerId))
+            {
+                logDebugP("Unrecognized by scanner!");
+                continue;
+            }
 
             resultData[1 + foundCount * 31] = fingerId >> 8;
             resultData[1 + foundCount * 31 + 1] = fingerId;
@@ -654,7 +672,7 @@ void FingerprintModule::handleFunctionPropertySearchFingerIdByPerson(uint8_t *da
         }
     }
     
-    resultData[0] = foundCount > 0;
+    resultData[0] = foundCount > 0 ? 0 : 1;
     resultLength = 1 + foundCount * 31;
 
     logIndentDown();

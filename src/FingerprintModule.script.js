@@ -62,18 +62,6 @@ function FIN_assignFingerId(device, online, progress, context) {
     parTargetId.value = parFingerId.value;
 }
 
-function FIN_checkFingerAction(device, online, progress, context) {
-    var parActionId = device.getParameterByName("FINACT_fa" + context.Channel + "ActionId");
-    var parFingerActionInfo = device.getParameterByName("FINACT_fa" + context.Channel + "FingerActionInfo");
-    var parVisibleActions = device.getParameterByName("FIN_VisibleActions");
-    if (parActionId.value <= parVisibleActions.value) {
-        var parActionDescription = device.getParameterByName("FIN_Action" + parActionId.value + "Description");
-        parFingerActionInfo.value = (parActionDescription.value + "; Waldemar; Zeigefinger rechts").substring(0, 80);
-    } else {
-        parFingerActionInfo.value = "Aktion ist nicht definiert, Finger wurde nicht ermittelt";
-    }
-}
-
 function FIN_checkFingerIdRange(input, changed, prevValue, context) {
     var limit = [149, 199, 1499];
     if (input.FingerID > limit[input.Scanner]) {
@@ -87,6 +75,88 @@ function FIN_checkFingerIdRange(input, changed, prevValue, context) {
 }
 
 function FIN_dummy(input, output, context) { }
+
+function FIN_checkFingerAction(device, online, progress, context) {
+    var parActionId = device.getParameterByName("FINACT_fa" + context.Channel + "ActionId");
+    var parFingerId = device.getParameterByName("FINACT_fa" + context.Channel + "FingerId");
+    var parFingerActionInfo = device.getParameterByName("FINACT_fa" + context.Channel + "FingerActionInfo");
+    var parVisibleActions = device.getParameterByName("FIN_VisibleActions");
+
+    if (parActionId.value <= parVisibleActions.value) {
+
+        progress.setText("Fingerprint: Person zu Finger ID " + parFingerId.value + " suchen...");
+        online.connect();
+    
+        var data = [11]; // internal function ID
+        data = data.concat((parFingerId.value & 0x0000ff00) >> 8, (parFingerId.value & 0x000000ff));
+
+        var personFinger = 0;
+        var personName = "";
+
+        var resp = online.invokeFunctionProperty(160, 3, data);
+        if (resp[0] != 0) {
+            online.disconnect();
+            progress.setText("Fingerprint: Person zu Finger ID " + parFingerId.value + " nicht gefunden.");
+        } else {
+            online.disconnect();
+            progress.setText("Fingerprint: Person zu Finger ID " + parFingerId.value + " gefunden.");
+        
+            personFinger = resp[1];
+            for (var i = 2; i < resp.length; ++i) {
+                if (resp[i] == 0)
+                    break; // null-termination
+            
+                personName += String.fromCharCode(resp[i]);
+            }
+        }
+
+        var personText = "";
+        if (personFinger > 0) {
+            var personFingerName = "";
+            switch (personFinger) {
+                case 1:
+                    personFingerName = "Daumen rechts";
+                    break;
+                case 2:
+                    personFingerName = "Daumen links";
+                    break;
+                case 3:
+                    personFingerName = "Zeigefinger rechts";
+                    break;
+                case 4:
+                    personFingerName = "Zeigefinger links";
+                    break;
+                case 5:
+                    personFingerName = "Mittelfinger rechts";
+                    break;
+                case 6:
+                    personFingerName = "Mittelfinger links";
+                    break;
+                case 7:
+                    personFingerName = "Ringfinger rechts";
+                    break;
+                case 8:
+                    personFingerName = "Ringfinger links";
+                    break;
+                case 9:
+                    personFingerName = "Kleiner Finger rechts";
+                    break;
+                case 10:
+                    personFingerName = "Kleiner Finger links";
+                    break;
+            }
+
+            personText = personName + "; " + personFingerName;
+        } else {
+            personText = "Unbekannter Finger";
+        }
+
+        var parActionDescription = device.getParameterByName("FIN_Action" + parActionId.value + "Description");
+        parFingerActionInfo.value = (parActionDescription.value + "; " + personText).substring(0, 80);
+    } else {
+        parFingerActionInfo.value = "Aktion ist nicht definiert, Finger wurde nicht ermittelt";
+    }
+}
 
 function FIN_searchFingerId(device, online, progress, context) {
     var parPersonName = device.getParameterByName("FINACT_PersonName");
@@ -108,9 +178,6 @@ function FIN_searchFingerId(device, online, progress, context) {
     }
     data = data.concat(0); // null-terminated string
 
-    info(parPersonFinger.value);
-    info(parPersonName.value);
-
     var resp = online.invokeFunctionProperty(160, 3, data);
     if (resp[0] != 0) {
         throw new Error("Fingerprint: Finger ID zu Person " + parPersonName.value + " (" + parPersonFinger.value + ") nicht gefunden.");
@@ -120,7 +187,20 @@ function FIN_searchFingerId(device, online, progress, context) {
     progress.setText("Fingerprint: Finger ID zu Person " + parPersonName.value + " (" + parPersonFinger.value + ") gefunden.");
 
     var fingerId = resp[1] << 8 | resp[2];
+    var personFinger = resp[3];
+    var personName = "";
+    for (var i = 4; i < 32; ++i) {
+        if (resp[i] == 0)
+            break; // null-termination
+      
+        personName += String.fromCharCode(resp[i]);
+    }
 
+    // following up to 10 results in total
+    // always 2 bytes fingerId, 1 byte personFinger and 28 bytes personName
+
+    parPersonName.value = personName;
+    parPersonFinger.value = personFinger;
     parFingerId.value = fingerId;
 }
 
@@ -134,8 +214,6 @@ function FIN_searchUser(device, online, progress, context) {
 
     var data = [11]; // internal function ID
     data = data.concat((parFingerId.value & 0x0000ff00) >> 8, (parFingerId.value & 0x000000ff));
-
-    info(parFingerId.value);
 
     var resp = online.invokeFunctionProperty(160, 3, data);
     if (resp[0] != 0) {

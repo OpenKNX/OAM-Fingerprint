@@ -48,7 +48,7 @@
                     <choose ParamRefId="%AID%_UP-%T%%CCC%001_R-%T%%CCC%00101">
                       <when test="!=0">
                         <ParameterRefRef RefId="%AID%_UP-%T%%CCC%002_R-%T%%CCC%00201" Cell="1,3" />
-                        <Button Id="%AID%_B-%T%%CCC%002" Text="Info holen" Cell="1,4" EventHandler="FIN_checkFingerAction" EventHandlerParameters="{ &quot;Channel&quot;: %C% }" />
+                        <Button Id="%AID%_B-%T%%CCC%002" Text="Info holen" Cell="1,4" EventHandler="FIN_checkFingerAction" EventHandlerParameters="{ &quot;Channel&quot;: %C% }" EventHandlerOnline="ConnectionOriented" />
                         <ParameterRefRef RefId="%AID%_P-%T%%CCC%003_R-%T%%CCC%00301" Cell="1,5" />
                       </when>
                     </choose>
