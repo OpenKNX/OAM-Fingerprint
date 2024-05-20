@@ -64,6 +64,7 @@ class Fingerprint
     bool retrieveTemplate(uint8_t *templateData);
     bool sendTemplate(uint8_t *templateData);
     bool writeCrc(uint16_t location, uint8_t *templateData, uint32_t secret);
+    bool loadTemplate(uint16_t location);
     bool storeTemplate(uint16_t location);
     bool deleteTemplate(uint16_t location);
     bool setPassword(uint32_t newPasswort);

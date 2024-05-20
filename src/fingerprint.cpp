@@ -462,6 +462,33 @@ bool Fingerprint::writeCrc(uint16_t location, uint8_t *templateData, uint32_t se
 }
 #endif
 
+bool Fingerprint::loadTemplate(uint16_t location)
+{
+    if (!scannerReady)
+        return false;
+
+    setLed(Busy);
+
+    logDebugP("Load model #%d:", location);
+    logIndentUp();
+    bool success = _finger.loadModel(location) == FINGERPRINT_OK;
+    logDebugP("Loaded");
+    logIndentDown();
+
+    if (success)
+    {
+        setLed(Success);
+    }
+    else
+    {
+        setLed(Failed);
+    }
+
+    setLed(Fingerprint::State::None);
+
+    return success;
+}
+
 bool Fingerprint::storeTemplate(uint16_t location)
 {
     if (!scannerReady)
@@ -474,7 +501,6 @@ bool Fingerprint::storeTemplate(uint16_t location)
     bool success = _finger.storeModel(location) == FINGERPRINT_OK;
     logDebugP("Stored");
     logIndentDown();
-    // esp_task_wdt_reset();
 
     if (success)
     {
