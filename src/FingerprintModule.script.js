@@ -271,14 +271,31 @@ function FIN_enrollFinger(device, online, progress, context) {
     progress.setText("Fingerprint: Finger ID " + parFingerId.value + " anlernen gestartet.");
 }
 
+function FIN_syncFinger(device, online, progress, context) {
+    var parFingerId = device.getParameterByName("FIN_SyncFingerId");
+
+    progress.setText("Fingerprint: Finger ID " + parFingerId.value + " synchronisieren...");
+    online.connect();
+
+    var data = [2]; // internal function ID
+    data = data.concat((parFingerId.value & 0x0000ff00) >> 8, (parFingerId.value & 0x000000ff));
+
+    var resp = online.invokeFunctionProperty(160, 3, data);
+    if (resp[0] != 0) {
+        throw new Error("Fingerprint: Es ist ein unbekannter Fehler aufgetreten!");
+    }
+
+    online.disconnect();
+    progress.setText("Fingerprint: Finger ID " + parFingerId.value + " synchronisiert.");
+}
+
 function FIN_deleteFinger(device, online, progress, context) {
     var parFingerId = device.getParameterByName("FIN_DeleteFingerId");
 
     progress.setText("Fingerprint: Finger ID " + parFingerId.value + " löschen...");
     online.connect();
 
-    // internal function ID
-    var data = [2];
+    var data = [3]; // internal function ID
     data = data.concat((parFingerId.value & 0x0000ff00) >> 8, (parFingerId.value & 0x000000ff));
 
     var resp = online.invokeFunctionProperty(160, 3, data);
@@ -294,8 +311,7 @@ function FIN_resetScanner(device, online, progress, context) {
     progress.setText("Fingerprint: Alle Finger löschen...");
     online.connect();
 
-    // internal function ID
-    var data = [3];
+    var data = [6]; // internal function ID
 
     var resp = online.invokeFunctionProperty(160, 3, data);
     if (resp[0] != 0) {

@@ -162,6 +162,8 @@ void FingerprintModule::loop()
 
     for (uint16_t i = 0; i < ParamFIN_VisibleActions; i++)
         _channels[i]->loop();
+    
+    processSyncSend();
 }
 
 void FingerprintModule::processScanSuccess(uint16_t location, bool external)
@@ -365,7 +367,7 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
                 digitalWrite(LED_GREEN_PIN, LOW);
             
             break;
-        case FIN_KoSync:
+        case FIN_KoSyncInput:
             processSyncReceive(iKo.value(DPT_String_8859_1));
             break;
         default:
@@ -391,7 +393,7 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
         }
     }
 
-    success = finger.retrieveTemplate(*syncSendBuffer);
+    success = finger.retrieveTemplate(syncSendBuffer);
     if (!success)
     {
         logErrorP("Sync-Send: retrieving template failed");
@@ -399,10 +401,9 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
     }
 
     syncSendBufferLength = TEMPLATE_SIZE;
-    syncSendPacketCount = TEMPLATE_SIZE / SYNC_SEND_PACKET_DATA_LENGTH + 1;
-    syncSendPacketSentCount = 0;
+    syncSendPacketCount = ceil(TEMPLATE_SIZE / (float)SYNC_SEND_PACKET_DATA_LENGTH) + 1; // currently separated control packet
 
-    logDebugP("Sync-Send: control packet: bufferLength=%u, lengthPerPacket=%u, packetCount=%u, fingerId=%u%", syncSendBufferLength, SYNC_SEND_PACKET_DATA_LENGTH, syncSendPacketCount, fingerId);
+    logDebugP("Sync-Send (1/%u): control packet: bufferLength=%u, lengthPerPacket=%u, fingerId=%u%", syncSendPacketCount, syncSendBufferLength, SYNC_SEND_PACKET_DATA_LENGTH, fingerId);
 
     /*
     Sync Control Packet Layout:
@@ -412,9 +413,10 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
     - 3-4: 2 bytes: total data content size
     -   5: 1 byte : max. payload data length per data packet
     -   6: 1 byte : number of data packets
+    - 7-8: 2 bytes: finger ID
     */
 
-    uint8_t data[SYNC_SEND_PACKET_DATA_LENGTH + 1];
+    uint8_t *data = KoFIN_SyncOutput.valueRef();
     data[0] = 0;
     data[1] = 0;
     data[2] = 0;
@@ -424,30 +426,32 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
     data[6] = syncSendPacketCount;
     data[7] = fingerId >> 8;
     data[8] = fingerId;
+    KoFIN_SyncOutput.objectWritten();
 
-    KoFIN_Sync.value(data, DPT_String_8859_1);
-
-    syncSendPacketSentCount++;
+    syncSendTimer = delayTimerInit() + 100; // some extra delay at the start
+    syncSendPacketSentCount = 1;
     syncSending = true;
 }
 
 void FingerprintModule::processSyncSend()
 {
-    if (!syncSending)
+    if (!syncSending ||
+        !delayCheck(syncSendTimer, ParamFIN_SyncDelay))
         return;
 
-    uint8_t data[SYNC_SEND_PACKET_DATA_LENGTH + 1];
+    syncSendTimer = delayTimerInit();
 
-    data[0] = syncSendPacketSentCount + 1; // sequence number = dataPacketNo + 1
-    uint16_t dataOffset = syncSendPacketSentCount * SYNC_SEND_PACKET_DATA_LENGTH;
+    uint8_t *data = KoFIN_SyncOutput.valueRef();
+    data[0] = syncSendPacketSentCount;
+    uint8_t dataPacketNo = syncSendPacketSentCount - 1; // = sequence number - 1
+    uint16_t dataOffset = dataPacketNo * SYNC_SEND_PACKET_DATA_LENGTH;
     uint8_t dataLength = dataOffset + SYNC_SEND_PACKET_DATA_LENGTH < syncSendBufferLength ? SYNC_SEND_PACKET_DATA_LENGTH : syncSendBufferLength - dataOffset;
     memcpy(data + 1, syncSendBuffer + dataOffset, dataLength);
-
-    KoFIN_Sync.value(data, DPT_String_8859_1);
-
-    logDebugP("Sync-Send: data packet: dataPacketNo=%u, dataOffset=%u, dataLength=%u", syncSendPacketSentCount, dataOffset, dataLength);
+    KoFIN_SyncOutput.objectWritten();
 
     syncSendPacketSentCount++;
+    logDebugP("Sync-Send (%u/%u): data packet: dataPacketNo=%u, dataOffset=%u, dataLength=%u", syncSendPacketSentCount, syncSendPacketCount, dataPacketNo, dataOffset, dataLength);
+
     if (syncSendPacketSentCount == syncSendPacketCount)
     {
         logDebugP("Sync-Send: finished");
@@ -458,8 +462,9 @@ void FingerprintModule::processSyncSend()
 
 void FingerprintModule::processSyncReceive(const char* data)
 {
-    if (data[0] == 0) {
-        switch (data[1])
+    if (data[0] == 0) // sequence number
+    {
+        switch (data[1]) // sync type
         {
             case 0: // template sync
                 if (data[2] != 0)
@@ -473,17 +478,22 @@ void FingerprintModule::processSyncReceive(const char* data)
                 syncReceivePacketCount = data[6];
                 syncReceiveFingerId = (data[7] << 8) | data[8];
 
-                logDebugP("Sync-Receive: control packet: bufferLength=%u, lengthPerPacket=%u, packetCount=%u, fingerId=%u%", syncReceiveBufferLength, syncReceiveLengthPerPacket, syncReceivePacketCount, syncReceiveFingerId);
+                logDebugP("Sync-Receive (1/%u): control packet: bufferLength=%u, lengthPerPacket=%u, fingerId=%u%", syncReceivePacketCount, syncReceiveBufferLength, syncReceiveLengthPerPacket, syncReceiveFingerId);
 
-                syncReceivePacketReceivedCount = 0;
+                syncReceivePacketReceivedCount = 1;
                 syncReceiving = true;
 
-                break;
+                return;
             default:
                 logInfoP("Sync-Receive: Unsupported sync type: %u", data[1]);
+                syncReceiving = false;
                 return;
         }
-        
+    }
+
+    if (!syncReceiving)
+    {
+        logInfoP("Sync-Receive: data packet without control packet");
         return;
     }
 
@@ -492,15 +502,27 @@ void FingerprintModule::processSyncReceive(const char* data)
     uint8_t dataLength = dataOffset + syncReceiveLengthPerPacket < syncReceiveBufferLength ? syncReceiveLengthPerPacket : syncReceiveBufferLength - dataOffset;
     memcpy(syncReceiveBuffer + dataOffset, data + 1, dataLength);
 
-    logDebugP("Sync-Receive: data packet: dataPacketNo=%u, dataOffset=%u, dataLength=%u", dataPacketNo, dataOffset, dataLength);
-
     syncReceivePacketReceivedCount++;
+    logDebugP("Sync-Receive (%u/%u): data packet: dataPacketNo=%u, dataOffset=%u, dataLength=%u", syncReceivePacketReceivedCount, syncReceivePacketCount, dataPacketNo, dataOffset, dataLength);
+
     if (syncReceivePacketReceivedCount == syncReceivePacketCount)
     {
         logDebugP("Sync-Receive: finished");
 
-        finger.sendTemplate(*syncReceiveBuffer);
-        finger.storeTemplate(syncReceiveFingerId);
+        bool success;
+        success = finger.sendTemplate(syncReceiveBuffer);
+        if (!success)
+        {
+            logErrorP("Sync-Receive: sending template failed");
+            return;
+        }
+
+        success = finger.storeTemplate(syncReceiveFingerId);
+        if (!success)
+        {
+            logErrorP("Sync-Receive: storing template failed");
+            return;
+        }
 
         syncReceiving = false;
     }
@@ -517,9 +539,12 @@ bool FingerprintModule::processFunctionProperty(uint8_t objectIndex, uint8_t pro
             handleFunctionPropertyEnrollFinger(data, resultData, resultLength);
             return true;
         case 2:
-            handleFunctionPropertyDeleteFinger(data, resultData, resultLength);
+            handleFunctionPropertySyncFinger(data, resultData, resultLength);
             return true;
         case 3:
+            handleFunctionPropertyDeleteFinger(data, resultData, resultLength);
+            return true;
+        case 6:
             handleFunctionPropertyResetScanner(data, resultData, resultLength);
             return true;
         case 11:
@@ -567,6 +592,24 @@ void FingerprintModule::handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_
     //bool success = enrollFinger(fingerId);
     
     resultData[0] = 0;
+    resultLength = 1;
+}
+
+void FingerprintModule::handleFunctionPropertySyncFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
+{
+    logInfoP("Function property: Sync request");
+
+    uint16_t fingerId = (data[1] << 8) | data[2];
+    logDebugP("fingerId: %d", fingerId);
+
+    if (finger.hasLocation(fingerId))
+    {
+        startSyncSend(fingerId, true);
+        resultData[0] = 0;
+    }
+    else
+        resultData[0] = 1;
+
     resultLength = 1;
 }
 

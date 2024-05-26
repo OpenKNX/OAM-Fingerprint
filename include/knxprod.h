@@ -172,6 +172,7 @@
 #define FIN_EnableTouchPcb                      50      // 1 Bit, Bit 3
 #define     FIN_EnableTouchPcbMask 0x08
 #define     FIN_EnableTouchPcbShift 3
+#define FIN_SyncDelay                           51      // uint8_t
 
 // Verfügbare Aktionen
 #define ParamFIN_VisibleActions                      (knx.paramWord(FIN_VisibleActions))
@@ -195,6 +196,8 @@
 #define ParamFIN_EnableAccessData                    ((bool)(knx.paramByte(FIN_EnableAccessData) & FIN_EnableAccessDataMask))
 // Touch-Frontplatine vorhanden
 #define ParamFIN_EnableTouchPcb                      ((bool)(knx.paramByte(FIN_EnableTouchPcb) & FIN_EnableTouchPcbMask))
+// Verzögerung zwischen Sync-Telegrammen
+#define ParamFIN_SyncDelay                           (knx.paramByte(FIN_SyncDelay))
 
 #define FIN_KoTouched 21
 #define FIN_KoTouchedNoAction 22
@@ -219,7 +222,8 @@
 #define FIN_KoExternFingerId 61
 #define FIN_KoActionAddFingerId 62
 #define FIN_KoActionRemoveFingerId 63
-#define FIN_KoSync 66
+#define FIN_KoSyncInput 66
+#define FIN_KoSyncOutput 67
 #define FIN_KoTouchPcbButtonLeft 71
 #define FIN_KoTouchPcbButtonRight 72
 #define FIN_KoTouchPcbLedRed 73
@@ -271,8 +275,10 @@
 #define KoFIN_ActionAddFingerId                   (knx.getGroupObject(FIN_KoActionAddFingerId))
 // Finger ID von Aktion entfernen
 #define KoFIN_ActionRemoveFingerId                (knx.getGroupObject(FIN_KoActionRemoveFingerId))
-// Datenaustausch zwischen Fingerprints
-#define KoFIN_Sync                                (knx.getGroupObject(FIN_KoSync))
+// Datenaustausch zwischen Fingerprints (Eingang)
+#define KoFIN_SyncInput                           (knx.getGroupObject(FIN_KoSyncInput))
+// Datenaustausch zwischen Fingerprints (Ausgang)
+#define KoFIN_SyncOutput                          (knx.getGroupObject(FIN_KoSyncOutput))
 // Touch-Front: Taste links
 #define KoFIN_TouchPcbButtonLeft                  (knx.getGroupObject(FIN_KoTouchPcbButtonLeft))
 // Touch-Front: Taste rechts
