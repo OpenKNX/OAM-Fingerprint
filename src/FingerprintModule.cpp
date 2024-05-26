@@ -462,8 +462,9 @@ void FingerprintModule::processSyncSend()
 
 void FingerprintModule::processSyncReceive(const char* data)
 {
-    if (data[0] == 0) {
-        switch (data[1])
+    if (data[0] == 0) // sequence number
+    {
+        switch (data[1]) // sync type
         {
             case 0: // template sync
                 if (data[2] != 0)
@@ -477,17 +478,22 @@ void FingerprintModule::processSyncReceive(const char* data)
                 syncReceivePacketCount = data[6];
                 syncReceiveFingerId = (data[7] << 8) | data[8];
 
-                logDebugP("Sync-Receive: control packet: bufferLength=%u, lengthPerPacket=%u, packetCount=%u, fingerId=%u%", syncReceiveBufferLength, syncReceiveLengthPerPacket, syncReceivePacketCount, syncReceiveFingerId);
+                logDebugP("Sync-Receive (1/%u): control packet: bufferLength=%u, lengthPerPacket=%u, fingerId=%u%", syncReceivePacketCount, syncReceiveBufferLength, syncReceiveLengthPerPacket, syncReceiveFingerId);
 
-                syncReceivePacketReceivedCount = 0;
+                syncReceivePacketReceivedCount = 1;
                 syncReceiving = true;
 
-                break;
+                return;
             default:
                 logInfoP("Sync-Receive: Unsupported sync type: %u", data[1]);
+                syncReceiving = false;
                 return;
         }
-        
+    }
+
+    if (!syncReceiving)
+    {
+        logInfoP("Sync-Receive: data packet without control packet");
         return;
     }
 
@@ -496,15 +502,27 @@ void FingerprintModule::processSyncReceive(const char* data)
     uint8_t dataLength = dataOffset + syncReceiveLengthPerPacket < syncReceiveBufferLength ? syncReceiveLengthPerPacket : syncReceiveBufferLength - dataOffset;
     memcpy(syncReceiveBuffer + dataOffset, data + 1, dataLength);
 
-    logDebugP("Sync-Receive: data packet: dataPacketNo=%u, dataOffset=%u, dataLength=%u", dataPacketNo, dataOffset, dataLength);
-
     syncReceivePacketReceivedCount++;
+    logDebugP("Sync-Receive (%u/%u): data packet: dataPacketNo=%u, dataOffset=%u, dataLength=%u", syncReceivePacketReceivedCount, syncReceivePacketCount, dataPacketNo, dataOffset, dataLength);
+
     if (syncReceivePacketReceivedCount == syncReceivePacketCount)
     {
         logDebugP("Sync-Receive: finished");
 
-        finger.sendTemplate(syncReceiveBuffer);
-        finger.storeTemplate(syncReceiveFingerId);
+        bool success;
+        success = finger.sendTemplate(syncReceiveBuffer);
+        if (!success)
+        {
+            logErrorP("Sync-Receive: sending template failed");
+            return;
+        }
+
+        success = finger.storeTemplate(syncReceiveFingerId);
+        if (!success)
+        {
+            logErrorP("Sync-Receive: storing template failed");
+            return;
+        }
 
         syncReceiving = false;
     }
