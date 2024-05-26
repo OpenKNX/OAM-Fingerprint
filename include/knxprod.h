@@ -10,7 +10,7 @@
                                              
 #define MAIN_OpenKnxId 0xA6
 #define MAIN_ApplicationNumber 1
-#define MAIN_ApplicationVersion 47
+#define MAIN_ApplicationVersion 48
 #define MAIN_ParameterSize 25180
 #define MAIN_MaxKoNumber 3496
 #define MAIN_OrderNumber "OpenKnxFingerprint"
@@ -218,7 +218,8 @@
 #define FIN_KoExternFingerId 61
 #define FIN_KoActionAddFingerId 62
 #define FIN_KoActionRemoveFingerId 63
-#define FIN_KoSync 66
+#define FIN_KoSyncInput 66
+#define FIN_KoSyncOutput 67
 #define FIN_KoTouchPcbButtonLeft 71
 #define FIN_KoTouchPcbButtonRight 72
 #define FIN_KoTouchPcbLedRed 73
@@ -270,8 +271,10 @@
 #define KoFIN_ActionAddFingerId                   (knx.getGroupObject(FIN_KoActionAddFingerId))
 // Finger ID von Aktion entfernen
 #define KoFIN_ActionRemoveFingerId                (knx.getGroupObject(FIN_KoActionRemoveFingerId))
-// Datenaustausch zwischen Fingerprints
-#define KoFIN_Sync                                (knx.getGroupObject(FIN_KoSync))
+// Datenaustausch zwischen Fingerprints (Eingang)
+#define KoFIN_SyncInput                           (knx.getGroupObject(FIN_KoSyncInput))
+// Datenaustausch zwischen Fingerprints (Ausgang)
+#define KoFIN_SyncOutput                          (knx.getGroupObject(FIN_KoSyncOutput))
 // Touch-Front: Taste links
 #define KoFIN_TouchPcbButtonLeft                  (knx.getGroupObject(FIN_KoTouchPcbButtonLeft))
 // Touch-Front: Taste rechts

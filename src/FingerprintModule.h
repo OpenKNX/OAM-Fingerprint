@@ -68,6 +68,7 @@ class FingerprintModule : public OpenKNX::Module
     void processSyncSend();
     void processSyncReceive(const char* data);
     void handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
+    void handleFunctionPropertySyncFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
     void handleFunctionPropertyDeleteFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
     void handleFunctionPropertyResetScanner(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
     void handleFunctionPropertySetPassword(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);

@@ -162,6 +162,8 @@ void FingerprintModule::loop()
 
     for (uint16_t i = 0; i < ParamFIN_VisibleActions; i++)
         _channels[i]->loop();
+    
+    processSyncSend();
 }
 
 void FingerprintModule::processScanSuccess(uint16_t location, bool external)
@@ -365,7 +367,7 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
                 digitalWrite(LED_GREEN_PIN, LOW);
             
             break;
-        case FIN_KoSync:
+        case FIN_KoSyncInput:
             processSyncReceive(iKo.value(DPT_String_8859_1));
             break;
         default:
@@ -412,6 +414,7 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
     - 3-4: 2 bytes: total data content size
     -   5: 1 byte : max. payload data length per data packet
     -   6: 1 byte : number of data packets
+    - 7-8: 2 bytes: finger ID
     */
 
     uint8_t data[SYNC_SEND_PACKET_DATA_LENGTH + 1];
@@ -425,7 +428,7 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
     data[7] = fingerId >> 8;
     data[8] = fingerId;
 
-    KoFIN_Sync.value(data, DPT_String_8859_1);
+    KoFIN_SyncOutput.value(data, DPT_String_8859_1);
 
     syncSendPacketSentCount++;
     syncSending = true;
@@ -443,7 +446,7 @@ void FingerprintModule::processSyncSend()
     uint8_t dataLength = dataOffset + SYNC_SEND_PACKET_DATA_LENGTH < syncSendBufferLength ? SYNC_SEND_PACKET_DATA_LENGTH : syncSendBufferLength - dataOffset;
     memcpy(data + 1, syncSendBuffer + dataOffset, dataLength);
 
-    KoFIN_Sync.value(data, DPT_String_8859_1);
+    KoFIN_SyncOutput.value(data, DPT_String_8859_1);
 
     logDebugP("Sync-Send: data packet: dataPacketNo=%u, dataOffset=%u, dataLength=%u", syncSendPacketSentCount, dataOffset, dataLength);
 
@@ -517,9 +520,12 @@ bool FingerprintModule::processFunctionProperty(uint8_t objectIndex, uint8_t pro
             handleFunctionPropertyEnrollFinger(data, resultData, resultLength);
             return true;
         case 2:
-            handleFunctionPropertyDeleteFinger(data, resultData, resultLength);
+            handleFunctionPropertySyncFinger(data, resultData, resultLength);
             return true;
         case 3:
+            handleFunctionPropertyDeleteFinger(data, resultData, resultLength);
+            return true;
+        case 6:
             handleFunctionPropertyResetScanner(data, resultData, resultLength);
             return true;
         case 11:
@@ -567,6 +573,24 @@ void FingerprintModule::handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_
     //bool success = enrollFinger(fingerId);
     
     resultData[0] = 0;
+    resultLength = 1;
+}
+
+void FingerprintModule::handleFunctionPropertySyncFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
+{
+    logInfoP("Function property: Sync request");
+
+    uint16_t fingerId = (data[1] << 8) | data[2];
+    logDebugP("fingerId: %d", fingerId);
+
+    if (finger.hasLocation(fingerId))
+    {
+        startSyncSend(fingerId, true);
+        resultData[0] = 0;
+    }
+    else
+        resultData[0] = 1;
+
     resultLength = 1;
 }
 
