@@ -401,10 +401,9 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
     }
 
     syncSendBufferLength = TEMPLATE_SIZE;
-    syncSendPacketCount = TEMPLATE_SIZE / SYNC_SEND_PACKET_DATA_LENGTH + 1;
-    syncSendPacketSentCount = 0;
+    syncSendPacketCount = ceil(TEMPLATE_SIZE / (float)SYNC_SEND_PACKET_DATA_LENGTH) + 1; // currently separated control packet
 
-    logDebugP("Sync-Send: control packet: bufferLength=%u, lengthPerPacket=%u, packetCount=%u, fingerId=%u%", syncSendBufferLength, SYNC_SEND_PACKET_DATA_LENGTH, syncSendPacketCount, fingerId);
+    logDebugP("Sync-Send (1/%u): control packet: bufferLength=%u, lengthPerPacket=%u, fingerId=%u%", syncSendPacketCount, syncSendBufferLength, SYNC_SEND_PACKET_DATA_LENGTH, fingerId);
 
     /*
     Sync Control Packet Layout:
@@ -430,7 +429,7 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
     KoFIN_SyncOutput.objectWritten();
 
     syncSendTimer = delayTimerInit() + 100; // some extra delay at the start
-    syncSendPacketSentCount++;
+    syncSendPacketSentCount = 1;
     syncSending = true;
 }
 
@@ -443,15 +442,16 @@ void FingerprintModule::processSyncSend()
     syncSendTimer = delayTimerInit();
 
     uint8_t *data = KoFIN_SyncOutput.valueRef();
-    data[0] = syncSendPacketSentCount + 1; // sequence number = dataPacketNo + 1
-    uint16_t dataOffset = syncSendPacketSentCount * SYNC_SEND_PACKET_DATA_LENGTH;
+    data[0] = syncSendPacketSentCount;
+    uint8_t dataPacketNo = syncSendPacketSentCount - 1; // = sequence number - 1
+    uint16_t dataOffset = dataPacketNo * SYNC_SEND_PACKET_DATA_LENGTH;
     uint8_t dataLength = dataOffset + SYNC_SEND_PACKET_DATA_LENGTH < syncSendBufferLength ? SYNC_SEND_PACKET_DATA_LENGTH : syncSendBufferLength - dataOffset;
     memcpy(data + 1, syncSendBuffer + dataOffset, dataLength);
     KoFIN_SyncOutput.objectWritten();
 
-    logDebugP("Sync-Send: data packet: dataPacketNo=%u, dataOffset=%u, dataLength=%u", syncSendPacketSentCount, dataOffset, dataLength);
-
     syncSendPacketSentCount++;
+    logDebugP("Sync-Send (%u/%u): data packet: dataPacketNo=%u, dataOffset=%u, dataLength=%u", syncSendPacketSentCount, syncSendPacketCount, dataPacketNo, dataOffset, dataLength);
+
     if (syncSendPacketSentCount == syncSendPacketCount)
     {
         logDebugP("Sync-Send: finished");
