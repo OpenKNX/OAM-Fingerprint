@@ -404,7 +404,7 @@ bool Fingerprint::createTemplate()
     return p == FINGERPRINT_OK;
 }
 
-bool Fingerprint::retrieveTemplate(uint8_t *templateData)
+bool Fingerprint::retrieveTemplate(uint8_t templateData[])
 {
     logDebugP("Receive template:");
     logIndentUp();
@@ -415,7 +415,7 @@ bool Fingerprint::retrieveTemplate(uint8_t *templateData)
     return p == FINGERPRINT_OK;
 }
 
-bool Fingerprint::sendTemplate(uint8_t *templateData)
+bool Fingerprint::sendTemplate(uint8_t templateData[])
 {
     logDebugP("Send template:");
     logIndentUp();

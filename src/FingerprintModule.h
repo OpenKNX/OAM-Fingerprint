@@ -88,14 +88,15 @@ class FingerprintModule : public OpenKNX::Module
     inline volatile static bool touched = false;
 
     bool syncSending = false;
-    uint8_t* syncSendBuffer[TEMPLATE_SIZE];
+    uint32_t syncSendTimer = 0;
+    uint8_t syncSendBuffer[TEMPLATE_SIZE];
     uint16_t syncSendBufferLength = 0;
     uint8_t syncSendPacketCount = 0;
     uint8_t syncSendPacketSentCount = 0;
 
     bool syncReceiving = false;
     uint16_t syncReceiveFingerId = 0;
-    uint8_t* syncReceiveBuffer[TEMPLATE_SIZE];
+    uint8_t syncReceiveBuffer[TEMPLATE_SIZE];
     uint16_t syncReceiveBufferLength = 0;
     uint8_t syncReceiveLengthPerPacket = 0;
     uint8_t syncReceivePacketCount = 0;

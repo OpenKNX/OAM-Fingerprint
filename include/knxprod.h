@@ -10,7 +10,7 @@
                                              
 #define MAIN_OpenKnxId 0xA6
 #define MAIN_ApplicationNumber 1
-#define MAIN_ApplicationVersion 48
+#define MAIN_ApplicationVersion 49
 #define MAIN_ParameterSize 25180
 #define MAIN_MaxKoNumber 3496
 #define MAIN_OrderNumber "OpenKnxFingerprint"
@@ -171,6 +171,7 @@
 #define FIN_EnableTouchPcb                      50      // 1 Bit, Bit 3
 #define     FIN_EnableTouchPcbMask 0x08
 #define     FIN_EnableTouchPcbShift 3
+#define FIN_SyncDelay                           51      // uint8_t
 
 // Verfügbare Aktionen
 #define ParamFIN_VisibleActions                      (knx.paramWord(FIN_VisibleActions))
@@ -194,6 +195,8 @@
 #define ParamFIN_EnableAccessData                    ((bool)(knx.paramByte(FIN_EnableAccessData) & FIN_EnableAccessDataMask))
 // Touch-Frontplatine vorhanden
 #define ParamFIN_EnableTouchPcb                      ((bool)(knx.paramByte(FIN_EnableTouchPcb) & FIN_EnableTouchPcbMask))
+// Verzögerung zwischen Sync-Telegrammen
+#define ParamFIN_SyncDelay                           (knx.paramByte(FIN_SyncDelay))
 
 #define FIN_KoTouched 21
 #define FIN_KoTouchedNoAction 22

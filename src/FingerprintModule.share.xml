@@ -97,6 +97,9 @@
                   <Enumeration Text="Treppenlicht" Value="3" Id="%ENID%" />
                 </TypeRestriction>
               </ParameterType>
+              <ParameterType Id="%AID%_PT-SyncDelay" Name="SyncDelay">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="5" maxInclusive="255" />
+              </ParameterType>
             </ParameterTypes>
             <Parameters>
               <Parameter Id="%AID%_P-%T%000003" Name="EnrollPersonName" ParameterType="%AID%_PT-Text28Byte" Text="Name der Person" Value="" />
@@ -128,6 +131,8 @@
                 <Parameter Id="%AID%_UP-%T%000013" Name="EnableExternalControl" Offset="4" BitOffset="2" ParameterType="%AID%_PT-OnOffYesNo" Text="Externe Kontrolle ermöglichen" Value="0" />
                 <Parameter Id="%AID%_UP-%T%000014" Name="EnableAccessData" Offset="4" BitOffset="3" ParameterType="%AID%_PT-OnOffYesNo" Text="Zutrittsdaten KOs aktivieren" Value="0" />
                 <Parameter Id="%AID%_UP-%T%000019" Name="EnableTouchPcb" Offset="4" BitOffset="4" ParameterType="%AID%_PT-OnOffYesNo" Text="Touch-Frontplatine vorhanden" Value="0" />
+                <!-- 3 bits free -->
+                <Parameter Id="%AID%_UP-%T%000027" Name="SyncDelay" Offset="5" BitOffset="0" ParameterType="%AID%_PT-SyncDelay" Text="Verzögerung zwischen Sync-Telegrammen" Value="50" />
               </Union>
             </Parameters>
             <ParameterRefs>
@@ -157,6 +162,7 @@
               <ParameterRef Id="%AID%_P-%T%000024_R-%T%00002401" RefId="%AID%_P-%T%000024" />
               <ParameterRef Id="%AID%_P-%T%000025_R-%T%00002501" RefId="%AID%_P-%T%000025" />
               <ParameterRef Id="%AID%_P-%T%000026_R-%T%00002601" RefId="%AID%_P-%T%000026" />
+              <ParameterRef Id="%AID%_UP-%T%000027_R-%T%00002701" RefId="%AID%_UP-%T%000027" />
             </ParameterRefs>
             <ComObjectTable>
               <ComObject Id="%AID%_O-%T%000001" Name="Touched"              Number="1"  ObjectSize="1 Bit"    Text="Berührung (sofort, immer)" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
@@ -302,18 +308,20 @@
                   <when test="1">
                     <ComObjectRefRef RefId="%AID%_O-%T%000046_R-%T%00004601" />
                     <ComObjectRefRef RefId="%AID%_O-%T%000047_R-%T%00004701" />
+
+                    <ParameterRefRef RefId="%AID%_UP-%T%000027_R-%T%00002701" IndentLevel="2" />
                     <ParameterSeparator Id="%AID%_PS-nnn" Text="Nach jedem Anlernvorgang wird der neue Finger automatisch synchronisiert. Zusätzlich kann hier die Synchronisation eines bestimmten Fingers auch manuell angestoßen werden." UIHint="Information" />
                     <choose ParamRefId="%AID%_UP-%T%000002_R-%T%00000201">
                       <when test="0">
-                        <ParameterRefRef RefId="%AID%_P-%T%000024_R-%T%00002401" IndentLevel="1" />
+                        <ParameterRefRef RefId="%AID%_P-%T%000024_R-%T%00002401" IndentLevel="2" />
                         <Assign SourceParamRefRef="%AID%_P-%T%000024_R-%T%00002401" TargetParamRefRef="%AID%_P-%T%000026_R-%T%00002601" />
                       </when>
                       <when test="1">
-                        <ParameterRefRef RefId="%AID%_P-%T%000025_R-%T%00002501" IndentLevel="1" />
+                        <ParameterRefRef RefId="%AID%_P-%T%000025_R-%T%00002501" IndentLevel="2" />
                         <Assign SourceParamRefRef="%AID%_P-%T%000025_R-%T%00002501" TargetParamRefRef="%AID%_P-%T%000026_R-%T%00002601" />
                       </when>
                       <when test="2">
-                        <ParameterRefRef RefId="%AID%_P-%T%000026_R-%T%00002601" IndentLevel="1" />
+                        <ParameterRefRef RefId="%AID%_P-%T%000026_R-%T%00002601" IndentLevel="2" />
                       </when>
                     </choose>
                     <Button Id="%AID%_B-%T%000003" Text="Synchronisieren" Name="syncFinger" EventHandler="FIN_syncFinger" EventHandlerOnline="ConnectionOriented" />

@@ -61,8 +61,8 @@ class Fingerprint
     uint16_t getNextFreeLocation();
     FindFingerResult findFingerprint();
     bool createTemplate();
-    bool retrieveTemplate(uint8_t *templateData);
-    bool sendTemplate(uint8_t *templateData);
+    bool retrieveTemplate(uint8_t templateData[]);
+    bool sendTemplate(uint8_t templateData[]);
     bool writeCrc(uint16_t location, uint8_t *templateData, uint32_t secret);
     bool loadTemplate(uint16_t location);
     bool storeTemplate(uint16_t location);

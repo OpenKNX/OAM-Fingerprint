@@ -393,7 +393,7 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
         }
     }
 
-    success = finger.retrieveTemplate(*syncSendBuffer);
+    success = finger.retrieveTemplate(syncSendBuffer);
     if (!success)
     {
         logErrorP("Sync-Send: retrieving template failed");
@@ -417,7 +417,7 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
     - 7-8: 2 bytes: finger ID
     */
 
-    uint8_t data[SYNC_SEND_PACKET_DATA_LENGTH + 1];
+    uint8_t *data = KoFIN_SyncOutput.valueRef();
     data[0] = 0;
     data[1] = 0;
     data[2] = 0;
@@ -427,26 +427,27 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
     data[6] = syncSendPacketCount;
     data[7] = fingerId >> 8;
     data[8] = fingerId;
+    KoFIN_SyncOutput.objectWritten();
 
-    KoFIN_SyncOutput.value(data, DPT_String_8859_1);
-
+    syncSendTimer = delayTimerInit() + 100; // some extra delay at the start
     syncSendPacketSentCount++;
     syncSending = true;
 }
 
 void FingerprintModule::processSyncSend()
 {
-    if (!syncSending)
+    if (!syncSending ||
+        !delayCheck(syncSendTimer, ParamFIN_SyncDelay))
         return;
 
-    uint8_t data[SYNC_SEND_PACKET_DATA_LENGTH + 1];
+    syncSendTimer = delayTimerInit();
 
+    uint8_t *data = KoFIN_SyncOutput.valueRef();
     data[0] = syncSendPacketSentCount + 1; // sequence number = dataPacketNo + 1
     uint16_t dataOffset = syncSendPacketSentCount * SYNC_SEND_PACKET_DATA_LENGTH;
     uint8_t dataLength = dataOffset + SYNC_SEND_PACKET_DATA_LENGTH < syncSendBufferLength ? SYNC_SEND_PACKET_DATA_LENGTH : syncSendBufferLength - dataOffset;
     memcpy(data + 1, syncSendBuffer + dataOffset, dataLength);
-
-    KoFIN_SyncOutput.value(data, DPT_String_8859_1);
+    KoFIN_SyncOutput.objectWritten();
 
     logDebugP("Sync-Send: data packet: dataPacketNo=%u, dataOffset=%u, dataLength=%u", syncSendPacketSentCount, dataOffset, dataLength);
 
@@ -502,7 +503,7 @@ void FingerprintModule::processSyncReceive(const char* data)
     {
         logDebugP("Sync-Receive: finished");
 
-        finger.sendTemplate(*syncReceiveBuffer);
+        finger.sendTemplate(syncReceiveBuffer);
         finger.storeTemplate(syncReceiveFingerId);
 
         syncReceiving = false;
