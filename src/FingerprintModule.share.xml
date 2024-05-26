@@ -115,21 +115,21 @@
               <Parameter Id="%AID%_P-%T%000021" Name="PasswordNew" ParameterType="%AID%_PT-Text16Byte" Text="Neues Passwort" Value="" />
               <Parameter Id="%AID%_P-%T%000022" Name="PasswordOld" ParameterType="%AID%_PT-Text16Byte" Text="Altes Passwort" Value="" />
               <Parameter Id="%AID%_P-%T%000023" Name="PasswardAlreadySet" ParameterType="%AID%_PT-OnOffYesNo" Text="Passwort bereits gesetzt" Value="0" Access="None" />
-              <Parameter Id="%AID%_P-%T%000024" Name="SyncFingerIdR503" ParameterType="%AID%_PT-FingerIdR503" Text="Sync Finger ID" Value="0" />
-              <Parameter Id="%AID%_P-%T%000025" Name="SyncFingerIdR503S" ParameterType="%AID%_PT-FingerIdR503S" Text="Sync Finger ID" Value="0" />
-              <Parameter Id="%AID%_P-%T%000026" Name="SyncFingerId" ParameterType="%AID%_PT-FingerId" Text="Sync Finger ID" Value="0" />
+              <Parameter Id="%AID%_P-%T%000024" Name="SyncFingerIdR503" ParameterType="%AID%_PT-FingerIdR503" Text="Finger ID synchronisieren" Value="0" />
+              <Parameter Id="%AID%_P-%T%000025" Name="SyncFingerIdR503S" ParameterType="%AID%_PT-FingerIdR503S" Text="Finger ID synchronisieren" Value="0" />
+              <Parameter Id="%AID%_P-%T%000026" Name="SyncFingerId" ParameterType="%AID%_PT-FingerId" Text="Finger ID synchronisieren" Value="0" />
               <Union SizeInBit="40">
                 <Memory CodeSegment="%AID%_RS-04-00000" Offset="0" BitOffset="0" />
                 <Parameter Id="%AID%_UP-%T%000001" Name="VisibleActions" ParameterType="%AID%_PT-FINNumChannels" Offset="0" BitOffset="0" Text="Verfügbare Aktionen" Value="3" SuffixText=" von %N%" />
                 <Parameter Id="%AID%_UP-%T%000008" Name="AuthDelayBase" ParameterType="%AID%_PT-DelayBase" Offset="2" BitOffset="0" Text="Zeitbasis" Value="0" />
                 <Parameter Id="%AID%_UP-%T%000009" Name="AuthDelayTime" ParameterType="%AID%_PT-DelayTime" Offset="2" BitOffset="2" Text="Zeit" Value="5" />
                 <Parameter Id="%AID%_UP-%T%000002" Name="FingerprintScanner" ParameterType="%AID%_PT-FingerprintScanner" Offset="4" BitOffset="0" Text="Fingerprint Scanner" Value="0" />
-                <Parameter Id="%AID%_UP-%T%000010" Name="FingerprintColor" ParameterType="%AID%_PT-FingerprintColor" Offset="4" BitOffset="2" Text="Blinkfarbe während der Authorisierung" Value="2" />
+                <Parameter Id="%AID%_UP-%T%000010" Name="FingerprintColor" ParameterType="%AID%_PT-FingerprintColor" Offset="4" BitOffset="2" Text="Blinkfarbe während der Autorisierung" Value="2" />
                 <!-- 4 bits free -->
                 <Parameter Id="%AID%_UP-%T%000011" Name="EnableRawData" Offset="4" BitOffset="0" ParameterType="%AID%_PT-OnOffYesNo" Text="Rohdaten auf den Bus senden" Value="0" />
-                <Parameter Id="%AID%_UP-%T%000012" Name="EnableSync" Offset="4" BitOffset="1" ParameterType="%AID%_PT-OnOffYesNo" Text="Synchronisation mehrerer Scanner aktivieren" Value="0" />
+                <Parameter Id="%AID%_UP-%T%000012" Name="EnableSync" Offset="4" BitOffset="1" ParameterType="%AID%_PT-OnOffYesNo" Text="Synchronisation mehrerer Scanner" Value="0" />
                 <Parameter Id="%AID%_UP-%T%000013" Name="EnableExternalControl" Offset="4" BitOffset="2" ParameterType="%AID%_PT-OnOffYesNo" Text="Externe Kontrolle ermöglichen" Value="0" />
-                <Parameter Id="%AID%_UP-%T%000014" Name="EnableAccessData" Offset="4" BitOffset="3" ParameterType="%AID%_PT-OnOffYesNo" Text="Zutrittsdaten KOs aktivieren" Value="0" />
+                <Parameter Id="%AID%_UP-%T%000014" Name="EnableAccessData" Offset="4" BitOffset="3" ParameterType="%AID%_PT-OnOffYesNo" Text="Zutrittsdaten-KOs aktivieren" Value="0" />
                 <Parameter Id="%AID%_UP-%T%000019" Name="EnableTouchPcb" Offset="4" BitOffset="4" ParameterType="%AID%_PT-OnOffYesNo" Text="Touch-Frontplatine vorhanden" Value="0" />
                 <!-- 3 bits free -->
                 <Parameter Id="%AID%_UP-%T%000027" Name="SyncDelay" Offset="5" BitOffset="0" ParameterType="%AID%_PT-SyncDelay" Text="Verzögerung zwischen Sync-Telegrammen" Value="50" />
@@ -162,7 +162,7 @@
               <ParameterRef Id="%AID%_P-%T%000024_R-%T%00002401" RefId="%AID%_P-%T%000024" />
               <ParameterRef Id="%AID%_P-%T%000025_R-%T%00002501" RefId="%AID%_P-%T%000025" />
               <ParameterRef Id="%AID%_P-%T%000026_R-%T%00002601" RefId="%AID%_P-%T%000026" />
-              <ParameterRef Id="%AID%_UP-%T%000027_R-%T%00002701" RefId="%AID%_UP-%T%000027" />
+              <ParameterRef Id="%AID%_UP-%T%000027_R-%T%00002701" RefId="%AID%_UP-%T%000027" SuffixText="ms" />
             </ParameterRefs>
             <ComObjectTable>
               <ComObject Id="%AID%_O-%T%000001" Name="Touched"              Number="1"  ObjectSize="1 Bit"    Text="Berührung (sofort, immer)" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
@@ -237,10 +237,10 @@
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
 
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="Hardware" UIHint="Headline" />
-                <ParameterRefRef RefId="%AID%_UP-%T%000002_R-%T%00000201" IndentLevel="1" />
+                <ParameterRefRef RefId="%AID%_UP-%T%000002_R-%T%00000201" IndentLevel="1" HelpContext="%DOC%" />
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
 
-                <ParameterSeparator Id="%AID%_PS-nnn" Text="Authorisierung" UIHint="Headline" />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Autorisierung" UIHint="Headline" />
                 <ParameterBlock Id="%AID%_PB-nnn" Inline="true" Layout="Grid" HelpContext="Empty">
                   <Rows>
                     <Row Id="%AID%_PB-nnn_R-1" Name="Row1" />
@@ -251,7 +251,7 @@
                     <Column Id="%AID%_PB-nnn_C-3" Name="Col3" Width="15%" />
                     <Column Id="%AID%_PB-nnn_C-4" Name="Col4" Width="20%" />
                   </Columns>
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text=" Warten auf Authorisierung" Cell="1,2" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text=" Warten auf Autorisierung" Cell="1,2" />
                   <ParameterRefRef RefId="%AID%_UP-%T%000009_R-%T%00000901" Cell="1,3" HelpContext="Empty" />
                   <ParameterRefRef RefId="%AID%_UP-%T%000008_R-%T%00000801" Cell="1,4" HelpContext="Empty" />
                 </ParameterBlock>
@@ -259,19 +259,19 @@
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
 
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="Neuen Finger anlernen" UIHint="Headline" />
-                <ParameterRefRef RefId="%AID%_P-%T%000003_R-%T%00000301" IndentLevel="1" />
-                <ParameterRefRef RefId="%AID%_P-%T%000004_R-%T%00000401" IndentLevel="1" />
+                <ParameterRefRef RefId="%AID%_P-%T%000003_R-%T%00000301" IndentLevel="1" HelpContext="%DOC%" />
+                <ParameterRefRef RefId="%AID%_P-%T%000004_R-%T%00000401" IndentLevel="1" HelpContext="%DOC%" />
                 <choose ParamRefId="%AID%_UP-%T%000002_R-%T%00000201">
                   <when test="0">
-                    <ParameterRefRef RefId="%AID%_P-%T%000005_R-%T%00000501" IndentLevel="1" />
+                    <ParameterRefRef RefId="%AID%_P-%T%000005_R-%T%00000501" IndentLevel="1" HelpContext="%DOC%" />
                     <Assign SourceParamRefRef="%AID%_P-%T%000005_R-%T%00000501" TargetParamRefRef="%AID%_P-%T%000007_R-%T%00000701" />
                   </when>
                   <when test="1">
-                    <ParameterRefRef RefId="%AID%_P-%T%000006_R-%T%00000601" IndentLevel="1" />
+                    <ParameterRefRef RefId="%AID%_P-%T%000006_R-%T%00000601" IndentLevel="1" HelpContext="%DOC%" />
                     <Assign SourceParamRefRef="%AID%_P-%T%000006_R-%T%00000601" TargetParamRefRef="%AID%_P-%T%000007_R-%T%00000701" />
                   </when>
                   <when test="2">
-                    <ParameterRefRef RefId="%AID%_P-%T%000007_R-%T%00000701" IndentLevel="1" />
+                    <ParameterRefRef RefId="%AID%_P-%T%000007_R-%T%00000701" IndentLevel="1" HelpContext="%DOC%" />
                   </when>
                 </choose>
                 <Button Id="%AID%_B-%T%000001" Text="Anlernen" Name="enrollFinger" EventHandler="FIN_enrollFinger" EventHandlerOnline="ConnectionOriented" />
@@ -279,49 +279,49 @@
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="Finger löschen" UIHint="Headline" />
                 <choose ParamRefId="%AID%_UP-%T%000002_R-%T%00000201">
                   <when test="0">
-                    <ParameterRefRef RefId="%AID%_P-%T%000016_R-%T%00001601" IndentLevel="1" />
+                    <ParameterRefRef RefId="%AID%_P-%T%000016_R-%T%00001601" IndentLevel="1" HelpContext="%DOC%" />
                     <Assign SourceParamRefRef="%AID%_P-%T%000016_R-%T%00001601" TargetParamRefRef="%AID%_P-%T%000018_R-%T%00001801" />
                   </when>
                   <when test="1">
-                    <ParameterRefRef RefId="%AID%_P-%T%000017_R-%T%00001701" IndentLevel="1" />
+                    <ParameterRefRef RefId="%AID%_P-%T%000017_R-%T%00001701" IndentLevel="1" HelpContext="%DOC%" />
                     <Assign SourceParamRefRef="%AID%_P-%T%000017_R-%T%00001701" TargetParamRefRef="%AID%_P-%T%000018_R-%T%00001801" />
                   </when>
                   <when test="2">
-                    <ParameterRefRef RefId="%AID%_P-%T%000018_R-%T%00001801" IndentLevel="1" />
+                    <ParameterRefRef RefId="%AID%_P-%T%000018_R-%T%00001801" IndentLevel="1" HelpContext="%DOC%" />
                   </when>
                 </choose>
                 <Button Id="%AID%_B-%T%000002" Text="Löschen" Name="deleteFinger" EventHandler="FIN_deleteFinger" EventHandlerOnline="ConnectionOriented" />
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
 
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="Zusatzfunktionen" UIHint="Headline" />
-                <ParameterRefRef RefId="%AID%_UP-%T%000019_R-%T%00001901" IndentLevel="1" />
-                <ParameterRefRef RefId="%AID%_UP-%T%000011_R-%T%00001101" IndentLevel="1" />
+                <ParameterRefRef RefId="%AID%_UP-%T%000019_R-%T%00001901" IndentLevel="1" HelpContext="%DOC%" />
+                <ParameterRefRef RefId="%AID%_UP-%T%000011_R-%T%00001101" IndentLevel="1" HelpContext="%DOC%" />
                 <choose ParamRefId="%AID%_UP-%T%000011_R-%T%00001101">
                   <when test="1">
-                    <ParameterRefRef RefId="%AID%_UP-%T%000014_R-%T%00001401" IndentLevel="2" />
+                    <ParameterRefRef RefId="%AID%_UP-%T%000014_R-%T%00001401" IndentLevel="2" HelpContext="%DOC%" />
                   </when>
                 </choose>
 
                 <!-- Sync -->
-                <ParameterRefRef RefId="%AID%_UP-%T%000012_R-%T%00001201" IndentLevel="1" />
+                <ParameterRefRef RefId="%AID%_UP-%T%000012_R-%T%00001201" IndentLevel="1" HelpContext="%DOC%" />
                 <choose ParamRefId="%AID%_UP-%T%000012_R-%T%00001201">
                   <when test="1">
                     <ComObjectRefRef RefId="%AID%_O-%T%000046_R-%T%00004601" />
                     <ComObjectRefRef RefId="%AID%_O-%T%000047_R-%T%00004701" />
 
-                    <ParameterRefRef RefId="%AID%_UP-%T%000027_R-%T%00002701" IndentLevel="2" />
+                    <ParameterRefRef RefId="%AID%_UP-%T%000027_R-%T%00002701" IndentLevel="2" HelpContext="%DOC%" />
                     <ParameterSeparator Id="%AID%_PS-nnn" Text="Nach jedem Anlernvorgang wird der neue Finger automatisch synchronisiert. Zusätzlich kann hier die Synchronisation eines bestimmten Fingers auch manuell angestoßen werden." UIHint="Information" />
                     <choose ParamRefId="%AID%_UP-%T%000002_R-%T%00000201">
                       <when test="0">
-                        <ParameterRefRef RefId="%AID%_P-%T%000024_R-%T%00002401" IndentLevel="2" />
+                        <ParameterRefRef RefId="%AID%_P-%T%000024_R-%T%00002401" IndentLevel="2" HelpContext="%DOC%" />
                         <Assign SourceParamRefRef="%AID%_P-%T%000024_R-%T%00002401" TargetParamRefRef="%AID%_P-%T%000026_R-%T%00002601" />
                       </when>
                       <when test="1">
-                        <ParameterRefRef RefId="%AID%_P-%T%000025_R-%T%00002501" IndentLevel="2" />
+                        <ParameterRefRef RefId="%AID%_P-%T%000025_R-%T%00002501" IndentLevel="2" HelpContext="%DOC%" />
                         <Assign SourceParamRefRef="%AID%_P-%T%000025_R-%T%00002501" TargetParamRefRef="%AID%_P-%T%000026_R-%T%00002601" />
                       </when>
                       <when test="2">
-                        <ParameterRefRef RefId="%AID%_P-%T%000026_R-%T%00002601" IndentLevel="2" />
+                        <ParameterRefRef RefId="%AID%_P-%T%000026_R-%T%00002601" IndentLevel="2" HelpContext="%DOC%" />
                       </when>
                     </choose>
                     <Button Id="%AID%_B-%T%000003" Text="Synchronisieren" Name="syncFinger" EventHandler="FIN_syncFinger" EventHandlerOnline="ConnectionOriented" />
@@ -329,7 +329,7 @@
                 </choose>
 
                 <!-- External control -->
-                <ParameterRefRef RefId="%AID%_UP-%T%000013_R-%T%00001301" IndentLevel="1" />
+                <ParameterRefRef RefId="%AID%_UP-%T%000013_R-%T%00001301" IndentLevel="1" HelpContext="%DOC%" />
                 <choose ParamRefId="%AID%_UP-%T%000013_R-%T%00001301">
                   <when test="1">
                     <ComObjectRefRef RefId="%AID%_O-%T%000021_R-%T%00002101" />
@@ -385,7 +385,7 @@
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
 
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="Gefährliche Funktionen" UIHint="Headline" />
-                <ParameterRefRef RefId="%AID%_P-%T%000020_R-%T%00002001" IndentLevel="1" />
+                <ParameterRefRef RefId="%AID%_P-%T%000020_R-%T%00002001" IndentLevel="1" HelpContext="%DOC%" />
                 <ParameterRefRef RefId="%AID%_P-%T%000023_R-%T%00002301" IndentLevel="1" />
                 <choose ParamRefId="%AID%_P-%T%000020_R-%T%00002001">
                   <when test="0">
@@ -399,16 +399,16 @@
                     <ParameterSeparator Id="%AID%_PS-nnn" Text="Wenn Sie hier ein Passwort vergeben und dieses vergessen, wird das Fingerprint-Lesegerät unbrauchbar. Das Passwort kann nicht wiederhergestellt werden!" UIHint="Error" />
                   </when>
                   <when test="1">
-                    <ParameterRefRef RefId="%AID%_P-%T%000021_R-%T%00002101" IndentLevel="1" />
+                    <ParameterRefRef RefId="%AID%_P-%T%000021_R-%T%00002101" IndentLevel="1" HelpContext="%DOC%" />
                     <Button Id="%AID%_B-%T%00004" Text="Jetzt Passwort festsetzen" Name="setPassword" EventHandler="FIN_setPassword" EventHandlerOnline="ConnectionOriented" />
                   </when>
                   <when test="2">
-                    <ParameterRefRef RefId="%AID%_P-%T%000022_R-%T%00002201" IndentLevel="1" />
-                    <ParameterRefRef RefId="%AID%_P-%T%000021_R-%T%00002101" IndentLevel="1" />
+                    <ParameterRefRef RefId="%AID%_P-%T%000022_R-%T%00002201" IndentLevel="1" HelpContext="%DOC%" />
+                    <ParameterRefRef RefId="%AID%_P-%T%000021_R-%T%00002101" IndentLevel="1" HelpContext="%DOC%" />
                     <Button Id="%AID%_B-%T%00005" Text="Jetzt Passwort ändern" Name="setPassword" EventHandler="FIN_setPassword" EventHandlerOnline="ConnectionOriented" />
                   </when>
                 </choose>
-                <ParameterRefRef RefId="%AID%_P-%T%000015_R-%T%00001501" IndentLevel="1" />
+                <ParameterRefRef RefId="%AID%_P-%T%000015_R-%T%00001501" IndentLevel="1" HelpContext="%DOC%" />
                 <choose ParamRefId="%AID%_P-%T%000015_R-%T%00001501">
                   <when test="1">
                     <ParameterSeparator Id="%AID%_PS-nnn" Text="Wenn Sie diese Funktion ausführen, werden alle gespeicherten Finger gelöscht und müssen neu angelernt werden." UIHint="Error" />

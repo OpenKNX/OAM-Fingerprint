@@ -74,8 +74,6 @@ function FIN_checkFingerIdRange(input, changed, prevValue, context) {
     return true;
 }
 
-function FIN_dummy(input, output, context) { }
-
 function FIN_checkFingerAction(device, online, progress, context) {
     var parActionId = device.getParameterByName("FINACT_fa" + context.Channel + "ActionId");
     var parFingerId = device.getParameterByName("FINACT_fa" + context.Channel + "FingerId");
