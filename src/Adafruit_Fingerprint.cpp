@@ -383,11 +383,12 @@ uint8_t Adafruit_Fingerprint::downloadModel(uint8_t buffer_no) {
     @returns true/false (successful or not)
 */
 /**************************************************************************/
-boolean Adafruit_Fingerprint::write_template_to_sensor(int temp_Size, const uint8_t ref_buf[])
+uint8_t Adafruit_Fingerprint::write_template_to_sensor(int temp_Size, const uint8_t ref_buf[])
 {
-  if (downloadModel(0x01) != FINGERPRINT_OK) {
+  uint8_t p = downloadModel(0x01);
+  if (p != FINGERPRINT_OK) {
     Serial.println("downloadModel failed");
-    return false; // check if buffer 1 is ready to be loaded
+    return p; // check if buffer 1 is ready to be loaded
   }
 
   //delay(2000);
@@ -406,7 +407,7 @@ boolean Adafruit_Fingerprint::write_template_to_sensor(int temp_Size, const uint
     //delay(1000);
   }
 
-  return true;
+  return FINGERPRINT_OK;
 }
 
 /**************************************************************************/

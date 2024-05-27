@@ -5,6 +5,7 @@
 #include "Fingerprint.h"
 #include "ActionChannel.h"
 #include "CRC32.h"
+#include "CRC16.h"
 
 #define SCANNER_TOUCH_PIN 2
 
@@ -100,6 +101,7 @@ class FingerprintModule : public OpenKNX::Module
     uint16_t syncReceiveFingerId = 0;
     uint8_t syncReceiveBuffer[TEMPLATE_SIZE];
     uint16_t syncReceiveBufferLength = 0;
+    uint16_t syncReceiveBufferChecksum = 0;
     uint8_t syncReceiveLengthPerPacket = 0;
     uint8_t syncReceivePacketCount = 0;
     uint8_t syncReceivePacketReceivedCount = 0;

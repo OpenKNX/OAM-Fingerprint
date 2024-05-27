@@ -408,18 +408,20 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
 
     syncSendBufferLength = TEMPLATE_SIZE;
     syncSendPacketCount = ceil(TEMPLATE_SIZE / (float)SYNC_SEND_PACKET_DATA_LENGTH) + 1; // currently separated control packet
+    uint16_t checksum = crc16(syncSendBuffer, syncSendBufferLength);
 
-    logDebugP("Sync-Send (1/%u): control packet: bufferLength=%u, lengthPerPacket=%u, fingerId=%u%", syncSendPacketCount, syncSendBufferLength, SYNC_SEND_PACKET_DATA_LENGTH, fingerId);
+    logDebugP("Sync-Send (1/%u): control packet: bufferLength=%u, lengthPerPacket=%u, checksum=%u, fingerId=%u%", syncSendPacketCount, syncSendBufferLength, SYNC_SEND_PACKET_DATA_LENGTH, checksum, fingerId);
 
     /*
     Sync Control Packet Layout:
-    -   0: 1 byte : sequence number (0: control packet)
-    -   1: 1 byte : sync type (0: new template sync)
-    -   2: 1 byte : sync data format version (currently always 0)
-    - 3-4: 2 bytes: total data content size
-    -   5: 1 byte : max. payload data length per data packet
-    -   6: 1 byte : number of data packets
-    - 7-8: 2 bytes: finger ID
+    -    0: 1 byte : sequence number (0: control packet)
+    -    1: 1 byte : sync type (0: new template sync)
+    -    2: 1 byte : sync data format version (currently always 0)
+    -  3-4: 2 bytes: total data content size
+    -    5: 1 byte : max. payload data length per data packet
+    -    6: 1 byte : number of data packets
+    -  7-8: 2 bytes: checksum
+    - 9-10: 2 bytes: finger ID
     */
 
     uint8_t *data = KoFIN_Sync.valueRef();
@@ -430,8 +432,10 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
     data[4] = syncSendBufferLength;
     data[5] = SYNC_SEND_PACKET_DATA_LENGTH;
     data[6] = syncSendPacketCount;
-    data[7] = fingerId >> 8;
-    data[8] = fingerId;
+    data[7] = checksum >> 8;
+    data[8] = checksum;
+    data[9] = fingerId >> 8;
+    data[10] = fingerId;
     KoFIN_Sync.objectWritten();
 
     syncSendTimer = delayTimerInit() + 100; // some extra delay at the start
@@ -488,9 +492,10 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
                 syncReceiveBufferLength = (data[3] << 8) | data[4];
                 syncReceiveLengthPerPacket = data[5];
                 syncReceivePacketCount = data[6];
-                syncReceiveFingerId = (data[7] << 8) | data[8];
+                syncReceiveBufferChecksum = (data[7] << 8) | data[8];
+                syncReceiveFingerId = (data[9] << 8) | data[10];
 
-                logDebugP("Sync-Receive (1/%u): control packet: bufferLength=%u, lengthPerPacket=%u, fingerId=%u%", syncReceivePacketCount, syncReceiveBufferLength, syncReceiveLengthPerPacket, syncReceiveFingerId);
+                logDebugP("Sync-Receive (1/%u): control packet: bufferLength=%u, lengthPerPacket=%u, checksum=%u, fingerId=%u%", syncReceivePacketCount, syncReceiveBufferLength, syncReceiveLengthPerPacket, syncReceiveBufferChecksum, syncReceiveFingerId);
 
                 syncReceivePacketReceivedCount = 1;
                 syncReceiving = true;
@@ -519,7 +524,14 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
 
     if (syncReceivePacketReceivedCount == syncReceivePacketCount)
     {
-        logDebugP("Sync-Receive: finished");
+        uint16_t checksum = crc16(syncReceiveBuffer, syncReceiveBufferLength);
+        if (syncReceiveBufferChecksum == checksum)
+            logDebugP("Sync-Receive: finished (checksum=%u)", syncReceiveBufferChecksum);
+        else
+        {
+            logErrorP("Sync-Receive: finished faled (checksum expected=%u, calculated=%u)", syncReceiveBufferChecksum, checksum);
+            return;
+        }
 
         bool success;
         success = finger.sendTemplate(syncReceiveBuffer);

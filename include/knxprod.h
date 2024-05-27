@@ -10,7 +10,7 @@
                                              
 #define MAIN_OpenKnxId 0xA6
 #define MAIN_ApplicationNumber 1
-#define MAIN_ApplicationVersion 49
+#define MAIN_ApplicationVersion 50
 #define MAIN_ParameterSize 2680
 #define MAIN_MaxKoNumber 796
 #define MAIN_OrderNumber "OpenKnxFingerprint"
