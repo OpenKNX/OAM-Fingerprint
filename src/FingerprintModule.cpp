@@ -162,6 +162,14 @@ void FingerprintModule::loop()
 
     for (uint16_t i = 0; i < ParamFIN_VisibleActions; i++)
         _channels[i]->loop();
+
+    if (syncSendAfterEnrollTimer > 0 && delayCheck(syncSendAfterEnrollTimer, SYNC_AFTER_ENROLL_DELAY))
+    {
+        startSyncSend(syncSendAfterEnrollFingerId);
+
+        syncSendAfterEnrollTimer = 0;
+        syncSendAfterEnrollFingerId = 0;
+    }
     
     processSyncSend();
 }
@@ -367,7 +375,7 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
                 digitalWrite(LED_GREEN_PIN, LOW);
             
             break;
-        case FIN_KoSyncInput:
+        case FIN_KoSync:
             processSyncReceive(iKo.valueRef());
             break;
         default:
@@ -380,7 +388,10 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
 
 void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
 {
-    logInfoP("Sync-Send: started: fingerId=%u, loadModel=%u", fingerId, loadModel);
+    if (syncReceiving)
+        return;
+
+    logInfoP("Sync-Send: started: fingerId=%u, loadModel=%u, syncDelay=%u", fingerId, loadModel, ParamFIN_SyncDelay);
 
     bool success;
     if (loadModel)
@@ -393,30 +404,41 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
         }
     }
 
-    success = finger.retrieveTemplate(syncSendBuffer);
+    uint8_t syncSendBufferTemp[SYNC_BUFFER_SIZE];
+    success = finger.retrieveTemplate(syncSendBufferTemp);
     if (!success)
     {
         logErrorP("Sync-Send: retrieving template failed");
         return;
     }
 
-    syncSendBufferLength = TEMPLATE_SIZE;
-    syncSendPacketCount = ceil(TEMPLATE_SIZE / (float)SYNC_SEND_PACKET_DATA_LENGTH) + 1; // currently separated control packet
+    uint32_t storageOffset = FIN_CaclStorageOffset(fingerId);
+    uint8_t personData[29] = {};
+    _fingerprintStorage.read(storageOffset, personData, 29);
+    memcpy(syncSendBuffer + TEMPLATE_SIZE, personData, 29);
 
-    logDebugP("Sync-Send (1/%u): control packet: bufferLength=%u, lengthPerPacket=%u, fingerId=%u%", syncSendPacketCount, syncSendBufferLength, SYNC_SEND_PACKET_DATA_LENGTH, fingerId);
+    const int maxDstSize = LZ4_compressBound(SYNC_BUFFER_SIZE);
+    const int compressedDataSize = LZ4_compress_default((char*)syncSendBufferTemp, (char*)syncSendBuffer, SYNC_BUFFER_SIZE, maxDstSize);
+
+    syncSendBufferLength = compressedDataSize;
+    syncSendPacketCount = ceil(syncSendBufferLength / (float)SYNC_SEND_PACKET_DATA_LENGTH) + 1; // currently separated control packet
+    uint16_t checksum = crc16(syncSendBuffer, syncSendBufferLength);
+
+    logDebugP("Sync-Send (1/%u): control packet: bufferLength=%u, lengthPerPacket=%u, checksum=%u, fingerId=%u%", syncSendPacketCount, syncSendBufferLength, SYNC_SEND_PACKET_DATA_LENGTH, checksum, fingerId);
 
     /*
     Sync Control Packet Layout:
-    -   0: 1 byte : sequence number (0: control packet)
-    -   1: 1 byte : sync type (0: new template sync)
-    -   2: 1 byte : sync data format version (currently always 0)
-    - 3-4: 2 bytes: total data content size
-    -   5: 1 byte : max. payload data length per data packet
-    -   6: 1 byte : number of data packets
-    - 7-8: 2 bytes: finger ID
+    -    0: 1 byte : sequence number (0: control packet)
+    -    1: 1 byte : sync type (0: new template sync)
+    -    2: 1 byte : sync data format version (currently always 0)
+    -  3-4: 2 bytes: total data content size
+    -    5: 1 byte : max. payload data length per data packet
+    -    6: 1 byte : number of data packets
+    -  7-8: 2 bytes: checksum
+    - 9-10: 2 bytes: finger ID
     */
 
-    uint8_t *data = KoFIN_SyncOutput.valueRef();
+    uint8_t *data = KoFIN_Sync.valueRef();
     data[0] = 0;
     data[1] = 0;
     data[2] = 0;
@@ -424,11 +446,13 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
     data[4] = syncSendBufferLength;
     data[5] = SYNC_SEND_PACKET_DATA_LENGTH;
     data[6] = syncSendPacketCount;
-    data[7] = fingerId >> 8;
-    data[8] = fingerId;
-    KoFIN_SyncOutput.objectWritten();
+    data[7] = checksum >> 8;
+    data[8] = checksum;
+    data[9] = fingerId >> 8;
+    data[10] = fingerId;
+    KoFIN_Sync.objectWritten();
 
-    syncSendTimer = delayTimerInit() + 100; // some extra delay at the start
+    syncSendTimer = delayTimerInit();
     syncSendPacketSentCount = 1;
     syncSending = true;
 }
@@ -441,13 +465,13 @@ void FingerprintModule::processSyncSend()
 
     syncSendTimer = delayTimerInit();
 
-    uint8_t *data = KoFIN_SyncOutput.valueRef();
+    uint8_t *data = KoFIN_Sync.valueRef();
     data[0] = syncSendPacketSentCount;
     uint8_t dataPacketNo = syncSendPacketSentCount - 1; // = sequence number - 1
     uint16_t dataOffset = dataPacketNo * SYNC_SEND_PACKET_DATA_LENGTH;
     uint8_t dataLength = dataOffset + SYNC_SEND_PACKET_DATA_LENGTH < syncSendBufferLength ? SYNC_SEND_PACKET_DATA_LENGTH : syncSendBufferLength - dataOffset;
     memcpy(data + 1, syncSendBuffer + dataOffset, dataLength);
-    KoFIN_SyncOutput.objectWritten();
+    KoFIN_Sync.objectWritten();
 
     syncSendPacketSentCount++;
     logDebugP("Sync-Send (%u/%u): data packet: dataPacketNo=%u, dataOffset=%u, dataLength=%u", syncSendPacketSentCount, syncSendPacketCount, dataPacketNo, dataOffset, dataLength);
@@ -462,6 +486,9 @@ void FingerprintModule::processSyncSend()
 
 void FingerprintModule::processSyncReceive(uint8_t* data)
 {
+    if (syncSending)
+        return;
+    
     if (data[0] == 0) // sequence number
     {
         switch (data[1]) // sync type
@@ -476,9 +503,10 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
                 syncReceiveBufferLength = (data[3] << 8) | data[4];
                 syncReceiveLengthPerPacket = data[5];
                 syncReceivePacketCount = data[6];
-                syncReceiveFingerId = (data[7] << 8) | data[8];
+                syncReceiveBufferChecksum = (data[7] << 8) | data[8];
+                syncReceiveFingerId = (data[9] << 8) | data[10];
 
-                logDebugP("Sync-Receive (1/%u): control packet: bufferLength=%u, lengthPerPacket=%u, fingerId=%u%", syncReceivePacketCount, syncReceiveBufferLength, syncReceiveLengthPerPacket, syncReceiveFingerId);
+                logDebugP("Sync-Receive (1/%u): control packet: bufferLength=%u, lengthPerPacket=%u, checksum=%u, fingerId=%u%", syncReceivePacketCount, syncReceiveBufferLength, syncReceiveLengthPerPacket, syncReceiveBufferChecksum, syncReceiveFingerId);
 
                 syncReceivePacketReceivedCount = 1;
                 syncReceiving = true;
@@ -507,10 +535,25 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
 
     if (syncReceivePacketReceivedCount == syncReceivePacketCount)
     {
-        logDebugP("Sync-Receive: finished");
+        uint16_t checksum = crc16(syncReceiveBuffer, syncReceiveBufferLength);
+        if (syncReceiveBufferChecksum == checksum)
+            logDebugP("Sync-Receive: finished (checksum=%u)", syncReceiveBufferChecksum);
+        else
+        {
+            logErrorP("Sync-Receive: finished failed (checksum expected=%u, calculated=%u)", syncReceiveBufferChecksum, checksum);
+            return;
+        }
+
+        uint8_t syncSendBufferTemp[SYNC_BUFFER_SIZE];
+        const int decompressedSize = LZ4_decompress_safe((char*)syncReceiveBuffer, (char*)syncSendBufferTemp, syncReceiveBufferLength, SYNC_BUFFER_SIZE);
+        if (decompressedSize != SYNC_BUFFER_SIZE)
+        {
+            logErrorP("Sync-Receive: decompression failed (size expected=%u, received=%u)", SYNC_BUFFER_SIZE, decompressedSize);
+            return;
+        }
 
         bool success;
-        success = finger.sendTemplate(syncReceiveBuffer);
+        success = finger.sendTemplate(syncSendBufferTemp);
         if (!success)
         {
             logErrorP("Sync-Receive: sending template failed");
@@ -523,6 +566,10 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
             logErrorP("Sync-Receive: storing template failed");
             return;
         }
+
+        uint32_t storageOffset = FIN_CaclStorageOffset(syncReceiveFingerId);
+        _fingerprintStorage.write(storageOffset, syncReceiveBuffer + TEMPLATE_SIZE, 29);
+        _fingerprintStorage.commit();
 
         syncReceiving = false;
     }
@@ -604,7 +651,9 @@ void FingerprintModule::handleFunctionPropertySyncFinger(uint8_t *data, uint8_t 
 
     if (finger.hasLocation(fingerId))
     {
-        startSyncSend(fingerId, true);
+        syncSendAfterEnrollFingerId = fingerId;
+        syncSendAfterEnrollTimer = delayTimerInit();
+
         resultData[0] = 0;
     }
     else

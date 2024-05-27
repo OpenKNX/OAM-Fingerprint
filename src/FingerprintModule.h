@@ -5,6 +5,8 @@
 #include "Fingerprint.h"
 #include "ActionChannel.h"
 #include "CRC32.h"
+#include "CRC16.h"
+#include "lz4.h"
 
 #define SCANNER_TOUCH_PIN 2
 
@@ -28,11 +30,14 @@
 #define MAX_FINGERS 1500
 
 #define FLASH_MAGIC_WORD 2912744758
-#define FIN_CaclStorageOffset(fingerId) fingerId * 29 + 4096 + 1 // first byte free for finger info storage format version
+#define FINGER_DATA_SIZE 29
+#define FIN_CaclStorageOffset(fingerId) fingerId * FINGER_DATA_SIZE + 4096 + 1 // first byte free for finger info storage format version
 
 #define FLASH_SCANNER_PASSWORD_OFFSET 5
 
+#define SYNC_BUFFER_SIZE TEMPLATE_SIZE + FINGER_DATA_SIZE
 #define SYNC_SEND_PACKET_DATA_LENGTH 13
+#define SYNC_AFTER_ENROLL_DELAY 500
 
 /*
 Flash Storage Layout:
@@ -91,15 +96,18 @@ class FingerprintModule : public OpenKNX::Module
 
     bool syncSending = false;
     uint32_t syncSendTimer = 0;
-    uint8_t syncSendBuffer[TEMPLATE_SIZE];
+    uint8_t syncSendBuffer[SYNC_BUFFER_SIZE];
     uint16_t syncSendBufferLength = 0;
     uint8_t syncSendPacketCount = 0;
     uint8_t syncSendPacketSentCount = 0;
+    uint32_t syncSendAfterEnrollTimer = 0;
+    uint16_t syncSendAfterEnrollFingerId = 0;
 
     bool syncReceiving = false;
     uint16_t syncReceiveFingerId = 0;
-    uint8_t syncReceiveBuffer[TEMPLATE_SIZE];
+    uint8_t syncReceiveBuffer[SYNC_BUFFER_SIZE];
     uint16_t syncReceiveBufferLength = 0;
+    uint16_t syncReceiveBufferChecksum = 0;
     uint8_t syncReceiveLengthPerPacket = 0;
     uint8_t syncReceivePacketCount = 0;
     uint8_t syncReceivePacketReceivedCount = 0;

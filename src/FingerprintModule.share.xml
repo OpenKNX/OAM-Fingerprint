@@ -113,7 +113,7 @@
                 </TypeRestriction>
               </ParameterType>
               <ParameterType Id="%AID%_PT-SyncDelay" Name="SyncDelay">
-                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="5" maxInclusive="255" />
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="50" maxInclusive="255" />
               </ParameterType>
             </ParameterTypes>
             <Parameters>
@@ -133,7 +133,7 @@
               <Parameter Id="%AID%_P-%T%000024" Name="SyncFingerIdR503" ParameterType="%AID%_PT-FingerIdR503" Text="Finger ID synchronisieren" Value="0" />
               <Parameter Id="%AID%_P-%T%000025" Name="SyncFingerIdR503S" ParameterType="%AID%_PT-FingerIdR503S" Text="Finger ID synchronisieren" Value="0" />
               <Parameter Id="%AID%_P-%T%000026" Name="SyncFingerId" ParameterType="%AID%_PT-FingerId" Text="Finger ID synchronisieren" Value="0" />
-              <Union SizeInBit="40">
+              <Union SizeInBit="48">
                 <Memory CodeSegment="%AID%_RS-04-00000" Offset="0" BitOffset="0" />
                 <Parameter Id="%AID%_UP-%T%000001" Name="VisibleActions" ParameterType="%AID%_PT-FINNumChannels" Offset="0" BitOffset="0" Text="Verfügbare Aktionen" Value="3" SuffixText=" von %N%" />
                 <Parameter Id="%AID%_UP-%T%000008" Name="AuthDelayBase" ParameterType="%AID%_PT-DelayBase" Offset="2" BitOffset="0" Text="Zeitbasis" Value="0" />
@@ -147,7 +147,7 @@
                 <Parameter Id="%AID%_UP-%T%000014" Name="EnableAccessData" Offset="4" BitOffset="3" ParameterType="%AID%_PT-OnOffYesNo" Text="Zutrittsdaten-KOs aktivieren" Value="0" />
                 <Parameter Id="%AID%_UP-%T%000019" Name="EnableTouchPcb" Offset="4" BitOffset="4" ParameterType="%AID%_PT-OnOffYesNo" Text="Touch-Frontplatine vorhanden" Value="0" />
                 <!-- 3 bits free -->
-                <Parameter Id="%AID%_UP-%T%000027" Name="SyncDelay" Offset="5" BitOffset="0" ParameterType="%AID%_PT-SyncDelay" Text="Verzögerung zwischen Sync-Telegrammen" Value="50" />
+                <Parameter Id="%AID%_UP-%T%000027" Name="SyncDelay" Offset="5" BitOffset="0" ParameterType="%AID%_PT-SyncDelay" Text="Verzögerung zwischen Sync-Telegrammen" Value="100" />
               </Union>
             </Parameters>
             <ParameterRefs>
@@ -203,8 +203,7 @@
               <ComObject Id="%AID%_O-%T%000041" Name="ExternFingerId"       Number="41" ObjectSize="2 Bytes"  Text="Externe Finger ID" FunctionText="Trigger" ReadFlag="Enabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-7-1" />
               <ComObject Id="%AID%_O-%T%000042" Name="ActionAddFingerId"    Number="42" ObjectSize="4 Bytes"  Text="Finger ID zu Aktion hinzufügen" FunctionText="Trigger" ReadFlag="Enabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPT-12" />
               <ComObject Id="%AID%_O-%T%000043" Name="ActionRemoveFingerId" Number="43" ObjectSize="4 Bytes"  Text="Finger ID von Aktion entfernen" FunctionText="Trigger" ReadFlag="Enabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPT-12" />
-              <ComObject Id="%AID%_O-%T%000046" Name="SyncInput"            Number="46" ObjectSize="14 Bytes" Text="Datenaustausch zwischen Fingerprints (Eingang)" FunctionText="Synchronisation" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPT-16" />
-              <ComObject Id="%AID%_O-%T%000047" Name="SyncOutput"           Number="47" ObjectSize="14 Bytes" Text="Datenaustausch zwischen Fingerprints (Ausgang)" FunctionText="Synchronisation" ReadFlag="Enabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPT-16" />
+              <ComObject Id="%AID%_O-%T%000046" Name="Sync"                 Number="46" ObjectSize="14 Bytes" Text="Datenaustausch zwischen Fingerprints" FunctionText="Synchronisation" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPT-16" />
               <ComObject Id="%AID%_O-%T%000051" Name="TouchPcbButtonLeft"   Number="51" ObjectSize="1 Bit"    Text="Touch-Front: Taste links" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
               <ComObject Id="%AID%_O-%T%000052" Name="TouchPcbButtonRight"  Number="52" ObjectSize="1 Bit"    Text="Touch-Front: Taste rechts" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
               <ComObject Id="%AID%_O-%T%000053" Name="TouchPcbLedRed"       Number="53" ObjectSize="1 Bit"    Text="Touch-Front: LED rot" FunctionText="Trigger" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
@@ -235,7 +234,6 @@
               <ComObjectRef Id="%AID%_O-%T%000042_R-%T%00004201" RefId="%AID%_O-%T%000042" />
               <ComObjectRef Id="%AID%_O-%T%000043_R-%T%00004301" RefId="%AID%_O-%T%000043" />
               <ComObjectRef Id="%AID%_O-%T%000046_R-%T%00004601" RefId="%AID%_O-%T%000046" />
-              <ComObjectRef Id="%AID%_O-%T%000047_R-%T%00004701" RefId="%AID%_O-%T%000047" />
               <ComObjectRef Id="%AID%_O-%T%000051_R-%T%00005101" RefId="%AID%_O-%T%000051" />
               <ComObjectRef Id="%AID%_O-%T%000052_R-%T%00005201" RefId="%AID%_O-%T%000052" />
               <ComObjectRef Id="%AID%_O-%T%000053_R-%T%00005301" RefId="%AID%_O-%T%000053" />
@@ -322,7 +320,6 @@
                 <choose ParamRefId="%AID%_UP-%T%000012_R-%T%00001201">
                   <when test="1">
                     <ComObjectRefRef RefId="%AID%_O-%T%000046_R-%T%00004601" />
-                    <ComObjectRefRef RefId="%AID%_O-%T%000047_R-%T%00004701" />
 
                     <ParameterRefRef RefId="%AID%_UP-%T%000027_R-%T%00002701" IndentLevel="2" HelpContext="%DOC%" />
                     <ParameterSeparator Id="%AID%_PS-nnn" Text="Nach jedem Anlernvorgang wird der neue Finger automatisch synchronisiert. Zusätzlich kann hier die Synchronisation eines bestimmten Fingers auch manuell angestoßen werden." UIHint="Information" />
