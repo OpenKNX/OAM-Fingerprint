@@ -162,6 +162,14 @@ void FingerprintModule::loop()
 
     for (uint16_t i = 0; i < ParamFIN_VisibleActions; i++)
         _channels[i]->loop();
+
+    if (syncSendAfterEnrollTimer > 0 && delayCheck(syncSendAfterEnrollTimer, SYNC_AFTER_ENROLL_DELAY))
+    {
+        startSyncSend(syncSendAfterEnrollFingerId);
+
+        syncSendAfterEnrollTimer = 0;
+        syncSendAfterEnrollFingerId = 0;
+    }
     
     processSyncSend();
 }
@@ -440,7 +448,7 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
     data[10] = fingerId;
     KoFIN_Sync.objectWritten();
 
-    syncSendTimer = delayTimerInit() + 100; // some extra delay at the start
+    syncSendTimer = delayTimerInit();
     syncSendPacketSentCount = 1;
     syncSending = true;
 }
@@ -631,7 +639,9 @@ void FingerprintModule::handleFunctionPropertySyncFinger(uint8_t *data, uint8_t 
 
     if (finger.hasLocation(fingerId))
     {
-        startSyncSend(fingerId, true);
+        syncSendAfterEnrollFingerId = fingerId;
+        syncSendAfterEnrollTimer = delayTimerInit();
+
         resultData[0] = 0;
     }
     else

@@ -34,6 +34,7 @@
 #define FLASH_SCANNER_PASSWORD_OFFSET 5
 
 #define SYNC_SEND_PACKET_DATA_LENGTH 13
+#define SYNC_AFTER_ENROLL_DELAY 500
 
 /*
 Flash Storage Layout:
@@ -96,6 +97,8 @@ class FingerprintModule : public OpenKNX::Module
     uint16_t syncSendBufferLength = 0;
     uint8_t syncSendPacketCount = 0;
     uint8_t syncSendPacketSentCount = 0;
+    uint32_t syncSendAfterEnrollTimer = 0;
+    uint16_t syncSendAfterEnrollFingerId = 0;
 
     bool syncReceiving = false;
     uint16_t syncReceiveFingerId = 0;
