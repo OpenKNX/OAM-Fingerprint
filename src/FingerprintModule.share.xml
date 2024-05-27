@@ -118,7 +118,7 @@
               <Parameter Id="%AID%_P-%T%000024" Name="SyncFingerIdR503" ParameterType="%AID%_PT-FingerIdR503" Text="Finger ID synchronisieren" Value="0" />
               <Parameter Id="%AID%_P-%T%000025" Name="SyncFingerIdR503S" ParameterType="%AID%_PT-FingerIdR503S" Text="Finger ID synchronisieren" Value="0" />
               <Parameter Id="%AID%_P-%T%000026" Name="SyncFingerId" ParameterType="%AID%_PT-FingerId" Text="Finger ID synchronisieren" Value="0" />
-              <Union SizeInBit="40">
+              <Union SizeInBit="48">
                 <Memory CodeSegment="%AID%_RS-04-00000" Offset="0" BitOffset="0" />
                 <Parameter Id="%AID%_UP-%T%000001" Name="VisibleActions" ParameterType="%AID%_PT-FINNumChannels" Offset="0" BitOffset="0" Text="Verfügbare Aktionen" Value="3" SuffixText=" von %N%" />
                 <Parameter Id="%AID%_UP-%T%000008" Name="AuthDelayBase" ParameterType="%AID%_PT-DelayBase" Offset="2" BitOffset="0" Text="Zeitbasis" Value="0" />

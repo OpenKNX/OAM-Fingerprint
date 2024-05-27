@@ -381,12 +381,9 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
 void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
 {
     if (syncReceiving)
-    {
-        logInfoP("Sync-Send: currently receiving, cannot start new sync in parallel");
         return;
-    }
 
-    logInfoP("Sync-Send: started: fingerId=%u, loadModel=%u", fingerId, loadModel);
+    logInfoP("Sync-Send: started: fingerId=%u, loadModel=%u, syncDelay=%u", fingerId, loadModel, ParamFIN_SyncDelay);
 
     bool success;
     if (loadModel)
@@ -406,8 +403,13 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
         return;
     }
 
-    syncSendBufferLength = TEMPLATE_SIZE;
-    syncSendPacketCount = ceil(TEMPLATE_SIZE / (float)SYNC_SEND_PACKET_DATA_LENGTH) + 1; // currently separated control packet
+    uint32_t storageOffset = FIN_CaclStorageOffset(fingerId);
+    uint8_t personData[29] = {};
+    _fingerprintStorage.read(storageOffset, personData, 29);
+    memcpy(syncSendBuffer + TEMPLATE_SIZE, personData, 29);
+
+    syncSendBufferLength = TEMPLATE_SIZE + 29;
+    syncSendPacketCount = ceil(syncSendBufferLength / (float)SYNC_SEND_PACKET_DATA_LENGTH) + 1; // currently separated control packet
     uint16_t checksum = crc16(syncSendBuffer, syncSendBufferLength);
 
     logDebugP("Sync-Send (1/%u): control packet: bufferLength=%u, lengthPerPacket=%u, checksum=%u, fingerId=%u%", syncSendPacketCount, syncSendBufferLength, SYNC_SEND_PACKET_DATA_LENGTH, checksum, fingerId);
@@ -473,10 +475,7 @@ void FingerprintModule::processSyncSend()
 void FingerprintModule::processSyncReceive(uint8_t* data)
 {
     if (syncSending)
-    {
-        logInfoP("Sync-Receive: currently sending, cannot receive sync data in parallel");
         return;
-    }
     
     if (data[0] == 0) // sequence number
     {
@@ -547,6 +546,10 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
             logErrorP("Sync-Receive: storing template failed");
             return;
         }
+
+        uint32_t storageOffset = FIN_CaclStorageOffset(syncReceiveFingerId);
+        _fingerprintStorage.write(storageOffset, syncReceiveBuffer + TEMPLATE_SIZE, 29);
+        _fingerprintStorage.commit();
 
         syncReceiving = false;
     }

@@ -1,6 +1,6 @@
 #pragma once
 
-#define MAIN_Version "872ff9a"
+#define MAIN_Version "434661f"
 #define KNX_Version "1f8c4e7"
 #define MODULE_Common_Version "1.1.1+7d5ea92"
 #define MODULE_Common_ETS 17
