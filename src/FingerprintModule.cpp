@@ -368,7 +368,7 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
             
             break;
         case FIN_KoSyncInput:
-            processSyncReceive(iKo.value(DPT_String_8859_1));
+            processSyncReceive(iKo.valueRef());
             break;
         default:
         {
@@ -460,7 +460,7 @@ void FingerprintModule::processSyncSend()
     }
 }
 
-void FingerprintModule::processSyncReceive(const char* data)
+void FingerprintModule::processSyncReceive(uint8_t* data)
 {
     if (data[0] == 0) // sequence number
     {
