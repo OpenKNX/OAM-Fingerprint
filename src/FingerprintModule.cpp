@@ -367,7 +367,7 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
                 digitalWrite(LED_GREEN_PIN, LOW);
             
             break;
-        case FIN_KoSyncInput:
+        case FIN_KoSync:
             processSyncReceive(iKo.valueRef());
             break;
         default:
@@ -380,6 +380,12 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
 
 void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
 {
+    if (syncReceiving)
+    {
+        logInfoP("Sync-Send: currently receiving, cannot start new sync in parallel");
+        return;
+    }
+
     logInfoP("Sync-Send: started: fingerId=%u, loadModel=%u", fingerId, loadModel);
 
     bool success;
@@ -416,7 +422,7 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
     - 7-8: 2 bytes: finger ID
     */
 
-    uint8_t *data = KoFIN_SyncOutput.valueRef();
+    uint8_t *data = KoFIN_Sync.valueRef();
     data[0] = 0;
     data[1] = 0;
     data[2] = 0;
@@ -426,7 +432,7 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
     data[6] = syncSendPacketCount;
     data[7] = fingerId >> 8;
     data[8] = fingerId;
-    KoFIN_SyncOutput.objectWritten();
+    KoFIN_Sync.objectWritten();
 
     syncSendTimer = delayTimerInit() + 100; // some extra delay at the start
     syncSendPacketSentCount = 1;
@@ -441,13 +447,13 @@ void FingerprintModule::processSyncSend()
 
     syncSendTimer = delayTimerInit();
 
-    uint8_t *data = KoFIN_SyncOutput.valueRef();
+    uint8_t *data = KoFIN_Sync.valueRef();
     data[0] = syncSendPacketSentCount;
     uint8_t dataPacketNo = syncSendPacketSentCount - 1; // = sequence number - 1
     uint16_t dataOffset = dataPacketNo * SYNC_SEND_PACKET_DATA_LENGTH;
     uint8_t dataLength = dataOffset + SYNC_SEND_PACKET_DATA_LENGTH < syncSendBufferLength ? SYNC_SEND_PACKET_DATA_LENGTH : syncSendBufferLength - dataOffset;
     memcpy(data + 1, syncSendBuffer + dataOffset, dataLength);
-    KoFIN_SyncOutput.objectWritten();
+    KoFIN_Sync.objectWritten();
 
     syncSendPacketSentCount++;
     logDebugP("Sync-Send (%u/%u): data packet: dataPacketNo=%u, dataOffset=%u, dataLength=%u", syncSendPacketSentCount, syncSendPacketCount, dataPacketNo, dataOffset, dataLength);
@@ -462,6 +468,12 @@ void FingerprintModule::processSyncSend()
 
 void FingerprintModule::processSyncReceive(uint8_t* data)
 {
+    if (syncSending)
+    {
+        logInfoP("Sync-Receive: currently sending, cannot receive sync data in parallel");
+        return;
+    }
+    
     if (data[0] == 0) // sequence number
     {
         switch (data[1]) // sync type
