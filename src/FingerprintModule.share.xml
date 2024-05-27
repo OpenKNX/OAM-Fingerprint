@@ -98,7 +98,7 @@
                 </TypeRestriction>
               </ParameterType>
               <ParameterType Id="%AID%_PT-SyncDelay" Name="SyncDelay">
-                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="5" maxInclusive="255" />
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="50" maxInclusive="255" />
               </ParameterType>
             </ParameterTypes>
             <Parameters>
@@ -132,7 +132,7 @@
                 <Parameter Id="%AID%_UP-%T%000014" Name="EnableAccessData" Offset="4" BitOffset="3" ParameterType="%AID%_PT-OnOffYesNo" Text="Zutrittsdaten-KOs aktivieren" Value="0" />
                 <Parameter Id="%AID%_UP-%T%000019" Name="EnableTouchPcb" Offset="4" BitOffset="4" ParameterType="%AID%_PT-OnOffYesNo" Text="Touch-Frontplatine vorhanden" Value="0" />
                 <!-- 3 bits free -->
-                <Parameter Id="%AID%_UP-%T%000027" Name="SyncDelay" Offset="5" BitOffset="0" ParameterType="%AID%_PT-SyncDelay" Text="Verzögerung zwischen Sync-Telegrammen" Value="50" />
+                <Parameter Id="%AID%_UP-%T%000027" Name="SyncDelay" Offset="5" BitOffset="0" ParameterType="%AID%_PT-SyncDelay" Text="Verzögerung zwischen Sync-Telegrammen" Value="100" />
               </Union>
             </Parameters>
             <ParameterRefs>
