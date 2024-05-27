@@ -811,7 +811,7 @@ void FingerprintModule::handleFunctionPropertySearchFingerIdByPerson(uint8_t *da
 
     uint32_t storageOffset = 0;
     uint8_t personFinger = 0;
-    uint8_t personName[28] = {};
+    uint8_t personName[29] = {};
     uint8_t foundCount = 0;
     for (uint16_t fingerId = 0; fingerId < MAX_FINGERS; fingerId++)
     {
@@ -824,7 +824,7 @@ void FingerprintModule::handleFunctionPropertySearchFingerIdByPerson(uint8_t *da
         }
 
         _fingerprintStorage.read(storageOffset + 1, personName, 28);
-        if (memcmp(personName, searchPersonName, searchPersonNameLength) == 0)
+        if (strcasestr((char*)personName, searchPersonName) == 0)
         {
             logDebugP("Found:");
             logIndentUp();

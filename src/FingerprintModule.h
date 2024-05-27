@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include "OpenKNX.h"
 #include "hardware.h"
 #include "Fingerprint.h"
@@ -66,7 +68,7 @@ class FingerprintModule : public OpenKNX::Module
     bool deleteFinger(uint16_t location);
     void startSyncSend(uint16_t fingerId, bool loadModel = true);
     void processSyncSend();
-    void processSyncReceive(const char* data);
+    void processSyncReceive(uint8_t* data);
     void handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
     void handleFunctionPropertySyncFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
     void handleFunctionPropertyDeleteFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
