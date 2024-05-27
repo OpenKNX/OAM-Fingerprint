@@ -77,6 +77,21 @@
                   <Enumeration Text="Kleiner Finger links" Value="10" Id="%ENID%" />
                 </TypeRestriction>
               </ParameterType>
+              <ParameterType Id="%AID%_PT-FingerSearch" Name="FingerSearch">
+                <TypeRestriction Base="Value" SizeInBit="4">
+                  <Enumeration Text="Irgendein Finger" Value="0" Id="%ENID%" />
+                  <Enumeration Text="Daumen rechts" Value="1" Id="%ENID%" />
+                  <Enumeration Text="Zeigefinger rechts" Value="3" Id="%ENID%" />
+                  <Enumeration Text="Mittelfinger rechts" Value="5" Id="%ENID%" />
+                  <Enumeration Text="Ringfinger rechts" Value="7" Id="%ENID%" />
+                  <Enumeration Text="Kleiner Finger rechts" Value="9" Id="%ENID%" />
+                  <Enumeration Text="Daumen links" Value="2" Id="%ENID%" />
+                  <Enumeration Text="Zeigefinger links" Value="4" Id="%ENID%" />
+                  <Enumeration Text="Mittelfinger links" Value="6" Id="%ENID%" />
+                  <Enumeration Text="Ringfinger links" Value="8" Id="%ENID%" />
+                  <Enumeration Text="Kleiner Finger links" Value="10" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
               <ParameterType Id="%AID%_PT-FingerIdR503" Name="FingerIdR503">
                 <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="199" />
               </ParameterType>

@@ -160,6 +160,9 @@ function FIN_searchFingerId(device, online, progress, context) {
     var parPersonName = device.getParameterByName("FINACT_PersonName");
     var parPersonFinger = device.getParameterByName("FINACT_PersonFinger");
     var parFingerId = device.getParameterByName("FINACT_FingerId");
+    var parNumberSearchResults = device.getParameterByName("FINACT_NumberSearchResults");
+
+    parNumberSearchResults.value = 0;
 
     progress.setText("Fingerprint: Finger ID zu Person " + parPersonName.value + " (" + parPersonFinger.value + ") suchen...");
     online.connect();
@@ -182,47 +185,78 @@ function FIN_searchFingerId(device, online, progress, context) {
     }
 
     online.disconnect();
-    progress.setText("Fingerprint: Finger ID zu Person " + parPersonName.value + " (" + parPersonFinger.value + ") gefunden.");
 
-    var fingerId = resp[1] << 8 | resp[2];
-    var personFinger = resp[3];
-    var personName = "";
-    for (var i = 4; i < 32; ++i) {
-        if (resp[i] == 0)
-            break; // null-termination
-      
-        personName += String.fromCharCode(resp[i]);
-    }
+    var numRes = (resp.length - 1) / 31;
+    progress.setText("Fingerprint: " + numRes + " Finger ID(s) zu Person " + parPersonName.value + " (" + parPersonFinger.value + ") gefunden.");
+
+    // var fingerId = resp[1] << 8 | resp[2];
+    // var personFinger = resp[3];
+    // var personName = "";
+    // for (var i = 4; i < 32; ++i) {
+    //     if (resp[i] == 0)
+    //         break; // null-termination
+
+    //     personName += String.fromCharCode(resp[i]);
+    // }
+
+    // parPersonName.value = personName;
+    // parPersonFinger.value = personFinger;
+    // parFingerId.value = fingerId;
 
     // following up to 10 results in total
     // always 2 bytes fingerId, 1 byte personFinger and 28 bytes personName
+    // info("Bevor: " + parNumberSearchResults.value);
+    parNumberSearchResults.value = numRes;
+    // info("Danach: " + parNumberSearchResults.value);
+    for (var row = 1; row <= numRes; row++) {
+        // info("FINACT_Person" + row + "Name");
+        parPersonName = device.getParameterByName("FINACTSER_Person" + row + "Name");
+        parPersonFinger = device.getParameterByName("FINACTSER_Person" + row + "Finger");
+        parFingerId = device.getParameterByName("FINACTSER_Finger" + row + "Id");
 
-    parPersonName.value = personName;
-    parPersonFinger.value = personFinger;
-    parFingerId.value = fingerId;
-}
+        var res = (row - 1) * 31 + 1;
+        // info("res " + row + ": " + res);
+        fingerId = resp[res + 0] << 8 | resp[res + 1];
+        // info("fingerid: " + fingerId);
+        personFinger = resp[res + 2];
+        // info("finger: " + personFinger);
+        personName = "";
+        for (var i = res + 3; i < res + 31; ++i) {
+            if (resp[i] == 0)
+                break; // null-termination
+
+            personName += String.fromCharCode(resp[i]);
+        }
+        // info("personName: " + personName);
+
+        parPersonName.value = personName;
+        parPersonFinger.value = personFinger;
+        parFingerId.value = fingerId;
+    }
+}    
 
 function FIN_searchUser(device, online, progress, context) {
     var parPersonName = device.getParameterByName("FINACT_PersonName");
     var parPersonFinger = device.getParameterByName("FINACT_PersonFinger");
     var parFingerId = device.getParameterByName("FINACT_FingerId");
+    var parNumberSearchResults = device.getParameterByName("FINACT_NumberSearchResults");
 
-    progress.setText("Fingerprint: Person zu Finger ID " + parFingerId.value + " suchen...");
+    parNumberSearchResults.value = 0;
+    var fingerId = parFingerId.value;
+
+    progress.setText("Fingerprint: Person zu Finger ID " + fingerId + " suchen...");
     online.connect();
 
     var data = [11]; // internal function ID
-    data = data.concat((parFingerId.value & 0x0000ff00) >> 8, (parFingerId.value & 0x000000ff));
+    data = data.concat((fingerId & 0x0000ff00) >> 8, (fingerId & 0x000000ff));
 
     var resp = online.invokeFunctionProperty(160, 3, data);
     if (resp[0] != 0) {
-        progress.setText("Fingerprint: Person zu Finger ID " + parFingerId.value + " nicht gefunden.");
-
-        parPersonName.value = "";
-        parPersonFinger.value = 0;
+        progress.setText("Fingerprint: Person zu Finger ID " + fingerId + " nicht gefunden.");
     }
 
     online.disconnect();
-    progress.setText("Fingerprint: Person zu Finger ID " + parFingerId.value + " gefunden.");
+    progress.setText("Fingerprint: Person zu Finger ID " + fingerId + " gefunden.");
 
     var personFinger = resp[1];
     var personName = "";
@@ -233,8 +267,14 @@ function FIN_searchUser(device, online, progress, context) {
         personName += String.fromCharCode(resp[i]);
     }
 
+    parNumberSearchResults.value = 1;
+
+    parPersonName = device.getParameterByName("FINACTSER_Person1Name");
+    parPersonFinger = device.getParameterByName("FINACTSER_Person1Finger");
+    parFingerId = device.getParameterByName("FINACTSER_Finger1Id");
     parPersonName.value = personName;
     parPersonFinger.value = personFinger;
+    parFingerId.value = fingerId;
 }
 
 function FIN_enrollFinger(device, online, progress, context) {
