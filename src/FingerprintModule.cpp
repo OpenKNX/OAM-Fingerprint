@@ -404,7 +404,8 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
         }
     }
 
-    success = finger.retrieveTemplate(syncSendBuffer);
+    uint8_t syncSendBufferTemp[SYNC_BUFFER_SIZE];
+    success = finger.retrieveTemplate(syncSendBufferTemp);
     if (!success)
     {
         logErrorP("Sync-Send: retrieving template failed");
@@ -416,7 +417,10 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
     _fingerprintStorage.read(storageOffset, personData, 29);
     memcpy(syncSendBuffer + TEMPLATE_SIZE, personData, 29);
 
-    syncSendBufferLength = TEMPLATE_SIZE + 29;
+    const int maxDstSize = LZ4_compressBound(SYNC_BUFFER_SIZE);
+    const int compressedDataSize = LZ4_compress_default((char*)syncSendBufferTemp, (char*)syncSendBuffer, SYNC_BUFFER_SIZE, maxDstSize);
+
+    syncSendBufferLength = compressedDataSize;
     syncSendPacketCount = ceil(syncSendBufferLength / (float)SYNC_SEND_PACKET_DATA_LENGTH) + 1; // currently separated control packet
     uint16_t checksum = crc16(syncSendBuffer, syncSendBufferLength);
 
@@ -536,12 +540,20 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
             logDebugP("Sync-Receive: finished (checksum=%u)", syncReceiveBufferChecksum);
         else
         {
-            logErrorP("Sync-Receive: finished faled (checksum expected=%u, calculated=%u)", syncReceiveBufferChecksum, checksum);
+            logErrorP("Sync-Receive: finished failed (checksum expected=%u, calculated=%u)", syncReceiveBufferChecksum, checksum);
+            return;
+        }
+
+        uint8_t syncSendBufferTemp[SYNC_BUFFER_SIZE];
+        const int decompressedSize = LZ4_decompress_safe((char*)syncReceiveBuffer, (char*)syncSendBufferTemp, syncReceiveBufferLength, SYNC_BUFFER_SIZE);
+        if (decompressedSize != SYNC_BUFFER_SIZE)
+        {
+            logErrorP("Sync-Receive: decompression failed (size expected=%u, received=%u)", SYNC_BUFFER_SIZE, decompressedSize);
             return;
         }
 
         bool success;
-        success = finger.sendTemplate(syncReceiveBuffer);
+        success = finger.sendTemplate(syncSendBufferTemp);
         if (!success)
         {
             logErrorP("Sync-Receive: sending template failed");
