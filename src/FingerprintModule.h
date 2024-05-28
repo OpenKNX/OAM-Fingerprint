@@ -111,6 +111,7 @@ class FingerprintModule : public OpenKNX::Module
     uint8_t syncReceiveLengthPerPacket = 0;
     uint8_t syncReceivePacketCount = 0;
     uint8_t syncReceivePacketReceivedCount = 0;
+    bool syncReceivePacketReceived[SYNC_BUFFER_SIZE] = {false};
 };
 
 extern FingerprintModule openknxFingerprintModule;

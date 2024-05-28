@@ -508,6 +508,8 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
 
                 logDebugP("Sync-Receive (1/%u): control packet: bufferLength=%u, lengthPerPacket=%u, checksum=%u, fingerId=%u%", syncReceivePacketCount, syncReceiveBufferLength, syncReceiveLengthPerPacket, syncReceiveBufferChecksum, syncReceiveFingerId);
 
+                memset(syncReceivePacketReceived, 0, sizeof(syncReceivePacketReceived[0]));
+                syncReceivePacketReceived[0] = true;
                 syncReceivePacketReceivedCount = 1;
                 syncReceiving = true;
 
@@ -525,7 +527,15 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
         return;
     }
 
-    uint8_t dataPacketNo = data[0] - 1; // = sequence number - 1
+    uint8_t sequenceNo = data[0];
+    if (syncReceivePacketReceived[sequenceNo])
+    {
+        logInfoP("Sync-Receive: same packet already received");
+        return;
+    }
+
+    syncReceivePacketReceived[sequenceNo] = true;
+    uint8_t dataPacketNo = sequenceNo - 1;
     uint16_t dataOffset = dataPacketNo * syncReceiveLengthPerPacket;
     uint8_t dataLength = dataOffset + syncReceiveLengthPerPacket < syncReceiveBufferLength ? syncReceiveLengthPerPacket : syncReceiveBufferLength - dataOffset;
     memcpy(syncReceiveBuffer + dataOffset, data + 1, dataLength);
