@@ -43,6 +43,11 @@ void FingerprintModule::setup()
     digitalWrite(LED_GREEN_PIN, HIGH);
     finger.setLed(Fingerprint::State::Success);
 
+    KoFIN_LedRingColor.valueNoSend((uint8_t)0, Dpt(5, 10));
+    KoFIN_LedRingControl.valueNoSend((uint8_t)FINGERPRINT_LED_OFF, Dpt(5, 10));
+    KoFIN_LedRingSpeed.valueNoSend((uint8_t)0, Dpt(5, 10));
+    KoFIN_LedRingCount.valueNoSend((uint8_t)0, Dpt(5, 10));
+
     initResetTimer = delayTimerInit();
     logInfoP("Fingerprint module ready.");
     logIndentDown();
@@ -157,12 +162,12 @@ void FingerprintModule::loop()
     {
         finger.setLed(Fingerprint::State::None);
         digitalWrite(LED_GREEN_PIN, LOW);
-        resetLedsTimer = 0;
+        initResetTimer = 0;
     }
 
     if (resetLedsTimer > 0 && delayCheck(resetLedsTimer, LED_RESET_TIMEOUT))
     {
-        finger.setLed(Fingerprint::State::None);
+        setLedDefault();
         resetLedsTimer = 0;
     }
 
@@ -178,6 +183,11 @@ void FingerprintModule::loop()
     }
     
     processSyncSend();
+}
+
+void FingerprintModule::setLedDefault()
+{
+    finger.setLed(KoFIN_LedRingColor.value(Dpt(5, 10)), KoFIN_LedRingControl.value(Dpt(5, 10)), KoFIN_LedRingSpeed.value(Dpt(5, 10)), KoFIN_LedRingCount.value(Dpt(5, 10)));
 }
 
 void FingerprintModule::processScanSuccess(uint16_t location, bool external)
@@ -325,6 +335,17 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
     uint16_t lAsap = iKo.asap();
     switch (lAsap)
     {
+        case FIN_KoLock:
+            KoFIN_LockStatus.value(KoFIN_Lock.value(DPT_Switch), DPT_Switch);
+            logInfoP("Locked: %d", KoFIN_Lock.value(DPT_Switch));
+            break;
+        case FIN_KoLedRingColor:
+        case FIN_KoLedRingControl:
+        case FIN_KoLedRingSpeed:
+        case FIN_KoLedRingCount:
+            setLedDefault();
+            logInfoP("LED ring: color=%u, control=%u, speed=%u, count=%u", (uint8_t)KoFIN_LedRingColor.value(Dpt(5, 10)), (uint8_t)KoFIN_LedRingControl.value(Dpt(5, 10)), (uint8_t)KoFIN_LedRingSpeed.value(Dpt(5, 10)), (uint8_t)KoFIN_LedRingCount.value(Dpt(5, 10)));
+            break;
         case FIN_KoEnrollNext:
         case FIN_KoEnrollId:
         case FIN_KoEnrollData:
@@ -361,10 +382,6 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
             }
 
             deleteFinger(location);
-            break;
-        case FIN_KoLock:
-            KoFIN_LockStatus.value(KoFIN_Lock.value(DPT_Switch), DPT_Switch);
-            logInfoP("Locked: %d", KoFIN_Lock.value(DPT_Switch));
             break;
         case FIN_KoExternFingerId:
             location = iKo.value(Dpt(7, 1));
@@ -425,7 +442,7 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
         return;
     }
 
-    finger.setLed(Fingerprint::State::None);
+    setLedDefault();
 
     uint32_t storageOffset = FIN_CaclStorageOffset(fingerId);
     uint8_t personData[29] = {};
@@ -594,7 +611,7 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
             return;
         }
 
-        finger.setLed(Fingerprint::State::None);
+        setLedDefault();
 
         uint32_t storageOffset = FIN_CaclStorageOffset(syncReceiveFingerId);
         _fingerprintStorage.write(storageOffset, syncReceiveBuffer + TEMPLATE_SIZE, 29);

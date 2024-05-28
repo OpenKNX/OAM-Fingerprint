@@ -102,6 +102,11 @@ bool Fingerprint::setLed(State state)
     }
 }
 
+bool Fingerprint::setLed(uint8_t color, uint8_t control, uint8_t speed, uint8_t count)
+{
+    return _finger.LEDcontrol(control, speed, color, count) == FINGERPRINT_OK;
+}
+
 bool Fingerprint::hasFinger()
 {
     if (!scannerReady)
