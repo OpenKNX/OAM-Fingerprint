@@ -22,6 +22,7 @@
 #define EXT4 29 // ADC
 #define EXT5 19
 
+#define INIT_RESET_TIMEOUT 1000
 #define LED_RESET_TIMEOUT 1000
 #define ENROLL_REQUEST_DELAY 100
 #define CAPTURE_RETRIES_TOUCH_TIMEOUT 500
@@ -87,6 +88,7 @@ class FingerprintModule : public OpenKNX::Module
     ActionChannel *_channels[FIN_ChannelCount];
 
     Fingerprint finger;
+    uint32_t initResetTimer = 0;
     uint32_t resetLedsTimer = 0;
     uint32_t enrollRequestedTimer = 0;
     uint16_t enrollRequestedLocation = 0;

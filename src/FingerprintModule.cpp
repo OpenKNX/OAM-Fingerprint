@@ -43,7 +43,7 @@ void FingerprintModule::setup()
     digitalWrite(LED_GREEN_PIN, HIGH);
     finger.setLed(Fingerprint::State::Success);
 
-    resetLedsTimer = delayTimerInit();
+    initResetTimer = delayTimerInit();
     logInfoP("Fingerprint module ready.");
     logIndentDown();
 }
@@ -153,10 +153,16 @@ void FingerprintModule::loop()
         enrollRequestedLocation = 0;
     }
 
-    if (resetLedsTimer > 0 && delayCheck(resetLedsTimer, LED_RESET_TIMEOUT))
+    if (initResetTimer > 0 && delayCheck(initResetTimer, INIT_RESET_TIMEOUT))
     {
         finger.setLed(Fingerprint::State::None);
         digitalWrite(LED_GREEN_PIN, LOW);
+        resetLedsTimer = 0;
+    }
+
+    if (resetLedsTimer > 0 && delayCheck(resetLedsTimer, LED_RESET_TIMEOUT))
+    {
+        finger.setLed(Fingerprint::State::None);
         resetLedsTimer = 0;
     }
 
