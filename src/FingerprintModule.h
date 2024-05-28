@@ -88,7 +88,7 @@ class FingerprintModule : public OpenKNX::Module
 
     Fingerprint finger;
     uint32_t resetLedsTimer = 0;
-    uint32_t enrollRequested = 0;
+    uint32_t enrollRequestedTimer = 0;
     uint16_t enrollRequestedLocation = 0;
     inline static bool delayCallbackActive = false;
 
@@ -100,8 +100,8 @@ class FingerprintModule : public OpenKNX::Module
     uint16_t syncSendBufferLength = 0;
     uint8_t syncSendPacketCount = 0;
     uint8_t syncSendPacketSentCount = 0;
-    uint32_t syncSendAfterEnrollTimer = 0;
-    uint16_t syncSendAfterEnrollFingerId = 0;
+    uint32_t syncRequestedTimer = 0;
+    uint16_t syncRequestedFingerId = 0;
 
     bool syncReceiving = false;
     uint16_t syncReceiveFingerId = 0;

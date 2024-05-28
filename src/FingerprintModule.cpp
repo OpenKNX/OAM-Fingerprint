@@ -143,13 +143,13 @@ void FingerprintModule::loop()
         touched = false;
     }
 
-    if (enrollRequested > 0 and delayCheck(enrollRequested, ENROLL_REQUEST_DELAY))
+    if (enrollRequestedTimer > 0 and delayCheck(enrollRequestedTimer, ENROLL_REQUEST_DELAY))
     {
         bool success = enrollFinger(enrollRequestedLocation);
         if (success && ParamFIN_EnableSync)
             startSyncSend(enrollRequestedLocation, false); // model should still be loaded
 
-        enrollRequested = 0;
+        enrollRequestedTimer = 0;
         enrollRequestedLocation = 0;
     }
 
@@ -163,12 +163,12 @@ void FingerprintModule::loop()
     for (uint16_t i = 0; i < ParamFIN_VisibleActions; i++)
         _channels[i]->loop();
 
-    if (syncSendAfterEnrollTimer > 0 && delayCheck(syncSendAfterEnrollTimer, SYNC_AFTER_ENROLL_DELAY))
+    if (syncRequestedTimer > 0 && delayCheck(syncRequestedTimer, SYNC_AFTER_ENROLL_DELAY))
     {
-        startSyncSend(syncSendAfterEnrollFingerId);
+        startSyncSend(syncRequestedFingerId);
 
-        syncSendAfterEnrollTimer = 0;
-        syncSendAfterEnrollFingerId = 0;
+        syncRequestedTimer = 0;
+        syncRequestedFingerId = 0;
     }
     
     processSyncSend();
@@ -248,6 +248,8 @@ bool FingerprintModule::enrollFinger(uint16_t location)
         KoFIN_EnrollSuccess.valueNoSend(false, Dpt(15, 1, 3));    // read direction (not used)
         KoFIN_EnrollSuccess.valueNoSend(false, Dpt(15, 1, 4));    // encryption (not used for now)
         KoFIN_EnrollSuccess.value((uint8_t)0, Dpt(15, 1, 5));     // index of access identification code (not used)
+
+        finger.setLed(Fingerprint::State::Success);
     }
     else
     {
@@ -261,6 +263,8 @@ bool FingerprintModule::enrollFinger(uint16_t location)
         KoFIN_EnrollSuccessData.valueNoSend(false, Dpt(15, 1, 3));    // read direction (not used)
         KoFIN_EnrollSuccessData.valueNoSend(false, Dpt(15, 1, 4));    // encryption (not used for now)
         KoFIN_EnrollSuccessData.value((uint8_t)0, Dpt(15, 1, 5));     // index of access identification code (not used)
+
+        finger.setLed(Fingerprint::State::Failed);
     }
 
     logIndentDown();
@@ -334,7 +338,8 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
                 logInfoP("Location provided: %d", location);
             }
 
-            enrollFinger(location);
+            enrollRequestedTimer = delayTimerInit();
+            enrollRequestedLocation = location;
             break;
         case FIN_KoDeleteId:
         case FIN_KoDeleteData:
@@ -393,6 +398,8 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
 
     logInfoP("Sync-Send: started: fingerId=%u, loadModel=%u, syncDelay=%u", fingerId, loadModel, ParamFIN_SyncDelay);
 
+    finger.setLed(Fingerprint::State::Busy);
+
     bool success;
     if (loadModel)
     {
@@ -411,6 +418,8 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
         logErrorP("Sync-Send: retrieving template failed");
         return;
     }
+
+    finger.setLed(Fingerprint::State::None);
 
     uint32_t storageOffset = FIN_CaclStorageOffset(fingerId);
     uint8_t personData[29] = {};
@@ -562,6 +571,8 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
             return;
         }
 
+        finger.setLed(Fingerprint::State::Busy);
+
         bool success;
         success = finger.sendTemplate(syncSendBufferTemp);
         if (!success)
@@ -576,6 +587,8 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
             logErrorP("Sync-Receive: storing template failed");
             return;
         }
+
+        finger.setLed(Fingerprint::State::None);
 
         uint32_t storageOffset = FIN_CaclStorageOffset(syncReceiveFingerId);
         _fingerprintStorage.write(storageOffset, syncReceiveBuffer + TEMPLATE_SIZE, 29);
@@ -643,7 +656,7 @@ void FingerprintModule::handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_
     _fingerprintStorage.write(storageOffset + 1, personName, 28);
     _fingerprintStorage.commit();
 
-    enrollRequested = delayTimerInit();
+    enrollRequestedTimer = delayTimerInit();
     enrollRequestedLocation = fingerId;
 
     //bool success = enrollFinger(fingerId);
@@ -661,8 +674,8 @@ void FingerprintModule::handleFunctionPropertySyncFinger(uint8_t *data, uint8_t 
 
     if (finger.hasLocation(fingerId))
     {
-        syncSendAfterEnrollFingerId = fingerId;
-        syncSendAfterEnrollTimer = delayTimerInit();
+        syncRequestedFingerId = fingerId;
+        syncRequestedTimer = delayTimerInit();
 
         resultData[0] = 0;
     }
