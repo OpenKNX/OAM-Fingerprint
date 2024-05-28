@@ -58,6 +58,7 @@ class Fingerprint
 
     uint16_t getTemplateCount();
     bool hasLocation(uint16_t location);
+    uint16_t* getLocations();
     uint16_t getNextFreeLocation();
     FindFingerResult findFingerprint();
     bool createTemplate();

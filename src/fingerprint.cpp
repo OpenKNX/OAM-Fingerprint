@@ -115,7 +115,10 @@ uint16_t Fingerprint::getTemplateCount()
     if (!scannerReady)
         return 0;
 
-    _finger.getTemplateCount();
+    uint8_t p = _finger.getTemplateCount();
+    if (p != FINGERPRINT_OK)
+        return 0;
+
     return _finger.templateCount;
 }
 
@@ -126,11 +129,9 @@ bool Fingerprint::_listTemplates()
         logDebugP("Stored template locations:");
         logIndentUp();
 
-        uint8_t templates[_finger.templateCount];
-        for (size_t i = 0; i < _finger.templateCount; ++i)
+        for (uint16_t i = 0; i < _finger.templateCount; ++i)
         {
-            templates[i] = _finger.templates[i];
-            logDebugP("%d", templates[i]);
+            logDebugP("%u", _finger.templates[i]);
         }
 
         logIndentDown();
@@ -149,7 +150,9 @@ bool Fingerprint::hasLocation(uint16_t location)
      if (!scannerReady)
         return false;
 
-    _finger.getTemplateIndices();
+    uint8_t p = _finger.getTemplateIndices();
+    if (p != FINGERPRINT_OK)
+        return false;
 
     for (size_t i = 0; i < _finger.templateCount; ++i)
     {
@@ -158,6 +161,18 @@ bool Fingerprint::hasLocation(uint16_t location)
     }
 
     return false;
+}
+
+uint16_t* Fingerprint::getLocations()
+{
+     if (!scannerReady)
+        return nullptr;
+
+    uint8_t p = _finger.getTemplateIndices();
+    if (p != FINGERPRINT_OK)
+        return nullptr;
+
+    return _finger.templates;
 }
 
 uint16_t Fingerprint::getNextFreeLocation()

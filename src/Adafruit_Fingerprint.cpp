@@ -564,16 +564,13 @@ uint8_t Adafruit_Fingerprint::getTemplateIndices() {
     return p;
 
   // clear template indices
-  int maxTemplates = sizeof(templates) / sizeof(uint8_t);
-  for (int i = 0; i < maxTemplates; ++i) {
-    templates[i] = 0;
-  }
+  memset(templates, 0, sizeof(templates[0]));
   
   //Serial.printf("capacity:%d,", capacity);
   //uint8_t t = ceil(capacity / (double)256);
   //Serial.printf("t:%d,", t);
 
-  int count = 0;
+  uint16_t count = 0;
   for (uint8_t j = 0; j < ceil(capacity / (double)256); ++j) {
     //Serial.printf("for-j:%d,", j);
     GET_CMD_PACKET(FINGERPRINT_TEMPLATEREAD, j);

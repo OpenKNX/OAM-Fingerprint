@@ -868,12 +868,17 @@ void FingerprintModule::handleFunctionPropertySearchFingerIdByPerson(uint8_t *da
     }
     logDebugP("searchPersonName: %s (length: %u)", searchPersonName, searchPersonNameLength);
 
+    uint16_t* fingerIds = finger.getLocations();
+    uint16_t templateCount = finger.getTemplateCount();
+
     uint32_t storageOffset = 0;
     uint8_t personFinger = 0;
     uint8_t personName[29] = {};
     uint8_t foundCount = 0;
-    for (uint16_t fingerId = 0; fingerId < MAX_FINGERS; fingerId++)
+    uint16_t foundTotalCount = 0;
+    for (uint16_t i = 0; i < templateCount; i++)
     {
+        uint16_t fingerId = fingerIds[i];
         storageOffset = FIN_CaclStorageOffset(fingerId);
         personFinger = _fingerprintStorage.readByte(storageOffset);
         if (searchPersonFinger > 0)
@@ -890,26 +895,27 @@ void FingerprintModule::handleFunctionPropertySearchFingerIdByPerson(uint8_t *da
             logDebugP("personName: %s", personName);
             logIndentDown();
 
-            if (!finger.hasLocation(fingerId))
+            // we return max. 10 results
+            if (foundCount <= 10)
             {
-                logDebugP("Unrecognized by scanner!");
-                continue;
+                resultData[3 + foundCount * 31] = fingerId >> 8;
+                resultData[3 + foundCount * 31 + 1] = fingerId;
+                resultData[3 + foundCount * 31 + 2] = personFinger;
+                memcpy(resultData + 3 + foundCount * 31 + 3, personName, 28);
+
+                foundCount++;
             }
 
-            resultData[1 + foundCount * 31] = fingerId >> 8;
-            resultData[1 + foundCount * 31 + 1] = fingerId;
-            resultData[1 + foundCount * 31 + 2] = personFinger;
-            memcpy(resultData + 1 + foundCount * 31 + 3, personName, 28);
-
-            foundCount++;
-            if (foundCount >= 10)
-                break; // we return max. 10 results
+            foundTotalCount++;
         }
     }
     
     resultData[0] = foundCount > 0 ? 0 : 1;
-    resultLength = 1 + foundCount * 31;
+    resultData[1] = foundTotalCount >> 8;
+    resultData[2] = foundTotalCount;
+    resultLength = 3 + foundCount * 31;
 
+    logDebugP("foundTotalCount: %u", foundTotalCount);
     logIndentDown();
 }
 
