@@ -7,21 +7,21 @@
         <ApplicationProgram Id="%AID%" ApplicationNumber="200" ApplicationVersion="1" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="FIN" LoadProcedureStyle="MergedProcedure" PeiType="0" DefaultLanguage="de" DynamicTableManagement="false" Linkable="false" MinEtsVersion="4.0">
           <Static>
             <Parameters>
-              <Parameter Id="%AID%_P-%T%%CCC%000" Name="Person%C%Name" ParameterType="%AID%_PT-Text28Byte" Text="Name der Person %C%" Value="" Access="Read" />
-              <Parameter Id="%AID%_P-%T%%CCC%001" Name="Person%C%Finger" ParameterType="%AID%_PT-FingerSearch" Text="Finger der Person %C%" Value="0" Access="Read" />
-              <Parameter Id="%AID%_P-%T%%CCC%002" Name="Finger%C%Id" ParameterType="%AID%_PT-FingerId" Text="Scanner Finger ID %C%" Value="0" Access="Read" />
-              <Parameter Id="%AID%_P-%T%%CCC%003" Name="Finger%C%ActionLine" ParameterType="%AID%_PT-FINACTNumChannels" Text="Zeile %C% für Zuweisung" Value="1" />
+              <Parameter Id="%AID%_P-%T%9%CCC%00" Name="Person%C%Name" ParameterType="%AID%_PT-Text28Byte" Text="Name der Person %C%" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%T%9%CCC%01" Name="Person%C%Finger" ParameterType="%AID%_PT-FingerSearch" Text="Finger der Person %C%" Value="0" Access="Read" />
+              <Parameter Id="%AID%_P-%T%9%CCC%02" Name="Finger%C%Id" ParameterType="%AID%_PT-FingerId" Text="Scanner Finger ID %C%" Value="0" Access="Read" />
+              <Parameter Id="%AID%_P-%T%9%CCC%03" Name="Finger%C%ActionLine" ParameterType="%AID%_PT-FINACTNumChannels" Text="Zeile %C% für Zuweisung" Value="1" />
             </Parameters>
             <ParameterRefs>
-              <ParameterRef Id="%AID%_P-%T%%CCC%000_R-%T%%CCC%00001" RefId="%AID%_P-%T%%CCC%000" />
-              <ParameterRef Id="%AID%_P-%T%%CCC%001_R-%T%%CCC%00101" RefId="%AID%_P-%T%%CCC%001" />
-              <ParameterRef Id="%AID%_P-%T%%CCC%002_R-%T%%CCC%00201" RefId="%AID%_P-%T%%CCC%002" />
-              <ParameterRef Id="%AID%_P-%T%%CCC%003_R-%T%%CCC%00301" RefId="%AID%_P-%T%%CCC%003" />
+              <ParameterRef Id="%AID%_P-%T%9%CCC%00_R-%T%9%CCC%0001" RefId="%AID%_P-%T%9%CCC%00" />
+              <ParameterRef Id="%AID%_P-%T%9%CCC%01_R-%T%9%CCC%0101" RefId="%AID%_P-%T%9%CCC%01" />
+              <ParameterRef Id="%AID%_P-%T%9%CCC%02_R-%T%9%CCC%0201" RefId="%AID%_P-%T%9%CCC%02" />
+              <ParameterRef Id="%AID%_P-%T%9%CCC%03_R-%T%9%CCC%0301" RefId="%AID%_P-%T%9%CCC%03" />
             </ParameterRefs>
           </Static>
           <Dynamic>
             <ChannelIndependentBlock>
-              <choose ParamRefId="%AID%_P-4000007_R-400000701">
+              <choose ParamRefId="%AID%_P-%T%000007_R-%T%00000701">
                 <when test="&gt;=%C%">
                   <ParameterBlock Id="%AID%_PB-nnn" Inline="true" Layout="Grid">
                     <Rows>
@@ -33,9 +33,9 @@
                       <Column Id="%AID%_PB-nnn_C-3" Width="45%" />
                       <Column Id="%AID%_PB-nnn_C-4" Width="28%" />
                     </Columns>
-                    <ParameterRefRef RefId="%AID%_P-%T%%CCC%002_R-%T%%CCC%00201" Cell="2,2" />
-                    <ParameterRefRef RefId="%AID%_P-%T%%CCC%000_R-%T%%CCC%00001" Cell="2,3" />
-                    <ParameterRefRef RefId="%AID%_P-%T%%CCC%001_R-%T%%CCC%00101" Cell="2,4" />
+                    <ParameterRefRef RefId="%AID%_P-%T%9%CCC%02_R-%T%9%CCC%0201" Cell="2,2" />
+                    <ParameterRefRef RefId="%AID%_P-%T%9%CCC%00_R-%T%9%CCC%0001" Cell="2,3" />
+                    <ParameterRefRef RefId="%AID%_P-%T%9%CCC%01_R-%T%9%CCC%0101" Cell="2,4" />
                   </ParameterBlock>
                 </when>
               </choose>

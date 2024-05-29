@@ -10,8 +10,8 @@
                                              
 #define MAIN_OpenKnxId 0xA6
 #define MAIN_ApplicationNumber 1
-#define MAIN_ApplicationVersion 49
-#define MAIN_ParameterSize 11269
+#define MAIN_ApplicationVersion 56
+#define MAIN_ParameterSize 11270
 #define MAIN_MaxKoNumber 796
 #define MAIN_OrderNumber "OpenKnxFingerprint"
 #define BASE_ModuleVersion 17
@@ -368,7 +368,7 @@
 // Scanner Finger ID
 #define ParamFINACT_faFingerId                          (knx.paramWord(FINACT_ParamCalcIndex(FINACT_faFingerId)))
 
-#define FINACTSER_ChannelCount 10
+#define FINACTSER_ChannelCount 9
 
 // Parameter per channel
 #define FINACTSER_ParamBlockOffset 0
@@ -377,7 +377,7 @@
 
 
 
-#define LOG_BuzzerInstalled                     2528      // 1 Bit, Bit 7
+#define LOG_BuzzerInstalled                     2529      // 1 Bit, Bit 7
 #define     LOG_BuzzerInstalledMask 0x80
 #define     LOG_BuzzerInstalledShift 7
 #define LOG_LedInstalled                        2529      // 1 Bit, Bit 6
@@ -2272,10 +2272,10 @@
 // Ausgang
 #define KoLOG_KOfO                                (knx.getGroupObject(LOG_KoCalcNumber(LOG_KoKOfO)))
 
-#define BTN_ReactionTimeMultiClick              10857      // 8 Bits, Bit 7-0
-#define BTN_ReactionTimeLong                    10858      // 8 Bits, Bit 7-0
-#define BTN_ReactionTimeExtraLong               10859      // 8 Bits, Bit 7-0
-#define BTN_VisibleChannels                     10860      // uint8_t
+#define BTN_ReactionTimeMultiClick              10858      // 8 Bits, Bit 7-0
+#define BTN_ReactionTimeLong                    10859      // 8 Bits, Bit 7-0
+#define BTN_ReactionTimeExtraLong               10860      // 8 Bits, Bit 7-0
+#define BTN_VisibleChannels                     10861      // uint8_t
 
 // Mehrfach-Klick
 #define ParamBTN_ReactionTimeMultiClick              (knx.paramByte(BTN_ReactionTimeMultiClick))
@@ -2289,7 +2289,7 @@
 #define BTN_ChannelCount 8
 
 // Parameter per channel
-#define BTN_ParamBlockOffset 10861
+#define BTN_ParamBlockOffset 10862
 #define BTN_ParamBlockSize 51
 #define BTN_ParamCalcIndex(index) (index + BTN_ParamBlockOffset + _channelIndex * BTN_ParamBlockSize)
 
@@ -2856,7 +2856,7 @@
 #define BASE_KommentarModuleModuleParamSize 0
 #define BASE_KommentarModuleSubmodulesParamSize 0
 #define BASE_KommentarModuleParamSize 0
-#define BASE_KommentarModuleParamOffset 11269
+#define BASE_KommentarModuleParamOffset 11270
 #define BASE_KommentarModuleCalcIndex(index, m1) (index + BASE_KommentarModuleParamOffset + _channelIndex * BASE_KommentarModuleCount * BASE_KommentarModuleParamSize + m1 * BASE_KommentarModuleParamSize)
 
 

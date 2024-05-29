@@ -36,6 +36,18 @@
               <ParameterRef Id="%AID%_P-%T%000007_R-%T%00000701" RefId="%AID%_P-%T%000007" />
 
             </ParameterRefs>
+            <ParameterCalculations>
+              <ParameterCalculation Id="%AID%_PC-%T%000002" Language="JavaScript" Name="ClearSearchResult" RLTransformationFunc="FIN_clearSearchResults" LRTransformationFunc="FIN_dummy">
+                <LParameters>
+                  <ParameterRefRef RefId="%AID%_P-%T%000007_R-%T%00000701" AliasName="SearchResults" />
+                </LParameters>
+                <RParameters>
+                  <ParameterRefRef RefId="%AID%_P-%T%000003_R-%T%00000301" AliasName="PersonName" />
+                  <ParameterRefRef RefId="%AID%_P-%T%000004_R-%T%00000401" AliasName="PersonFinger" />
+                  <ParameterRefRef RefId="%AID%_P-%T%000005_R-%T%00000501" AliasName="FingerId" />
+                </RParameters>
+              </ParameterCalculation>
+            </ParameterCalculations>
           </Static>
           <Dynamic>
             <ChannelIndependentBlock>
@@ -68,6 +80,7 @@
                 <ParameterBlock Id="%AID%_PB-nnn" Inline="true" Layout="Grid">
                   <Rows>
                     <Row Id="%AID%_PB-nnn_R-1" />
+                    <Row Id="%AID%_PB-nnn_R-2" CollapseIfEmpty="true" />
                   </Rows>
                   <Columns>
                     <Column Id="%AID%_PB-nnn_C-1" Width="20%" />
@@ -79,8 +92,29 @@
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="Finger-ID" UIHint="Headline" Cell="1,2" />
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="Name" UIHint="Headline" Cell="1,3" />
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="Finger" UIHint="Headline" Cell="1,4" />
+                  <choose ParamRefId="%AID%_P-%T%000007_R-%T%00000701">
+                    <when test="0">
+                      <ParameterSeparator Id="%AID%_PS-nnn" Text="Keine Suchergebnisse vorhanden" Cell="2,3" />
+                    </when>
+                  </choose>
                 </ParameterBlock>
                 <op:include href="FingerActionSearch.templ.xml" xpath="//Dynamic/ChannelIndependentBlock/*" type="template" prefix="FINACTSER" IsInner="true" />
+                <ParameterBlock Id="%AID%_PB-nnn" Inline="true" Layout="Grid">
+                  <Rows>
+                    <Row Id="%AID%_PB-nnn_R-1" CollapseIfEmpty="true" />
+                  </Rows>
+                  <Columns>
+                    <Column Id="%AID%_PB-nnn_C-1" Width="20%" />
+                    <Column Id="%AID%_PB-nnn_C-2" Width="13%" />
+                    <Column Id="%AID%_PB-nnn_C-3" Width="45%" />
+                    <Column Id="%AID%_PB-nnn_C-4" Width="28%" />
+                  </Columns>
+                  <choose ParamRefId="%AID%_P-%T%000007_R-%T%00000701">
+                    <when test="10">
+                      <ParameterSeparator Id="%AID%_PS-nnn" Text="Weitere Suchergebnisse vorhanden, Suche eingrenzen" Cell="1,3" />
+                    </when>
+                  </choose>
+                </ParameterBlock>
 
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="Zuweisung von Fingern zu Aktionen" UIHint="Headline" />

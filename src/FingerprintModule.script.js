@@ -1,3 +1,10 @@
+
+function FIN_clearSearchResults(input, output, context) {
+    output.SearchResults = 0;
+}
+
+function FIN_dummy(input, output, context) { }
+
 function FIN_sort(device, online, progress, context) {
     var parFingerActionCount = device.getParameterByName("FINACT_FingerActionCount");
     // first get rid of zero lines
