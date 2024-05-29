@@ -647,7 +647,7 @@ bool FingerprintModule::processFunctionProperty(uint8_t objectIndex, uint8_t pro
             handleFunctionPropertyDeleteFinger(data, resultData, resultLength);
             return true;
         case 4:
-            handleFunctionPropertyRenameFinger(data, resultData, resultLength);
+            handleFunctionPropertyChangeFinger(data, resultData, resultLength);
             return true;
         case 6:
             handleFunctionPropertyResetScanner(data, resultData, resultLength);
@@ -738,9 +738,9 @@ void FingerprintModule::handleFunctionPropertyDeleteFinger(uint8_t *data, uint8_
     resultLength = 1;
 }
 
-void FingerprintModule::handleFunctionPropertyRenameFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
+void FingerprintModule::handleFunctionPropertyChangeFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
 {
-    logInfoP("Function property: Rename request");
+    logInfoP("Function property: Change request");
 
     uint16_t fingerId = (data[1] << 8) | data[2];
     logDebugP("fingerId: %d", fingerId);
