@@ -577,12 +577,16 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
 
     if (syncReceivePacketReceivedCount == syncReceivePacketCount)
     {
+        finger.setLed(Fingerprint::State::Busy);
+
         uint16_t checksum = crc16(syncReceiveBuffer, syncReceiveBufferLength);
         if (syncReceiveBufferChecksum == checksum)
             logDebugP("Sync-Receive: finished (checksum=%u)", syncReceiveBufferChecksum);
         else
         {
             logErrorP("Sync-Receive: finished failed (checksum expected=%u, calculated=%u)", syncReceiveBufferChecksum, checksum);
+            finger.setLed(Fingerprint::State::Failed);
+            resetLedsTimer = delayTimerInit();
             return;
         }
 
@@ -591,16 +595,18 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
         if (decompressedSize != SYNC_BUFFER_SIZE)
         {
             logErrorP("Sync-Receive: decompression failed (size expected=%u, received=%u)", SYNC_BUFFER_SIZE, decompressedSize);
+            finger.setLed(Fingerprint::State::Failed);
+            resetLedsTimer = delayTimerInit();
             return;
         }
-
-        finger.setLed(Fingerprint::State::Busy);
 
         bool success;
         success = finger.sendTemplate(syncSendBufferTemp);
         if (!success)
         {
             logErrorP("Sync-Receive: sending template failed");
+            finger.setLed(Fingerprint::State::Failed);
+            resetLedsTimer = delayTimerInit();
             return;
         }
 
@@ -608,15 +614,17 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
         if (!success)
         {
             logErrorP("Sync-Receive: storing template failed");
+            finger.setLed(Fingerprint::State::Failed);
+            resetLedsTimer = delayTimerInit();
             return;
         }
-
-        setLedDefault();
 
         uint32_t storageOffset = FIN_CaclStorageOffset(syncReceiveFingerId);
         _fingerprintStorage.write(storageOffset, syncReceiveBuffer + TEMPLATE_SIZE, 29);
         _fingerprintStorage.commit();
 
+        finger.setLed(Fingerprint::State::Success);
+        resetLedsTimer = delayTimerInit();
         syncReceiving = false;
     }
 }
