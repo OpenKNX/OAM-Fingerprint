@@ -669,6 +669,7 @@ bool FingerprintModule::processFunctionProperty(uint8_t objectIndex, uint8_t pro
 void FingerprintModule::handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
 {
     logInfoP("Function property: Enroll request");
+    logIndentUp();
 
     uint16_t fingerId = (data[1] << 8) | data[2];
     logDebugP("fingerId: %d", fingerId);
@@ -696,11 +697,13 @@ void FingerprintModule::handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_
     
     resultData[0] = 0;
     resultLength = 1;
+    logIndentDown();
 }
 
 void FingerprintModule::handleFunctionPropertySyncFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
 {
     logInfoP("Function property: Sync request");
+    logIndentUp();
 
     uint16_t fingerId = (data[1] << 8) | data[2];
     logDebugP("fingerId: %d", fingerId);
@@ -716,11 +719,13 @@ void FingerprintModule::handleFunctionPropertySyncFinger(uint8_t *data, uint8_t 
         resultData[0] = 1;
 
     resultLength = 1;
+    logIndentDown();
 }
 
 void FingerprintModule::handleFunctionPropertyDeleteFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
 {
     logInfoP("Function property: Delete request");
+    logIndentUp();
 
     uint16_t fingerId = (data[1] << 8) | data[2];
     logDebugP("fingerId: %d", fingerId);
@@ -736,11 +741,13 @@ void FingerprintModule::handleFunctionPropertyDeleteFinger(uint8_t *data, uint8_
     
     resultData[0] = success ? 0 : 1;
     resultLength = 1;
+    logIndentDown();
 }
 
 void FingerprintModule::handleFunctionPropertyChangeFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
 {
     logInfoP("Function property: Change request");
+    logIndentUp();
 
     uint16_t fingerId = (data[1] << 8) | data[2];
     logDebugP("fingerId: %d", fingerId);
@@ -777,11 +784,13 @@ void FingerprintModule::handleFunctionPropertyChangeFinger(uint8_t *data, uint8_
     }
 
     resultLength = 1;
+    logIndentDown();
 }
 
 void FingerprintModule::handleFunctionPropertyResetScanner(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
 {
     logInfoP("Function property: Reset scanner");
+    logIndentUp();
 
     char personData[29] = {}; // empty
     for (uint16_t i = 0; i < MAX_FINGERS; i++)
@@ -795,11 +804,13 @@ void FingerprintModule::handleFunctionPropertyResetScanner(uint8_t *data, uint8_
 
     resultData[0] = success ? 0 : 1;
     resultLength = 1;
+    logIndentDown();
 }
 
 void FingerprintModule::handleFunctionPropertySetPassword(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
 {
     logInfoP("Function property: Set password");
+    logIndentUp();
 
     uint8_t passwordOption = data[1];
     logDebugP("passwordOption: %d", passwordOption);
@@ -876,6 +887,7 @@ void FingerprintModule::handleFunctionPropertySetPassword(uint8_t *data, uint8_t
     
     resultData[0] = success ? 0 : 1;
     resultLength = 1;
+    logIndentDown();
 }
 
 void FingerprintModule::handleFunctionPropertySearchPersonByFingerId(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
