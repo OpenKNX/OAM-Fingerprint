@@ -225,7 +225,7 @@ public:
   uint16_t templateCount;
   /// The stored template indices in the sensor, set by getTemplateIndices(),
   /// filled up to templateCount
-  uint8_t templates[1024];
+  uint16_t templates[1500] = {0};
 
   uint16_t status_reg = 0x0; ///< The status register (set by getParameters)
   uint16_t system_id = 0x0;  ///< The system identifier (set by getParameters)

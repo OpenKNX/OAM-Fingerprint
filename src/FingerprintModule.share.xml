@@ -187,6 +187,10 @@
               <ComObject Id="%AID%_O-%T%000011" Name="ScanSuccess"          Number="11" ObjectSize="1 Bit"    Text="Scan: Erfolg" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
               <ComObject Id="%AID%_O-%T%000012" Name="ScanSuccessId"        Number="12" ObjectSize="2 Bytes"  Text="Scan: ID" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-7-1" />
               <ComObject Id="%AID%_O-%T%000013" Name="ScanSuccessData"      Number="13" ObjectSize="4 Bytes"  Text="Scan: Zutrittsdaten" FunctionText="Status" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-15-0" />
+              <ComObject Id="%AID%_O-%T%000016" Name="LedRingColor"         Number="16" ObjectSize="1 Byte"   Text="LED-Ring: Farbe (1: Rot, 2: Blau, 3: Violett, 4: Grün, 5: Gelb, 6: Cyan, 7: Weiß)" FunctionText="Trigger" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-10" />
+              <ComObject Id="%AID%_O-%T%000017" Name="LedRingControl"       Number="17" ObjectSize="1 Byte"   Text="LED-Ring: Steuerung (1: Atmen, 2: Blinken, 3: Konstant an, 4: Konstant aus, 5: Langsam an, 6: Langsam aus)" FunctionText="Trigger" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-10" />
+              <ComObject Id="%AID%_O-%T%000018" Name="LedRingSpeed"         Number="18" ObjectSize="1 Byte"   Text="LED-Ring: Geschwindigkeit (wird bei konstant an/aus ignoriert)" FunctionText="Trigger" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-10" />
+              <ComObject Id="%AID%_O-%T%000019" Name="LedRingCount"         Number="19" ObjectSize="1 Byte"   Text="LED-Ring: Anzahl der Zyklen (0: unendlich, nur relevant für atmen und blinken)" FunctionText="Trigger" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-10" />
               <ComObject Id="%AID%_O-%T%000021" Name="EnrollNext"           Number="21" ObjectSize="1 Bit"    Text="Lerne an: Nächste freie ID" FunctionText="Trigger" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
               <ComObject Id="%AID%_O-%T%000022" Name="EnrollId"             Number="22" ObjectSize="2 Bytes"  Text="Lerne an: ID (verfügbare Slots: R503S: 0-149, R503: 0-199, R503Pro: 0-1499)" FunctionText="Trigger" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-7-1" />
               <ComObject Id="%AID%_O-%T%000023" Name="EnrollData"           Number="23" ObjectSize="4 Bytes"  Text="Lerne an: Zutrittsdaten (verfügbare Slots: R503S: 0-149, R503: 0-199, R503Pro: 0-1499)" FunctionText="Trigger" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-15-0" />
@@ -217,6 +221,10 @@
               <ComObjectRef Id="%AID%_O-%T%000011_R-%T%00001101" RefId="%AID%_O-%T%000011" />
               <ComObjectRef Id="%AID%_O-%T%000012_R-%T%00001201" RefId="%AID%_O-%T%000012" />
               <ComObjectRef Id="%AID%_O-%T%000013_R-%T%00001301" RefId="%AID%_O-%T%000013" />
+              <ComObjectRef Id="%AID%_O-%T%000016_R-%T%00001601" RefId="%AID%_O-%T%000016" />
+              <ComObjectRef Id="%AID%_O-%T%000017_R-%T%00001701" RefId="%AID%_O-%T%000017" />
+              <ComObjectRef Id="%AID%_O-%T%000018_R-%T%00001801" RefId="%AID%_O-%T%000018" />
+              <ComObjectRef Id="%AID%_O-%T%000019_R-%T%00001901" RefId="%AID%_O-%T%000019" />
               <ComObjectRef Id="%AID%_O-%T%000021_R-%T%00002101" RefId="%AID%_O-%T%000021" />
               <ComObjectRef Id="%AID%_O-%T%000022_R-%T%00002201" RefId="%AID%_O-%T%000022" />
               <ComObjectRef Id="%AID%_O-%T%000023_R-%T%00002301" RefId="%AID%_O-%T%000023" />
@@ -382,6 +390,12 @@
                     <ComObjectRefRef RefId="%AID%_O-%T%000033_R-%T%00003301" />
                     <ComObjectRefRef RefId="%AID%_O-%T%000034_R-%T%00003401" />
                     <ComObjectRefRef RefId="%AID%_O-%T%000036_R-%T%00003601" />
+
+                    <!-- LED ring -->
+                    <ComObjectRefRef RefId="%AID%_O-%T%000016_R-%T%00001601" />
+                    <ComObjectRefRef RefId="%AID%_O-%T%000017_R-%T%00001701" />
+                    <ComObjectRefRef RefId="%AID%_O-%T%000018_R-%T%00001801" />
+                    <ComObjectRefRef RefId="%AID%_O-%T%000019_R-%T%00001901" />
 
                     <!-- access data -->
                     <choose ParamRefId="%AID%_UP-%T%000014_R-%T%00001401">

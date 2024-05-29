@@ -54,10 +54,12 @@ class Fingerprint
     void close();
     std::string logPrefix();
     bool setLed(State state);
+    bool setLed(uint8_t color, uint8_t control, uint8_t speed, uint8_t count);
     bool hasFinger();
 
     uint16_t getTemplateCount();
     bool hasLocation(uint16_t location);
+    uint16_t* getLocations();
     uint16_t getNextFreeLocation();
     FindFingerResult findFingerprint();
     bool createTemplate();

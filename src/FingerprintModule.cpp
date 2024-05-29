@@ -43,7 +43,12 @@ void FingerprintModule::setup()
     digitalWrite(LED_GREEN_PIN, HIGH);
     finger.setLed(Fingerprint::State::Success);
 
-    resetLedsTimer = delayTimerInit();
+    KoFIN_LedRingColor.valueNoSend((uint8_t)0, Dpt(5, 10));
+    KoFIN_LedRingControl.valueNoSend((uint8_t)FINGERPRINT_LED_OFF, Dpt(5, 10));
+    KoFIN_LedRingSpeed.valueNoSend((uint8_t)0, Dpt(5, 10));
+    KoFIN_LedRingCount.valueNoSend((uint8_t)0, Dpt(5, 10));
+
+    initResetTimer = delayTimerInit();
     logInfoP("Fingerprint module ready.");
     logIndentDown();
 }
@@ -143,35 +148,46 @@ void FingerprintModule::loop()
         touched = false;
     }
 
-    if (enrollRequested > 0 and delayCheck(enrollRequested, ENROLL_REQUEST_DELAY))
+    if (enrollRequestedTimer > 0 and delayCheck(enrollRequestedTimer, ENROLL_REQUEST_DELAY))
     {
         bool success = enrollFinger(enrollRequestedLocation);
         if (success && ParamFIN_EnableSync)
             startSyncSend(enrollRequestedLocation, false); // model should still be loaded
 
-        enrollRequested = 0;
+        enrollRequestedTimer = 0;
         enrollRequestedLocation = 0;
+    }
+
+    if (initResetTimer > 0 && delayCheck(initResetTimer, INIT_RESET_TIMEOUT))
+    {
+        finger.setLed(Fingerprint::State::None);
+        digitalWrite(LED_GREEN_PIN, LOW);
+        initResetTimer = 0;
     }
 
     if (resetLedsTimer > 0 && delayCheck(resetLedsTimer, LED_RESET_TIMEOUT))
     {
-        finger.setLed(Fingerprint::State::None);
-        digitalWrite(LED_GREEN_PIN, LOW);
+        setLedDefault();
         resetLedsTimer = 0;
     }
 
     for (uint16_t i = 0; i < ParamFIN_VisibleActions; i++)
         _channels[i]->loop();
 
-    if (syncSendAfterEnrollTimer > 0 && delayCheck(syncSendAfterEnrollTimer, SYNC_AFTER_ENROLL_DELAY))
+    if (syncRequestedTimer > 0 && delayCheck(syncRequestedTimer, SYNC_AFTER_ENROLL_DELAY))
     {
-        startSyncSend(syncSendAfterEnrollFingerId);
+        startSyncSend(syncRequestedFingerId);
 
-        syncSendAfterEnrollTimer = 0;
-        syncSendAfterEnrollFingerId = 0;
+        syncRequestedTimer = 0;
+        syncRequestedFingerId = 0;
     }
     
     processSyncSend();
+}
+
+void FingerprintModule::setLedDefault()
+{
+    finger.setLed(KoFIN_LedRingColor.value(Dpt(5, 10)), KoFIN_LedRingControl.value(Dpt(5, 10)), KoFIN_LedRingSpeed.value(Dpt(5, 10)), KoFIN_LedRingCount.value(Dpt(5, 10)));
 }
 
 void FingerprintModule::processScanSuccess(uint16_t location, bool external)
@@ -248,6 +264,8 @@ bool FingerprintModule::enrollFinger(uint16_t location)
         KoFIN_EnrollSuccess.valueNoSend(false, Dpt(15, 1, 3));    // read direction (not used)
         KoFIN_EnrollSuccess.valueNoSend(false, Dpt(15, 1, 4));    // encryption (not used for now)
         KoFIN_EnrollSuccess.value((uint8_t)0, Dpt(15, 1, 5));     // index of access identification code (not used)
+
+        finger.setLed(Fingerprint::State::Success);
     }
     else
     {
@@ -261,6 +279,8 @@ bool FingerprintModule::enrollFinger(uint16_t location)
         KoFIN_EnrollSuccessData.valueNoSend(false, Dpt(15, 1, 3));    // read direction (not used)
         KoFIN_EnrollSuccessData.valueNoSend(false, Dpt(15, 1, 4));    // encryption (not used for now)
         KoFIN_EnrollSuccessData.value((uint8_t)0, Dpt(15, 1, 5));     // index of access identification code (not used)
+
+        finger.setLed(Fingerprint::State::Failed);
     }
 
     logIndentDown();
@@ -315,6 +335,17 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
     uint16_t lAsap = iKo.asap();
     switch (lAsap)
     {
+        case FIN_KoLock:
+            KoFIN_LockStatus.value(KoFIN_Lock.value(DPT_Switch), DPT_Switch);
+            logInfoP("Locked: %d", KoFIN_Lock.value(DPT_Switch));
+            break;
+        case FIN_KoLedRingColor:
+        case FIN_KoLedRingControl:
+        case FIN_KoLedRingSpeed:
+        case FIN_KoLedRingCount:
+            setLedDefault();
+            logInfoP("LED ring: color=%u, control=%u, speed=%u, count=%u", (uint8_t)KoFIN_LedRingColor.value(Dpt(5, 10)), (uint8_t)KoFIN_LedRingControl.value(Dpt(5, 10)), (uint8_t)KoFIN_LedRingSpeed.value(Dpt(5, 10)), (uint8_t)KoFIN_LedRingCount.value(Dpt(5, 10)));
+            break;
         case FIN_KoEnrollNext:
         case FIN_KoEnrollId:
         case FIN_KoEnrollData:
@@ -334,7 +365,8 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
                 logInfoP("Location provided: %d", location);
             }
 
-            enrollFinger(location);
+            enrollRequestedTimer = delayTimerInit();
+            enrollRequestedLocation = location;
             break;
         case FIN_KoDeleteId:
         case FIN_KoDeleteData:
@@ -350,10 +382,6 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
             }
 
             deleteFinger(location);
-            break;
-        case FIN_KoLock:
-            KoFIN_LockStatus.value(KoFIN_Lock.value(DPT_Switch), DPT_Switch);
-            logInfoP("Locked: %d", KoFIN_Lock.value(DPT_Switch));
             break;
         case FIN_KoExternFingerId:
             location = iKo.value(Dpt(7, 1));
@@ -393,6 +421,8 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
 
     logInfoP("Sync-Send: started: fingerId=%u, loadModel=%u, syncDelay=%u", fingerId, loadModel, ParamFIN_SyncDelay);
 
+    finger.setLed(Fingerprint::State::Busy);
+
     bool success;
     if (loadModel)
     {
@@ -411,6 +441,8 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
         logErrorP("Sync-Send: retrieving template failed");
         return;
     }
+
+    setLedDefault();
 
     uint32_t storageOffset = FIN_CaclStorageOffset(fingerId);
     uint8_t personData[29] = {};
@@ -508,6 +540,8 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
 
                 logDebugP("Sync-Receive (1/%u): control packet: bufferLength=%u, lengthPerPacket=%u, checksum=%u, fingerId=%u%", syncReceivePacketCount, syncReceiveBufferLength, syncReceiveLengthPerPacket, syncReceiveBufferChecksum, syncReceiveFingerId);
 
+                memset(syncReceivePacketReceived, 0, sizeof(syncReceivePacketReceived[0]));
+                syncReceivePacketReceived[0] = true;
                 syncReceivePacketReceivedCount = 1;
                 syncReceiving = true;
 
@@ -525,7 +559,15 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
         return;
     }
 
-    uint8_t dataPacketNo = data[0] - 1; // = sequence number - 1
+    uint8_t sequenceNo = data[0];
+    if (syncReceivePacketReceived[sequenceNo])
+    {
+        logInfoP("Sync-Receive: same packet already received");
+        return;
+    }
+
+    syncReceivePacketReceived[sequenceNo] = true;
+    uint8_t dataPacketNo = sequenceNo - 1;
     uint16_t dataOffset = dataPacketNo * syncReceiveLengthPerPacket;
     uint8_t dataLength = dataOffset + syncReceiveLengthPerPacket < syncReceiveBufferLength ? syncReceiveLengthPerPacket : syncReceiveBufferLength - dataOffset;
     memcpy(syncReceiveBuffer + dataOffset, data + 1, dataLength);
@@ -552,6 +594,8 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
             return;
         }
 
+        finger.setLed(Fingerprint::State::Busy);
+
         bool success;
         success = finger.sendTemplate(syncSendBufferTemp);
         if (!success)
@@ -566,6 +610,8 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
             logErrorP("Sync-Receive: storing template failed");
             return;
         }
+
+        setLedDefault();
 
         uint32_t storageOffset = FIN_CaclStorageOffset(syncReceiveFingerId);
         _fingerprintStorage.write(storageOffset, syncReceiveBuffer + TEMPLATE_SIZE, 29);
@@ -633,7 +679,7 @@ void FingerprintModule::handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_
     _fingerprintStorage.write(storageOffset + 1, personName, 28);
     _fingerprintStorage.commit();
 
-    enrollRequested = delayTimerInit();
+    enrollRequestedTimer = delayTimerInit();
     enrollRequestedLocation = fingerId;
 
     //bool success = enrollFinger(fingerId);
@@ -651,8 +697,8 @@ void FingerprintModule::handleFunctionPropertySyncFinger(uint8_t *data, uint8_t 
 
     if (finger.hasLocation(fingerId))
     {
-        syncSendAfterEnrollFingerId = fingerId;
-        syncSendAfterEnrollTimer = delayTimerInit();
+        syncRequestedFingerId = fingerId;
+        syncRequestedTimer = delayTimerInit();
 
         resultData[0] = 0;
     }
@@ -858,12 +904,17 @@ void FingerprintModule::handleFunctionPropertySearchFingerIdByPerson(uint8_t *da
     }
     logDebugP("searchPersonName: %s (length: %u)", searchPersonName, searchPersonNameLength);
 
+    uint16_t* fingerIds = finger.getLocations();
+    uint16_t templateCount = finger.getTemplateCount();
+
     uint32_t storageOffset = 0;
     uint8_t personFinger = 0;
     uint8_t personName[29] = {};
     uint8_t foundCount = 0;
-    for (uint16_t fingerId = 0; fingerId < MAX_FINGERS; fingerId++)
+    uint16_t foundTotalCount = 0;
+    for (uint16_t i = 0; i < templateCount; i++)
     {
+        uint16_t fingerId = fingerIds[i];
         storageOffset = FIN_CaclStorageOffset(fingerId);
         personFinger = _fingerprintStorage.readByte(storageOffset);
         if (searchPersonFinger > 0)
@@ -880,26 +931,27 @@ void FingerprintModule::handleFunctionPropertySearchFingerIdByPerson(uint8_t *da
             logDebugP("personName: %s", personName);
             logIndentDown();
 
-            if (!finger.hasLocation(fingerId))
+            // we return max. 10 results
+            if (foundCount <= 10)
             {
-                logDebugP("Unrecognized by scanner!");
-                continue;
+                resultData[3 + foundCount * 31] = fingerId >> 8;
+                resultData[3 + foundCount * 31 + 1] = fingerId;
+                resultData[3 + foundCount * 31 + 2] = personFinger;
+                memcpy(resultData + 3 + foundCount * 31 + 3, personName, 28);
+
+                foundCount++;
             }
 
-            resultData[1 + foundCount * 31] = fingerId >> 8;
-            resultData[1 + foundCount * 31 + 1] = fingerId;
-            resultData[1 + foundCount * 31 + 2] = personFinger;
-            memcpy(resultData + 1 + foundCount * 31 + 3, personName, 28);
-
-            foundCount++;
-            if (foundCount >= 10)
-                break; // we return max. 10 results
+            foundTotalCount++;
         }
     }
     
     resultData[0] = foundCount > 0 ? 0 : 1;
-    resultLength = 1 + foundCount * 31;
+    resultData[1] = foundTotalCount >> 8;
+    resultData[2] = foundTotalCount;
+    resultLength = 3 + foundCount * 31;
 
+    logDebugP("foundTotalCount: %u", foundTotalCount);
     logIndentDown();
 }
 

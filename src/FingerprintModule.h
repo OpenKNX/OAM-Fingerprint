@@ -22,6 +22,7 @@
 #define EXT4 29 // ADC
 #define EXT5 19
 
+#define INIT_RESET_TIMEOUT 1000
 #define LED_RESET_TIMEOUT 1000
 #define ENROLL_REQUEST_DELAY 100
 #define CAPTURE_RETRIES_TOUCH_TIMEOUT 500
@@ -71,6 +72,7 @@ class FingerprintModule : public OpenKNX::Module
     void processScanSuccess(uint16_t location, bool external = false);
     bool enrollFinger(uint16_t location);
     bool deleteFinger(uint16_t location);
+    void setLedDefault();
     void startSyncSend(uint16_t fingerId, bool loadModel = true);
     void processSyncSend();
     void processSyncReceive(uint8_t* data);
@@ -87,8 +89,9 @@ class FingerprintModule : public OpenKNX::Module
     ActionChannel *_channels[FIN_ChannelCount];
 
     Fingerprint finger;
+    uint32_t initResetTimer = 0;
     uint32_t resetLedsTimer = 0;
-    uint32_t enrollRequested = 0;
+    uint32_t enrollRequestedTimer = 0;
     uint16_t enrollRequestedLocation = 0;
     inline static bool delayCallbackActive = false;
 
@@ -100,8 +103,8 @@ class FingerprintModule : public OpenKNX::Module
     uint16_t syncSendBufferLength = 0;
     uint8_t syncSendPacketCount = 0;
     uint8_t syncSendPacketSentCount = 0;
-    uint32_t syncSendAfterEnrollTimer = 0;
-    uint16_t syncSendAfterEnrollFingerId = 0;
+    uint32_t syncRequestedTimer = 0;
+    uint16_t syncRequestedFingerId = 0;
 
     bool syncReceiving = false;
     uint16_t syncReceiveFingerId = 0;
@@ -111,6 +114,7 @@ class FingerprintModule : public OpenKNX::Module
     uint8_t syncReceiveLengthPerPacket = 0;
     uint8_t syncReceivePacketCount = 0;
     uint8_t syncReceivePacketReceivedCount = 0;
+    bool syncReceivePacketReceived[SYNC_BUFFER_SIZE] = {false};
 };
 
 extern FingerprintModule openknxFingerprintModule;
