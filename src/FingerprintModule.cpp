@@ -151,7 +151,7 @@ void FingerprintModule::loop()
     if (enrollRequestedTimer > 0 and delayCheck(enrollRequestedTimer, ENROLL_REQUEST_DELAY))
     {
         bool success = enrollFinger(enrollRequestedLocation);
-        if (success && ParamFIN_EnableSync)
+        if (success)
             startSyncSend(enrollRequestedLocation, false); // model should still be loaded
 
         enrollRequestedTimer = 0;
@@ -416,7 +416,8 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
 
 void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
 {
-    if (syncReceiving)
+    if (!ParamFIN_EnableSync ||
+        syncReceiving)
         return;
 
     logInfoP("Sync-Send: started: fingerId=%u, loadModel=%u, syncDelay=%u", fingerId, loadModel, ParamFIN_SyncDelay);
@@ -540,7 +541,7 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
 
                 logDebugP("Sync-Receive (1/%u): control packet: bufferLength=%u, lengthPerPacket=%u, checksum=%u, fingerId=%u%", syncReceivePacketCount, syncReceiveBufferLength, syncReceiveLengthPerPacket, syncReceiveBufferChecksum, syncReceiveFingerId);
 
-                memset(syncReceivePacketReceived, 0, sizeof(syncReceivePacketReceived[0]));
+                memset(syncReceivePacketReceived, 0, sizeof(syncReceivePacketReceived));
                 syncReceivePacketReceived[0] = true;
                 syncReceivePacketReceivedCount = 1;
                 syncReceiving = true;
@@ -645,6 +646,9 @@ bool FingerprintModule::processFunctionProperty(uint8_t objectIndex, uint8_t pro
         case 3:
             handleFunctionPropertyDeleteFinger(data, resultData, resultLength);
             return true;
+        case 4:
+            handleFunctionPropertyRenameFinger(data, resultData, resultLength);
+            return true;
         case 6:
             handleFunctionPropertyResetScanner(data, resultData, resultLength);
             return true;
@@ -689,8 +693,6 @@ void FingerprintModule::handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_
 
     enrollRequestedTimer = delayTimerInit();
     enrollRequestedLocation = fingerId;
-
-    //bool success = enrollFinger(fingerId);
     
     resultData[0] = 0;
     resultLength = 1;
@@ -733,6 +735,47 @@ void FingerprintModule::handleFunctionPropertyDeleteFinger(uint8_t *data, uint8_
     bool success = deleteFinger(fingerId);
     
     resultData[0] = success ? 0 : 1;
+    resultLength = 1;
+}
+
+void FingerprintModule::handleFunctionPropertyRenameFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
+{
+    logInfoP("Function property: Rename request");
+
+    uint16_t fingerId = (data[1] << 8) | data[2];
+    logDebugP("fingerId: %d", fingerId);
+
+    if (finger.hasLocation(fingerId))
+    {
+        uint8_t personFinger = data[3];
+        logDebugP("personFinger: %d", personFinger);
+
+        uint8_t personName[28] = {};
+        for (uint8_t i = 0; i < 28; i++)
+        {
+            memcpy(personName + i, data + 4 + i, 1);
+            if (personName[i] == 0) // null termination
+                break;
+        }
+        logDebugP("personName: %s", personName);
+
+        uint32_t storageOffset = FIN_CaclStorageOffset(fingerId);
+        logDebugP("storageOffset: %d", storageOffset);
+        _fingerprintStorage.writeByte(storageOffset, personFinger); // only 4 bits used
+        _fingerprintStorage.write(storageOffset + 1, personName, 28);
+        _fingerprintStorage.commit();
+
+        syncRequestedFingerId = fingerId;
+        syncRequestedTimer = delayTimerInit();
+
+        resultData[0] = 0;
+    }
+    else
+    {
+        logInfoP("Finger not found");
+        resultData[0] = 1;
+    }
+
     resultLength = 1;
 }
 

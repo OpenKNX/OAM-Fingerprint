@@ -564,7 +564,7 @@ uint8_t Adafruit_Fingerprint::getTemplateIndices() {
     return p;
 
   // clear template indices
-  memset(templates, 0, sizeof(templates[0]));
+  memset(templates, 0, sizeof(templates));
   
   //Serial.printf("capacity:%d,", capacity);
   //uint8_t t = ceil(capacity / (double)256);
