@@ -168,6 +168,7 @@ function FIN_searchFingerId(device, online, progress, context) {
     var parPersonFinger = device.getParameterByName("FINACT_PersonFinger");
     var parFingerId = device.getParameterByName("FINACT_FingerId");
     var parNumberSearchResults = device.getParameterByName("FINACT_NumberSearchResults");
+    var parNumberSearchResultsText = device.getParameterByName("FINACT_NumberSearchResultsText");
 
     parNumberSearchResults.value = 0;
 
@@ -216,7 +217,8 @@ function FIN_searchFingerId(device, online, progress, context) {
     // following up to 10 results in total
     // always 2 bytes fingerId, 1 byte personFinger and 28 bytes personName
     // info("Bevor: " + parNumberSearchResults.value);
-    parNumberSearchResults.value = numRes;
+    parNumberSearchResults.value = totalMatches;
+    parNumberSearchResultsText.value = totalMatches;
     // info("Danach: " + parNumberSearchResults.value);
     for (var row = 1; row <= numRes; row++) {
         // info("FINACT_Person" + row + "Name");
@@ -226,11 +228,11 @@ function FIN_searchFingerId(device, online, progress, context) {
 
         var res = (row - 1) * 31 + 3;
         // info("res " + row + ": " + res);
-        fingerId = resp[res + 0] << 8 | resp[res + 1];
+        var fingerId = resp[res + 0] << 8 | resp[res + 1];
         // info("fingerid: " + fingerId);
-        personFinger = resp[res + 2];
+        var personFinger = resp[res + 2];
         // info("finger: " + personFinger);
-        personName = "";
+        var personName = "";
         for (var i = res + 3; i < res + 31; ++i) {
             if (resp[i] == 0)
                 break; // null-termination
