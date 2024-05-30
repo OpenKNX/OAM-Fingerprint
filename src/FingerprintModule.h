@@ -39,7 +39,7 @@
 #define SYNC_BUFFER_SIZE TEMPLATE_SIZE + FINGER_DATA_SIZE
 #define SYNC_SEND_PACKET_DATA_LENGTH 13
 #define SYNC_AFTER_ENROLL_DELAY 500
-#define SYNC_RESET_DELAY 500
+#define SYNC_IGNORE_DELAY 500
 
 /*
 Flash Storage Layout:
@@ -100,9 +100,10 @@ class FingerprintModule : public OpenKNX::Module
 
     inline volatile static bool touched = false;
 
+    uint32_t syncIgnoreTimer = 0;
+
     bool syncSending = false;
     uint32_t syncSendTimer = 0;
-    uint32_t syncResetTimer = 0;
     uint8_t syncSendBuffer[SYNC_BUFFER_SIZE];
     uint16_t syncSendBufferLength = 0;
     uint8_t syncSendPacketCount = 0;
