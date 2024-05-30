@@ -184,6 +184,12 @@ void FingerprintModule::loop()
         syncRequestedTimer = 0;
         syncRequestedFingerId = 0;
     }
+
+    if (syncResetTimer > 0 && delayCheck(syncResetTimer, SYNC_RESET_DELAY))
+    {
+        syncSending = false;
+        syncResetTimer = 0;
+    }
     
     processSyncSend();
 }
@@ -443,6 +449,9 @@ void FingerprintModule::startSyncDelete(uint16_t fingerId)
     data[3] = fingerId >> 8;
     data[4] = fingerId;
     KoFIN_Sync.objectWritten();
+
+    syncSending = true;
+    syncResetTimer = delayTimerInit();
 }
 
 void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
@@ -544,7 +553,7 @@ void FingerprintModule::processSyncSend()
     {
         logDebugP("Sync-Send: finished");
 
-        syncSending = false;
+        syncResetTimer = delayTimerInit();
     }
 }
 
