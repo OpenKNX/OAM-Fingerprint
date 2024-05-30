@@ -289,7 +289,7 @@ bool FingerprintModule::enrollFinger(uint16_t location)
     return success;
 }
 
-bool FingerprintModule::deleteFinger(uint16_t location)
+bool FingerprintModule::deleteFinger(uint16_t location, bool sync)
 {
     logInfoP("Delete request:");
     logIndentUp();
@@ -307,6 +307,9 @@ bool FingerprintModule::deleteFinger(uint16_t location)
         KoFIN_DeleteSuccess.valueNoSend(false, Dpt(15, 1, 3));    // read direction (not used)
         KoFIN_DeleteSuccess.valueNoSend(false, Dpt(15, 1, 4));    // encryption (not used for now)
         KoFIN_DeleteSuccess.value((uint8_t)0, Dpt(15, 1, 5));     // index of access identification code (not used)
+
+        if (sync)
+            startSyncDelete(location);
     }
     else
     {
@@ -414,6 +417,31 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
     }
 }
 
+void FingerprintModule::startSyncDelete(uint16_t fingerId)
+{
+    if (!ParamFIN_EnableSync ||
+        syncReceiving)
+        return;
+
+    logInfoP("Sync-Send: delete: fingerId=%u", fingerId);
+
+    /*
+    Sync Delete Packet Layout:
+    -   0: 1 byte : sequence number (0: control packet)
+    -   1: 1 byte : sync type (0: new finger, 1: delete finger)
+    -   2: 1 byte : sync data format version (currently always 0)
+    - 3-4: 2 bytes: finger ID
+    */
+
+    uint8_t *data = KoFIN_Sync.valueRef();
+    data[0] = 0;
+    data[1] = 1;
+    data[2] = 0;
+    data[3] = fingerId >> 8;
+    data[4] = fingerId;
+    KoFIN_Sync.objectWritten();
+}
+
 void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
 {
     if (!ParamFIN_EnableSync ||
@@ -462,7 +490,7 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
     /*
     Sync Control Packet Layout:
     -    0: 1 byte : sequence number (0: control packet)
-    -    1: 1 byte : sync type (0: new template sync)
+    -    1: 1 byte : sync type (0: new finger, 1: delete finger)
     -    2: 1 byte : sync data format version (currently always 0)
     -  3-4: 2 bytes: total data content size
     -    5: 1 byte : max. payload data length per data packet
@@ -526,7 +554,7 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
     {
         switch (data[1]) // sync type
         {
-            case 0: // template sync
+            case 0: // new finger
                 if (data[2] != 0)
                 {
                     logInfoP("Sync-Receive: Unsupported sync version: %u", data[2]);
@@ -539,12 +567,25 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
                 syncReceiveBufferChecksum = (data[7] << 8) | data[8];
                 syncReceiveFingerId = (data[9] << 8) | data[10];
 
-                logDebugP("Sync-Receive (1/%u): control packet: bufferLength=%u, lengthPerPacket=%u, checksum=%u, fingerId=%u%", syncReceivePacketCount, syncReceiveBufferLength, syncReceiveLengthPerPacket, syncReceiveBufferChecksum, syncReceiveFingerId);
+                logDebugP("Sync-Receive (1/%u): control packet: bufferLength=%u, lengthPerPacket=%u, checksum=%u, fingerId=%u", syncReceivePacketCount, syncReceiveBufferLength, syncReceiveLengthPerPacket, syncReceiveBufferChecksum, syncReceiveFingerId);
 
                 memset(syncReceivePacketReceived, 0, sizeof(syncReceivePacketReceived));
                 syncReceivePacketReceived[0] = true;
                 syncReceivePacketReceivedCount = 1;
                 syncReceiving = true;
+
+                return;
+            case 1: // delete finger
+                if (data[2] != 0)
+                {
+                    logInfoP("Sync-Receive (delete finger): Unsupported sync version: %u", data[2]);
+                    return;
+                }
+
+                uint16_t fingerId = (data[3] << 8) | data[4];
+                logDebugP("Sync-Receive (delete finger): fingerId=%u", fingerId);
+
+                deleteFinger(fingerId, false);
 
                 return;
             default:
