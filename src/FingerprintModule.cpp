@@ -152,7 +152,10 @@ void FingerprintModule::loop()
     {
         bool success = enrollFinger(enrollRequestedLocation);
         if (success)
-            startSyncSend(enrollRequestedLocation, false); // model should still be loaded
+        {
+            syncRequestedFingerId = enrollRequestedLocation;
+            syncRequestedTimer = delayTimerInit();
+        }
 
         enrollRequestedTimer = 0;
         enrollRequestedLocation = 0;
