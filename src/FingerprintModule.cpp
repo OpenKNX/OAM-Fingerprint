@@ -801,6 +801,7 @@ void FingerprintModule::handleFunctionPropertyResetScanner(uint8_t *data, uint8_
     _fingerprintStorage.commit();
 
     bool success = finger.emptyDatabase();
+    resetLedsTimer = delayTimerInit();
 
     resultData[0] = success ? 0 : 1;
     resultLength = 1;
@@ -880,6 +881,7 @@ void FingerprintModule::handleFunctionPropertySetPassword(uint8_t *data, uint8_t
             finger.start();
         }
 
+        resetLedsTimer = delayTimerInit();
         logIndentDown();
     }
     else
