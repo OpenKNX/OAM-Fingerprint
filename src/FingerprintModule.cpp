@@ -555,6 +555,7 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
     
     if (data[0] == 0) // sequence number
     {
+        uint16_t syncDeleteFingerId;
         switch (data[1]) // sync type
         {
             case 0: // new finger
@@ -585,10 +586,10 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
                     return;
                 }
 
-                uint16_t fingerId = (data[3] << 8) | data[4];
-                logDebugP("Sync-Receive (delete finger): fingerId=%u", fingerId);
+                syncDeleteFingerId = (data[3] << 8) | data[4];
+                logDebugP("Sync-Receive (delete finger): fingerId=%u", syncDeleteFingerId);
 
-                deleteFinger(fingerId, false);
+                deleteFinger(syncDeleteFingerId, false);
 
                 return;
             default:
