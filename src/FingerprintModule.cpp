@@ -481,7 +481,7 @@ void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
     uint32_t storageOffset = FIN_CaclStorageOffset(fingerId);
     uint8_t personData[29] = {};
     _fingerprintStorage.read(storageOffset, personData, 29);
-    memcpy(syncSendBuffer + TEMPLATE_SIZE, personData, 29);
+    memcpy(syncSendBufferTemp + TEMPLATE_SIZE, personData, 29);
 
     const int maxDstSize = LZ4_compressBound(SYNC_BUFFER_SIZE);
     const int compressedDataSize = LZ4_compress_default((char*)syncSendBufferTemp, (char*)syncSendBuffer, SYNC_BUFFER_SIZE, maxDstSize);
@@ -677,7 +677,7 @@ void FingerprintModule::processSyncReceive(uint8_t* data)
         }
 
         uint32_t storageOffset = FIN_CaclStorageOffset(syncReceiveFingerId);
-        _fingerprintStorage.write(storageOffset, syncReceiveBuffer + TEMPLATE_SIZE, 29);
+        _fingerprintStorage.write(storageOffset, syncSendBufferTemp + TEMPLATE_SIZE, 29);
         _fingerprintStorage.commit();
 
         finger.setLed(Fingerprint::State::Success);
