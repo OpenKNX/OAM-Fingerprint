@@ -883,11 +883,15 @@ void FingerprintModule::handleFunctionPropertySetPassword(uint8_t *data, uint8_t
 
         resetLedsTimer = delayTimerInit();
         logIndentDown();
+
+        resultData[0] = success ? 0 : 2;
     }
     else
+    {
         logDebugP("Invalid old password provided.");
+        resultData[0] = 1;
+    }
     
-    resultData[0] = success ? 0 : 1;
     resultLength = 1;
     logIndentDown();
 }

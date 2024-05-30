@@ -100,8 +100,9 @@ function FIN_checkFingerAction(device, online, progress, context) {
 
         var resp = online.invokeFunctionProperty(160, 3, data);
         if (resp[0] != 0) {
-            online.disconnect();
             progress.setText("Fingerprint: Person zu Finger ID " + parFingerId.value + " nicht gefunden.");
+            online.disconnect();
+            return;
         } else {
             online.disconnect();
             progress.setText("Fingerprint: Person zu Finger ID " + parFingerId.value + " gefunden.");
@@ -189,7 +190,13 @@ function FIN_searchFingerId(device, online, progress, context) {
 
     var resp = online.invokeFunctionProperty(160, 3, data);
     if (resp[0] != 0) {
-        throw new Error("Fingerprint: Finger ID zu Person " + parPersonName.value + " (" + parPersonFinger.value + ") nicht gefunden.");
+        if (resp[0] == 1) {
+            throw new Error("Fingerprint: Finger ID zu Person " + parPersonName.value + " (" + parPersonFinger.value + ") nicht gefunden.");
+            online.disconnect();
+            return;
+        } else {
+            throw new Error("Fingerprint: Es ist ein unbekannter Fehler aufgetreten!");
+        }
     }
 
     online.disconnect();
@@ -264,7 +271,13 @@ function FIN_searchUser(device, online, progress, context) {
 
     var resp = online.invokeFunctionProperty(160, 3, data);
     if (resp[0] != 0) {
-        progress.setText("Fingerprint: Person zu Finger ID " + fingerId + " nicht gefunden.");
+        if (resp[0] == 1) {
+            progress.setText("Fingerprint: Person zu Finger ID " + fingerId + " nicht gefunden.");
+            online.disconnect();
+            return;
+        } else {
+            throw new Error("Fingerprint: Es ist ein unbekannter Fehler aufgetreten!");
+        }
     }
 
     online.disconnect();
@@ -346,7 +359,11 @@ function FIN_changeFinger(device, online, progress, context) {
 
     var resp = online.invokeFunctionProperty(160, 3, data);
     if (resp[0] != 0) {
-        throw new Error("Fingerprint: Es ist ein unbekannter Fehler aufgetreten!");
+        if (resp[0] == 1) {
+            throw new Error("Fingerprint: Finger ID " + parFingerId.value + " nicht gefunden!");
+        } else {
+            throw new Error("Fingerprint: Es ist ein unbekannter Fehler aufgetreten!");
+        }
     }
 
     online.disconnect();
@@ -364,11 +381,15 @@ function FIN_syncFinger(device, online, progress, context) {
 
     var resp = online.invokeFunctionProperty(160, 3, data);
     if (resp[0] != 0) {
-        throw new Error("Fingerprint: Es ist ein unbekannter Fehler aufgetreten!");
+        if (resp[0] == 1) {
+            throw new Error("Fingerprint: Finger ID " + parFingerId.value + " nicht gefunden!");
+        } else {
+            throw new Error("Fingerprint: Es ist ein unbekannter Fehler aufgetreten!");
+        }
     }
 
     online.disconnect();
-    progress.setText("Fingerprint: Finger ID " + parFingerId.value + " synchronisiert.");
+    progress.setText("Fingerprint: Finger ID " + parFingerId.value + " Synchronisierung gestartet.");
 }
 
 function FIN_deleteFinger(device, online, progress, context) {
@@ -382,7 +403,11 @@ function FIN_deleteFinger(device, online, progress, context) {
 
     var resp = online.invokeFunctionProperty(160, 3, data);
     if (resp[0] != 0) {
-        throw new Error("Fingerprint: Es ist ein unbekannter Fehler aufgetreten!");
+        if (resp[0] == 1) {
+            throw new Error("Fingerprint: Finger ID " + parFingerId.value + " nicht gefunden!");
+        } else {
+            throw new Error("Fingerprint: Es ist ein unbekannter Fehler aufgetreten!");
+        }
     }
 
     online.disconnect();
@@ -436,7 +461,11 @@ function FIN_setPassword(device, online, progress, context) {
 
     var resp = online.invokeFunctionProperty(160, 3, data);
     if (resp[0] != 0) {
-        throw new Error("Fingerprint: Es ist ein unbekannter Fehler aufgetreten!");
+        if (resp[0] == 1) {
+            throw new Error("Fingerprint: Eingegebenes altes Passwort falsch!");
+        } else {
+            throw new Error("Fingerprint: Es ist ein unbekannter Fehler aufgetreten!");
+        }
     }
 
     var parPasswordAlreadySet = device.getParameterByName("FIN_PasswardAlreadySet");
