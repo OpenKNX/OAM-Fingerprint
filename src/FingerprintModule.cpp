@@ -43,7 +43,12 @@ void FingerprintModule::setup()
     digitalWrite(LED_GREEN_PIN, HIGH);
     finger.setLed(Fingerprint::State::Success);
 
-    resetLedsTimer = delayTimerInit();
+    KoFIN_LedRingColor.valueNoSend((uint8_t)0, Dpt(5, 10));
+    KoFIN_LedRingControl.valueNoSend((uint8_t)FINGERPRINT_LED_OFF, Dpt(5, 10));
+    KoFIN_LedRingSpeed.valueNoSend((uint8_t)0, Dpt(5, 10));
+    KoFIN_LedRingCount.valueNoSend((uint8_t)0, Dpt(5, 10));
+
+    initResetTimer = delayTimerInit();
     logInfoP("Fingerprint module ready.");
     logIndentDown();
 }
@@ -143,23 +148,49 @@ void FingerprintModule::loop()
         touched = false;
     }
 
-    if (enrollRequested > 0 and delayCheck(enrollRequested, ENROLL_REQUEST_DELAY))
+    if (enrollRequestedTimer > 0 and delayCheck(enrollRequestedTimer, ENROLL_REQUEST_DELAY))
     {
-        enrollFinger(enrollRequestedLocation);
+        bool success = enrollFinger(enrollRequestedLocation);
+        if (success)
+        {
+            syncRequestedFingerId = enrollRequestedLocation;
+            syncRequestedTimer = delayTimerInit();
+        }
 
-        enrollRequested = 0;
+        enrollRequestedTimer = 0;
         enrollRequestedLocation = 0;
+    }
+
+    if (initResetTimer > 0 && delayCheck(initResetTimer, INIT_RESET_TIMEOUT))
+    {
+        finger.setLed(Fingerprint::State::None);
+        digitalWrite(LED_GREEN_PIN, LOW);
+        initResetTimer = 0;
     }
 
     if (resetLedsTimer > 0 && delayCheck(resetLedsTimer, LED_RESET_TIMEOUT))
     {
-        finger.setLed(Fingerprint::State::None);
-        digitalWrite(LED_GREEN_PIN, LOW);
+        setLedDefault();
         resetLedsTimer = 0;
     }
 
     for (uint16_t i = 0; i < ParamFIN_VisibleActions; i++)
         _channels[i]->loop();
+
+    if (syncRequestedTimer > 0 && delayCheck(syncRequestedTimer, SYNC_AFTER_ENROLL_DELAY))
+    {
+        startSyncSend(syncRequestedFingerId);
+
+        syncRequestedTimer = 0;
+        syncRequestedFingerId = 0;
+    }
+
+    processSyncSend();
+}
+
+void FingerprintModule::setLedDefault()
+{
+    finger.setLed(KoFIN_LedRingColor.value(Dpt(5, 10)), KoFIN_LedRingControl.value(Dpt(5, 10)), KoFIN_LedRingSpeed.value(Dpt(5, 10)), KoFIN_LedRingCount.value(Dpt(5, 10)));
 }
 
 void FingerprintModule::processScanSuccess(uint16_t location, bool external)
@@ -236,6 +267,8 @@ bool FingerprintModule::enrollFinger(uint16_t location)
         KoFIN_EnrollSuccess.valueNoSend(false, Dpt(15, 1, 3));    // read direction (not used)
         KoFIN_EnrollSuccess.valueNoSend(false, Dpt(15, 1, 4));    // encryption (not used for now)
         KoFIN_EnrollSuccess.value((uint8_t)0, Dpt(15, 1, 5));     // index of access identification code (not used)
+
+        finger.setLed(Fingerprint::State::Success);
     }
     else
     {
@@ -249,6 +282,8 @@ bool FingerprintModule::enrollFinger(uint16_t location)
         KoFIN_EnrollSuccessData.valueNoSend(false, Dpt(15, 1, 3));    // read direction (not used)
         KoFIN_EnrollSuccessData.valueNoSend(false, Dpt(15, 1, 4));    // encryption (not used for now)
         KoFIN_EnrollSuccessData.value((uint8_t)0, Dpt(15, 1, 5));     // index of access identification code (not used)
+
+        finger.setLed(Fingerprint::State::Failed);
     }
 
     logIndentDown();
@@ -257,7 +292,7 @@ bool FingerprintModule::enrollFinger(uint16_t location)
     return success;
 }
 
-bool FingerprintModule::deleteFinger(uint16_t location)
+bool FingerprintModule::deleteFinger(uint16_t location, bool sync)
 {
     logInfoP("Delete request:");
     logIndentUp();
@@ -275,6 +310,9 @@ bool FingerprintModule::deleteFinger(uint16_t location)
         KoFIN_DeleteSuccess.valueNoSend(false, Dpt(15, 1, 3));    // read direction (not used)
         KoFIN_DeleteSuccess.valueNoSend(false, Dpt(15, 1, 4));    // encryption (not used for now)
         KoFIN_DeleteSuccess.value((uint8_t)0, Dpt(15, 1, 5));     // index of access identification code (not used)
+
+        if (sync)
+            startSyncDelete(location);
     }
     else
     {
@@ -303,6 +341,17 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
     uint16_t lAsap = iKo.asap();
     switch (lAsap)
     {
+        case FIN_KoLock:
+            KoFIN_LockStatus.value(KoFIN_Lock.value(DPT_Switch), DPT_Switch);
+            logInfoP("Locked: %d", KoFIN_Lock.value(DPT_Switch));
+            break;
+        case FIN_KoLedRingColor:
+        case FIN_KoLedRingControl:
+        case FIN_KoLedRingSpeed:
+        case FIN_KoLedRingCount:
+            setLedDefault();
+            logInfoP("LED ring: color=%u, control=%u, speed=%u, count=%u", (uint8_t)KoFIN_LedRingColor.value(Dpt(5, 10)), (uint8_t)KoFIN_LedRingControl.value(Dpt(5, 10)), (uint8_t)KoFIN_LedRingSpeed.value(Dpt(5, 10)), (uint8_t)KoFIN_LedRingCount.value(Dpt(5, 10)));
+            break;
         case FIN_KoEnrollNext:
         case FIN_KoEnrollId:
         case FIN_KoEnrollData:
@@ -322,7 +371,8 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
                 logInfoP("Location provided: %d", location);
             }
 
-            enrollFinger(location);
+            enrollRequestedTimer = delayTimerInit();
+            enrollRequestedLocation = location;
             break;
         case FIN_KoDeleteId:
         case FIN_KoDeleteData:
@@ -338,10 +388,6 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
             }
 
             deleteFinger(location);
-            break;
-        case FIN_KoLock:
-            KoFIN_LockStatus.value(KoFIN_Lock.value(DPT_Switch), DPT_Switch);
-            logInfoP("Locked: %d", KoFIN_Lock.value(DPT_Switch));
             break;
         case FIN_KoExternFingerId:
             location = iKo.value(Dpt(7, 1));
@@ -363,11 +409,280 @@ void FingerprintModule::processInputKo(GroupObject& iKo)
                 digitalWrite(LED_GREEN_PIN, LOW);
             
             break;
+        case FIN_KoSync:
+            processSyncReceive(iKo.valueRef());
+            break;
         default:
         {
             for (uint16_t i = 0; i < ParamFIN_VisibleActions; i++)
                 _channels[i]->processInputKo(iKo);
         }
+    }
+}
+
+void FingerprintModule::startSyncDelete(uint16_t fingerId)
+{
+    if (!ParamFIN_EnableSync ||
+        syncReceiving)
+        return;
+
+    logInfoP("Sync-Send: delete: fingerId=%u", fingerId);
+
+    /*
+    Sync Delete Packet Layout:
+    -   0: 1 byte : sequence number (0: control packet)
+    -   1: 1 byte : sync type (0: new finger, 1: delete finger)
+    -   2: 1 byte : sync data format version (currently always 0)
+    - 3-4: 2 bytes: finger ID
+    */
+
+    uint8_t *data = KoFIN_Sync.valueRef();
+    data[0] = 0;
+    data[1] = 1;
+    data[2] = 0;
+    data[3] = fingerId >> 8;
+    data[4] = fingerId;
+    KoFIN_Sync.objectWritten();
+
+    syncIgnoreTimer = delayTimerInit();
+}
+
+void FingerprintModule::startSyncSend(uint16_t fingerId, bool loadModel)
+{
+    if (!ParamFIN_EnableSync ||
+        syncReceiving)
+        return;
+
+    logInfoP("Sync-Send: started: fingerId=%u, loadModel=%u, syncDelay=%u", fingerId, loadModel, ParamFIN_SyncDelay);
+
+    finger.setLed(Fingerprint::State::Busy);
+
+    bool success;
+    if (loadModel)
+    {
+        success = finger.loadTemplate(fingerId);
+        if (!success)
+        {
+            logErrorP("Sync-Send: loading template failed");
+            return;
+        }
+    }
+
+    uint8_t syncSendBufferTemp[SYNC_BUFFER_SIZE];
+    success = finger.retrieveTemplate(syncSendBufferTemp);
+    if (!success)
+    {
+        logErrorP("Sync-Send: retrieving template failed");
+        return;
+    }
+
+    setLedDefault();
+
+    uint32_t storageOffset = FIN_CaclStorageOffset(fingerId);
+    uint8_t personData[29] = {};
+    _fingerprintStorage.read(storageOffset, personData, 29);
+    memcpy(syncSendBufferTemp + TEMPLATE_SIZE, personData, 29);
+
+    const int maxDstSize = LZ4_compressBound(SYNC_BUFFER_SIZE);
+    const int compressedDataSize = LZ4_compress_default((char*)syncSendBufferTemp, (char*)syncSendBuffer, SYNC_BUFFER_SIZE, maxDstSize);
+
+    syncSendBufferLength = compressedDataSize;
+    syncSendPacketCount = ceil(syncSendBufferLength / (float)SYNC_SEND_PACKET_DATA_LENGTH) + 1; // currently separated control packet
+    uint16_t checksum = crc16(syncSendBuffer, syncSendBufferLength);
+
+    logDebugP("Sync-Send (1/%u): control packet: bufferLength=%u, lengthPerPacket=%u, checksum=%u, fingerId=%u%", syncSendPacketCount, syncSendBufferLength, SYNC_SEND_PACKET_DATA_LENGTH, checksum, fingerId);
+
+    /*
+    Sync Control Packet Layout:
+    -    0: 1 byte : sequence number (0: control packet)
+    -    1: 1 byte : sync type (0: new finger, 1: delete finger)
+    -    2: 1 byte : sync data format version (currently always 0)
+    -  3-4: 2 bytes: total data content size
+    -    5: 1 byte : max. payload data length per data packet
+    -    6: 1 byte : number of data packets
+    -  7-8: 2 bytes: checksum
+    - 9-10: 2 bytes: finger ID
+    */
+
+    uint8_t *data = KoFIN_Sync.valueRef();
+    data[0] = 0;
+    data[1] = 0;
+    data[2] = 0;
+    data[3] = syncSendBufferLength >> 8;
+    data[4] = syncSendBufferLength;
+    data[5] = SYNC_SEND_PACKET_DATA_LENGTH;
+    data[6] = syncSendPacketCount;
+    data[7] = checksum >> 8;
+    data[8] = checksum;
+    data[9] = fingerId >> 8;
+    data[10] = fingerId;
+    KoFIN_Sync.objectWritten();
+
+    syncSendTimer = delayTimerInit();
+    syncSendPacketSentCount = 1;
+    syncSending = true;
+}
+
+void FingerprintModule::processSyncSend()
+{
+    if (!syncSending ||
+        !delayCheck(syncSendTimer, ParamFIN_SyncDelay))
+        return;
+
+    syncSendTimer = delayTimerInit();
+
+    uint8_t *data = KoFIN_Sync.valueRef();
+    data[0] = syncSendPacketSentCount;
+    uint8_t dataPacketNo = syncSendPacketSentCount - 1; // = sequence number - 1
+    uint16_t dataOffset = dataPacketNo * SYNC_SEND_PACKET_DATA_LENGTH;
+    uint8_t dataLength = dataOffset + SYNC_SEND_PACKET_DATA_LENGTH < syncSendBufferLength ? SYNC_SEND_PACKET_DATA_LENGTH : syncSendBufferLength - dataOffset;
+    memcpy(data + 1, syncSendBuffer + dataOffset, dataLength);
+    KoFIN_Sync.objectWritten();
+
+    syncSendPacketSentCount++;
+    logDebugP("Sync-Send (%u/%u): data packet: dataPacketNo=%u, dataOffset=%u, dataLength=%u", syncSendPacketSentCount, syncSendPacketCount, dataPacketNo, dataOffset, dataLength);
+
+    if (syncSendPacketSentCount == syncSendPacketCount)
+    {
+        logDebugP("Sync-Send: finished");
+
+        syncSending = false;
+        syncIgnoreTimer = delayTimerInit();
+    }
+}
+
+void FingerprintModule::processSyncReceive(uint8_t* data)
+{
+    if (syncSending)
+        return;
+
+    if (syncIgnoreTimer > 0)
+    {
+        if (delayCheck(syncIgnoreTimer, SYNC_IGNORE_DELAY))
+            syncIgnoreTimer = 0;
+        else
+            return;
+    }
+    
+    if (data[0] == 0) // sequence number
+    {
+        uint16_t syncDeleteFingerId;
+        switch (data[1]) // sync type
+        {
+            case 0: // new finger
+                if (data[2] != 0)
+                {
+                    logInfoP("Sync-Receive: Unsupported sync version: %u", data[2]);
+                    return;
+                }
+
+                syncReceiveBufferLength = (data[3] << 8) | data[4];
+                syncReceiveLengthPerPacket = data[5];
+                syncReceivePacketCount = data[6];
+                syncReceiveBufferChecksum = (data[7] << 8) | data[8];
+                syncReceiveFingerId = (data[9] << 8) | data[10];
+
+                logDebugP("Sync-Receive (1/%u): control packet: bufferLength=%u, lengthPerPacket=%u, checksum=%u, fingerId=%u", syncReceivePacketCount, syncReceiveBufferLength, syncReceiveLengthPerPacket, syncReceiveBufferChecksum, syncReceiveFingerId);
+
+                memset(syncReceivePacketReceived, 0, sizeof(syncReceivePacketReceived));
+                syncReceivePacketReceived[0] = true;
+                syncReceivePacketReceivedCount = 1;
+                syncReceiving = true;
+
+                return;
+            case 1: // delete finger
+                if (data[2] != 0)
+                {
+                    logInfoP("Sync-Receive (delete finger): Unsupported sync version: %u", data[2]);
+                    return;
+                }
+
+                syncDeleteFingerId = (data[3] << 8) | data[4];
+                logDebugP("Sync-Receive (delete finger): fingerId=%u", syncDeleteFingerId);
+
+                deleteFinger(syncDeleteFingerId, false);
+
+                return;
+            default:
+                logInfoP("Sync-Receive: Unsupported sync type: %u", data[1]);
+                syncReceiving = false;
+                return;
+        }
+    }
+
+    if (!syncReceiving)
+    {
+        logInfoP("Sync-Receive: data packet without control packet");
+        return;
+    }
+
+    uint8_t sequenceNo = data[0];
+    if (syncReceivePacketReceived[sequenceNo])
+    {
+        logInfoP("Sync-Receive: same packet already received");
+        return;
+    }
+
+    syncReceivePacketReceived[sequenceNo] = true;
+    uint8_t dataPacketNo = sequenceNo - 1;
+    uint16_t dataOffset = dataPacketNo * syncReceiveLengthPerPacket;
+    uint8_t dataLength = dataOffset + syncReceiveLengthPerPacket < syncReceiveBufferLength ? syncReceiveLengthPerPacket : syncReceiveBufferLength - dataOffset;
+    memcpy(syncReceiveBuffer + dataOffset, data + 1, dataLength);
+
+    syncReceivePacketReceivedCount++;
+    logDebugP("Sync-Receive (%u/%u): data packet: dataPacketNo=%u, dataOffset=%u, dataLength=%u", syncReceivePacketReceivedCount, syncReceivePacketCount, dataPacketNo, dataOffset, dataLength);
+
+    if (syncReceivePacketReceivedCount == syncReceivePacketCount)
+    {
+        finger.setLed(Fingerprint::State::Busy);
+
+        uint16_t checksum = crc16(syncReceiveBuffer, syncReceiveBufferLength);
+        if (syncReceiveBufferChecksum == checksum)
+            logDebugP("Sync-Receive: finished (checksum=%u)", syncReceiveBufferChecksum);
+        else
+        {
+            logErrorP("Sync-Receive: finished failed (checksum expected=%u, calculated=%u)", syncReceiveBufferChecksum, checksum);
+            finger.setLed(Fingerprint::State::Failed);
+            resetLedsTimer = delayTimerInit();
+            return;
+        }
+
+        uint8_t syncSendBufferTemp[SYNC_BUFFER_SIZE];
+        const int decompressedSize = LZ4_decompress_safe((char*)syncReceiveBuffer, (char*)syncSendBufferTemp, syncReceiveBufferLength, SYNC_BUFFER_SIZE);
+        if (decompressedSize != SYNC_BUFFER_SIZE)
+        {
+            logErrorP("Sync-Receive: decompression failed (size expected=%u, received=%u)", SYNC_BUFFER_SIZE, decompressedSize);
+            finger.setLed(Fingerprint::State::Failed);
+            resetLedsTimer = delayTimerInit();
+            return;
+        }
+
+        bool success;
+        success = finger.sendTemplate(syncSendBufferTemp);
+        if (!success)
+        {
+            logErrorP("Sync-Receive: sending template failed");
+            finger.setLed(Fingerprint::State::Failed);
+            resetLedsTimer = delayTimerInit();
+            return;
+        }
+
+        success = finger.storeTemplate(syncReceiveFingerId);
+        if (!success)
+        {
+            logErrorP("Sync-Receive: storing template failed");
+            finger.setLed(Fingerprint::State::Failed);
+            resetLedsTimer = delayTimerInit();
+            return;
+        }
+
+        uint32_t storageOffset = FIN_CaclStorageOffset(syncReceiveFingerId);
+        _fingerprintStorage.write(storageOffset, syncSendBufferTemp + TEMPLATE_SIZE, 29);
+        _fingerprintStorage.commit();
+
+        finger.setLed(Fingerprint::State::Success);
+        resetLedsTimer = delayTimerInit();
+        syncReceiving = false;
     }
 }
 
@@ -382,9 +697,15 @@ bool FingerprintModule::processFunctionProperty(uint8_t objectIndex, uint8_t pro
             handleFunctionPropertyEnrollFinger(data, resultData, resultLength);
             return true;
         case 2:
-            handleFunctionPropertyDeleteFinger(data, resultData, resultLength);
+            handleFunctionPropertySyncFinger(data, resultData, resultLength);
             return true;
         case 3:
+            handleFunctionPropertyDeleteFinger(data, resultData, resultLength);
+            return true;
+        case 4:
+            handleFunctionPropertyChangeFinger(data, resultData, resultLength);
+            return true;
+        case 6:
             handleFunctionPropertyResetScanner(data, resultData, resultLength);
             return true;
         case 11:
@@ -404,6 +725,7 @@ bool FingerprintModule::processFunctionProperty(uint8_t objectIndex, uint8_t pro
 void FingerprintModule::handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
 {
     logInfoP("Function property: Enroll request");
+    logIndentUp();
 
     uint16_t fingerId = (data[1] << 8) | data[2];
     logDebugP("fingerId: %d", fingerId);
@@ -411,8 +733,8 @@ void FingerprintModule::handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_
     uint8_t personFinger = data[3];
     logDebugP("personFinger: %d", personFinger);
 
-    char personName[28] = {};
-    for (size_t i = 0; i < 28; i++)
+    uint8_t personName[28] = {};
+    for (uint8_t i = 0; i < 28; i++)
     {
         memcpy(personName + i, data + 4 + i, 1);
         if (personName[i] == 0) // null termination
@@ -423,21 +745,43 @@ void FingerprintModule::handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_
     uint32_t storageOffset = FIN_CaclStorageOffset(fingerId);
     logDebugP("storageOffset: %d", storageOffset);
     _fingerprintStorage.writeByte(storageOffset, personFinger); // only 4 bits used
-    _fingerprintStorage.write(storageOffset + 1, *personName, 28);
+    _fingerprintStorage.write(storageOffset + 1, personName, 28);
     _fingerprintStorage.commit();
 
-    enrollRequested = delayTimerInit();
+    enrollRequestedTimer = delayTimerInit();
     enrollRequestedLocation = fingerId;
-
-    //bool success = enrollFinger(fingerId);
     
     resultData[0] = 0;
     resultLength = 1;
+    logIndentDown();
+}
+
+void FingerprintModule::handleFunctionPropertySyncFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
+{
+    logInfoP("Function property: Sync request");
+    logIndentUp();
+
+    uint16_t fingerId = (data[1] << 8) | data[2];
+    logDebugP("fingerId: %d", fingerId);
+
+    if (finger.hasLocation(fingerId))
+    {
+        syncRequestedFingerId = fingerId;
+        syncRequestedTimer = delayTimerInit();
+
+        resultData[0] = 0;
+    }
+    else
+        resultData[0] = 1;
+
+    resultLength = 1;
+    logIndentDown();
 }
 
 void FingerprintModule::handleFunctionPropertyDeleteFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
 {
     logInfoP("Function property: Delete request");
+    logIndentUp();
 
     uint16_t fingerId = (data[1] << 8) | data[2];
     logDebugP("fingerId: %d", fingerId);
@@ -453,14 +797,59 @@ void FingerprintModule::handleFunctionPropertyDeleteFinger(uint8_t *data, uint8_
     
     resultData[0] = success ? 0 : 1;
     resultLength = 1;
+    logIndentDown();
+}
+
+void FingerprintModule::handleFunctionPropertyChangeFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
+{
+    logInfoP("Function property: Change request");
+    logIndentUp();
+
+    uint16_t fingerId = (data[1] << 8) | data[2];
+    logDebugP("fingerId: %d", fingerId);
+
+    if (finger.hasLocation(fingerId))
+    {
+        uint8_t personFinger = data[3];
+        logDebugP("personFinger: %d", personFinger);
+
+        uint8_t personName[28] = {};
+        for (uint8_t i = 0; i < 28; i++)
+        {
+            memcpy(personName + i, data + 4 + i, 1);
+            if (personName[i] == 0) // null termination
+                break;
+        }
+        logDebugP("personName: %s", personName);
+
+        uint32_t storageOffset = FIN_CaclStorageOffset(fingerId);
+        logDebugP("storageOffset: %d", storageOffset);
+        _fingerprintStorage.writeByte(storageOffset, personFinger); // only 4 bits used
+        _fingerprintStorage.write(storageOffset + 1, personName, 28);
+        _fingerprintStorage.commit();
+
+        syncRequestedFingerId = fingerId;
+        syncRequestedTimer = delayTimerInit();
+
+        resultData[0] = 0;
+    }
+    else
+    {
+        logInfoP("Finger not found");
+        resultData[0] = 1;
+    }
+
+    resultLength = 1;
+    logIndentDown();
 }
 
 void FingerprintModule::handleFunctionPropertyResetScanner(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
 {
     logInfoP("Function property: Reset scanner");
+    logIndentUp();
 
     char personData[29] = {}; // empty
-    for (size_t i = 0; i < MAX_FINGERS; i++)
+    for (uint16_t i = 0; i < MAX_FINGERS; i++)
     {
         uint32_t storageOffset = FIN_CaclStorageOffset(i);
         _fingerprintStorage.write(storageOffset, *personData, 29);
@@ -468,14 +857,17 @@ void FingerprintModule::handleFunctionPropertyResetScanner(uint8_t *data, uint8_
     _fingerprintStorage.commit();
 
     bool success = finger.emptyDatabase();
+    resetLedsTimer = delayTimerInit();
 
     resultData[0] = success ? 0 : 1;
     resultLength = 1;
+    logIndentDown();
 }
 
 void FingerprintModule::handleFunctionPropertySetPassword(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
 {
     logInfoP("Function property: Set password");
+    logIndentUp();
 
     uint8_t passwordOption = data[1];
     logDebugP("passwordOption: %d", passwordOption);
@@ -503,7 +895,7 @@ void FingerprintModule::handleFunctionPropertySetPassword(uint8_t *data, uint8_t
     if (passwordOption == 2)
     {
         char oldPassword[16] = {};
-        for (size_t i = 0; i < 16; i++)
+        for (uint8_t i = 0; i < 16; i++)
         {
             dataOffset++;
             memcpy(oldPassword + i, data + dataOffset, 1);
@@ -545,13 +937,19 @@ void FingerprintModule::handleFunctionPropertySetPassword(uint8_t *data, uint8_t
             finger.start();
         }
 
+        resetLedsTimer = delayTimerInit();
         logIndentDown();
+
+        resultData[0] = success ? 0 : 2;
     }
     else
+    {
         logDebugP("Invalid old password provided.");
+        resultData[0] = 1;
+    }
     
-    resultData[0] = success ? 0 : 1;
     resultLength = 1;
+    logIndentDown();
 }
 
 void FingerprintModule::handleFunctionPropertySearchPersonByFingerId(uint8_t *data, uint8_t *resultData, uint8_t &resultLength)
@@ -562,13 +960,24 @@ void FingerprintModule::handleFunctionPropertySearchPersonByFingerId(uint8_t *da
     uint16_t fingerId = (data[1] << 8) | data[2];
     logDebugP("fingerId: %d", fingerId);
 
-    uint8_t* personName[28] = {};
+    if (!finger.hasLocation(fingerId))
+    {
+        logDebugP("Unrecognized by scanner!");
+        resultData[0] = 1;
+        resultLength = 1;
+
+        logIndentDown();
+        return;
+    }
+
+    uint8_t personName[28] = {};
 
     uint32_t storageOffset = FIN_CaclStorageOffset(fingerId);
+    logDebugP("storageOffset: %d", storageOffset);
     uint8_t personFinger = _fingerprintStorage.readByte(storageOffset);
     if (personFinger > 0)
     {
-        _fingerprintStorage.read(storageOffset + 1, *personName, 28);
+        _fingerprintStorage.read(storageOffset + 1, personName, 28);
 
         logDebugP("Found:");
         logIndentUp();
@@ -576,10 +985,10 @@ void FingerprintModule::handleFunctionPropertySearchPersonByFingerId(uint8_t *da
         logDebugP("personName: %s", personName);
         logIndentDown();
 
-        resultData[0] = 1;
+        resultData[0] = 0;
         resultData[1] = personFinger;
         resultLength = 2;
-        for (size_t i = 0; i < 28; i++)
+        for (uint8_t i = 0; i < 28; i++)
         {
             memcpy(resultData + 2 + i, personName + i, 1);
             resultLength++;
@@ -592,7 +1001,7 @@ void FingerprintModule::handleFunctionPropertySearchPersonByFingerId(uint8_t *da
     {
         logDebugP("Not found.");
 
-        resultData[0] = 0;
+        resultData[0] = 1;
         resultLength = 1;
     }
 
@@ -614,49 +1023,62 @@ void FingerprintModule::handleFunctionPropertySearchFingerIdByPerson(uint8_t *da
         memcpy(searchPersonName + i, data + 2 + i, 1);
         if (searchPersonName[i] == 0) // null termination
         {
-            searchPersonNameLength = i + 1;
+            searchPersonNameLength = i;
             break;
         }
     }
-    logDebugP("searchPersonName: %s", searchPersonName);
+    logDebugP("searchPersonName: %s (length: %u)", searchPersonName, searchPersonNameLength);
+    logDebugP("resultLength: %u", resultLength);
+
+    uint16_t* fingerIds = finger.getLocations();
+    uint16_t templateCount = finger.getTemplateCount();
 
     uint32_t storageOffset = 0;
     uint8_t personFinger = 0;
-    uint8_t* personName[28] = {};
+    uint8_t personName[29] = {};
     uint8_t foundCount = 0;
-    for (size_t fingerId = 0; fingerId < MAX_FINGERS; fingerId++)
+    uint16_t foundTotalCount = 0;
+    for (uint16_t i = 0; i < templateCount; i++)
     {
+        uint16_t fingerId = fingerIds[i];
         storageOffset = FIN_CaclStorageOffset(fingerId);
+        personFinger = _fingerprintStorage.readByte(storageOffset);
         if (searchPersonFinger > 0)
-        {
-            personFinger = _fingerprintStorage.readByte(storageOffset);
             if (searchPersonFinger != personFinger)
                 continue;
-        }
 
-        _fingerprintStorage.read(storageOffset + 1, *personName, 28);
-        if (memcmp(personName, searchPersonName, searchPersonNameLength) == 0)
+        _fingerprintStorage.read(storageOffset + 1, personName, 28);
+        if (strcasestr((char *)personName, searchPersonName) != nullptr)
         {
-            logDebugP("Found:");
-            logIndentUp();
-            logDebugP("personFinger: %d", personFinger);
-            logDebugP("personName: %s", personName);
-            logIndentDown();
+            // logDebugP("Found:");
+            // logIndentUp();
+            // logDebugP("fingerId: %d", fingerId);
+            // logDebugP("personFinger: %d", personFinger);
+            // logDebugP("personName: %s", personName);
+            // logIndentDown();
 
-            resultData[1 + foundCount * 31] = fingerId >> 8;
-            resultData[1 + foundCount * 31 + 1] = fingerId;
-            resultData[1 + foundCount * 31 + 2] = personFinger;
-            memcpy(resultData + 1 + foundCount * 31 + 3, personName, 28);
+            // we return max. 10 results
+            if (foundCount < 7)
+            {
+                resultData[3 + foundCount * 31] = fingerId >> 8;
+                resultData[3 + foundCount * 31 + 1] = fingerId;
+                resultData[3 + foundCount * 31 + 2] = personFinger;
+                memcpy(resultData + 3 + foundCount * 31 + 3, personName, 28);
 
-            foundCount++;
-            if (foundCount == 10)
-                break; // we return max. 10 results
+                foundCount++;
+            }
+
+            foundTotalCount++;
         }
     }
     
-    resultData[0] = foundCount > 0;
-    resultLength = 1 + foundCount * 31;
+    resultData[0] = foundCount > 0 ? 0 : 1;
+    resultData[1] = foundTotalCount >> 8;
+    resultData[2] = foundTotalCount;
+    resultLength = 3 + foundCount * 31;
 
+    logDebugP("foundTotalCount: %u", foundTotalCount);
+    logDebugP("returned resultLength: %u", resultLength);
     logIndentDown();
 }
 

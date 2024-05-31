@@ -383,11 +383,12 @@ uint8_t Adafruit_Fingerprint::downloadModel(uint8_t buffer_no) {
     @returns true/false (successful or not)
 */
 /**************************************************************************/
-boolean Adafruit_Fingerprint::write_template_to_sensor(int temp_Size, const uint8_t ref_buf[])
+uint8_t Adafruit_Fingerprint::write_template_to_sensor(int temp_Size, const uint8_t ref_buf[])
 {
-  if (downloadModel(0x01) != FINGERPRINT_OK) {
+  uint8_t p = downloadModel(0x01);
+  if (p != FINGERPRINT_OK) {
     Serial.println("downloadModel failed");
-    return false; // check if buffer 1 is ready to be loaded
+    return p; // check if buffer 1 is ready to be loaded
   }
 
   //delay(2000);
@@ -406,7 +407,7 @@ boolean Adafruit_Fingerprint::write_template_to_sensor(int temp_Size, const uint
     //delay(1000);
   }
 
-  return true;
+  return FINGERPRINT_OK;
 }
 
 /**************************************************************************/
@@ -563,16 +564,13 @@ uint8_t Adafruit_Fingerprint::getTemplateIndices() {
     return p;
 
   // clear template indices
-  int maxTemplates = sizeof(templates) / sizeof(uint8_t);
-  for (int i = 0; i < maxTemplates; ++i) {
-    templates[i] = 0;
-  }
+  memset(templates, 0, sizeof(templates));
   
   //Serial.printf("capacity:%d,", capacity);
   //uint8_t t = ceil(capacity / (double)256);
   //Serial.printf("t:%d,", t);
 
-  int count = 0;
+  uint16_t count = 0;
   for (uint8_t j = 0; j < ceil(capacity / (double)256); ++j) {
     //Serial.printf("for-j:%d,", j);
     GET_CMD_PACKET(FINGERPRINT_TEMPLATEREAD, j);

@@ -2,13 +2,12 @@
 <?xml-model href="../../Organization/knxprod-support/knx_project_20/knx-editor.xsd" type="application/xml" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <KNX xmlns="http://knx.org/xml/project/20" xmlns:op="http://github.com/OpenKNX/OpenKNXproducer">
 
-  <op:config name="%LOG_NumChannelsDefault%" value="3" />
-  <op:config name="%BTN_NumChannelsDefault%" value="3" />
+  <op:config href="FingerprintModule.conf.xml" />
 
   <op:ETS OpenKnxId="0xA6"
     ApplicationNumber="0x00"
-    ApplicationVersion="0.1"
-    ReplacesVersions="0.0"
+    ApplicationVersion="%ApplicationVersion%"
+    ReplacesVersions="%ReplacesVersions%"
     ApplicationRevision="0"
     ProductName="Fingerabdruckleser"
     ApplicationName="AB-Finger-Logic-Button"
@@ -19,7 +18,7 @@
 
   <op:define prefix="BASE" ModuleType="1"
             share="../lib/OGM-Common/src/Common.share.xml">
-    <op:verify File="../lib/OGM-Common/library.json" ModuleVersion="1.1" />
+    <op:verify File="../lib/OGM-Common/library.json" ModuleVersion="%BASE_VerifyVersion%" />
   </op:define>
 
   <!-- for FIN, we have to stay with ModuleType 2!!! -->
@@ -29,13 +28,22 @@
     ModuleType="2"
     KoSingleOffset="20"
     KoOffset="100"
-    NumChannels="200" />
+    NumChannels="200">
+    <op:verify File="../library.json" ModuleVersion="%ApplicationVersion%" />
+  </op:define>
 
   <op:define prefix="FINACT"
+    prefixDoc="FIN"
     share="FingerAction.share.xml"
     template="FingerAction.templ.xml"
-    ModuleType="4"
-    NumChannels="200" />
+    ModuleType="2"
+    NumChannels="300" />
+
+  <op:define prefix="FINACTSER"
+    prefixDoc="FIN"
+    template="FingerActionSearch.templ.xml"
+    ModuleType="2"
+    NumChannels="7" />
 
   <op:define prefix="LOG"
             share="../lib/OFM-LogicModule/src/Logikmodul.share.xml"
@@ -43,7 +51,7 @@
             NumChannels="99"
             KoOffset="700"
             ModuleType="1" >
-    <op:verify File="../lib/OFM-LogicModule/library.json" ModuleVersion="3.2" />
+    <op:verify File="../lib/OFM-LogicModule/library.json" ModuleVersion="%LOG_VerifyVersion%" />
   </op:define>
 
   <op:define prefix="BTN"
@@ -52,7 +60,7 @@
             NumChannels="20"
             KoOffset="1000"
             ModuleType="3" >
-  <op:verify File="../lib/OFM-VirtualButton/library.json" ModuleVersion="0.3" />
+    <op:verify File="../lib/OFM-VirtualButton/library.json" ModuleVersion="%BTN_VerifyVersion%" />
   </op:define>
 
   <generate>

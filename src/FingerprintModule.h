@@ -1,8 +1,12 @@
+#define _GNU_SOURCE
+
 #include "OpenKNX.h"
 #include "hardware.h"
 #include "Fingerprint.h"
 #include "ActionChannel.h"
 #include "CRC32.h"
+#include "CRC16.h"
+#include "lz4.h"
 
 #define SCANNER_TOUCH_PIN 2
 
@@ -18,6 +22,7 @@
 #define EXT4 29 // ADC
 #define EXT5 19
 
+#define INIT_RESET_TIMEOUT 1000
 #define LED_RESET_TIMEOUT 1000
 #define ENROLL_REQUEST_DELAY 100
 #define CAPTURE_RETRIES_TOUCH_TIMEOUT 500
@@ -26,9 +31,15 @@
 #define MAX_FINGERS 1500
 
 #define FLASH_MAGIC_WORD 2912744758
-#define FIN_CaclStorageOffset(fingerId) fingerId * 29 + 4096 + 1 // first byte free for finger info storage format version
+#define FINGER_DATA_SIZE 29
+#define FIN_CaclStorageOffset(fingerId) fingerId * FINGER_DATA_SIZE + 4096 + 1 // first byte free for finger info storage format version
 
 #define FLASH_SCANNER_PASSWORD_OFFSET 5
+
+#define SYNC_BUFFER_SIZE TEMPLATE_SIZE + FINGER_DATA_SIZE
+#define SYNC_SEND_PACKET_DATA_LENGTH 13
+#define SYNC_AFTER_ENROLL_DELAY 500
+#define SYNC_IGNORE_DELAY 500
 
 /*
 Flash Storage Layout:
@@ -61,9 +72,16 @@ class FingerprintModule : public OpenKNX::Module
     void initFlash();
     void processScanSuccess(uint16_t location, bool external = false);
     bool enrollFinger(uint16_t location);
-    bool deleteFinger(uint16_t location);
+    bool deleteFinger(uint16_t location, bool sync = true);
+    void setLedDefault();
+    void startSyncDelete(uint16_t fingerId);
+    void startSyncSend(uint16_t fingerId, bool loadModel = true);
+    void processSyncSend();
+    void processSyncReceive(uint8_t* data);
     void handleFunctionPropertyEnrollFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
+    void handleFunctionPropertySyncFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
     void handleFunctionPropertyDeleteFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
+    void handleFunctionPropertyChangeFinger(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
     void handleFunctionPropertyResetScanner(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
     void handleFunctionPropertySetPassword(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
     void handleFunctionPropertySearchPersonByFingerId(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
@@ -74,12 +92,34 @@ class FingerprintModule : public OpenKNX::Module
     ActionChannel *_channels[FIN_ChannelCount];
 
     Fingerprint finger;
+    uint32_t initResetTimer = 0;
     uint32_t resetLedsTimer = 0;
-    uint32_t enrollRequested = 0;
+    uint32_t enrollRequestedTimer = 0;
     uint16_t enrollRequestedLocation = 0;
     inline static bool delayCallbackActive = false;
 
     inline volatile static bool touched = false;
+
+    uint32_t syncIgnoreTimer = 0;
+
+    bool syncSending = false;
+    uint32_t syncSendTimer = 0;
+    uint8_t syncSendBuffer[SYNC_BUFFER_SIZE];
+    uint16_t syncSendBufferLength = 0;
+    uint8_t syncSendPacketCount = 0;
+    uint8_t syncSendPacketSentCount = 0;
+    uint32_t syncRequestedTimer = 0;
+    uint16_t syncRequestedFingerId = 0;
+
+    bool syncReceiving = false;
+    uint16_t syncReceiveFingerId = 0;
+    uint8_t syncReceiveBuffer[SYNC_BUFFER_SIZE];
+    uint16_t syncReceiveBufferLength = 0;
+    uint16_t syncReceiveBufferChecksum = 0;
+    uint8_t syncReceiveLengthPerPacket = 0;
+    uint8_t syncReceivePacketCount = 0;
+    uint8_t syncReceivePacketReceivedCount = 0;
+    bool syncReceivePacketReceived[SYNC_BUFFER_SIZE] = {false};
 };
 
 extern FingerprintModule openknxFingerprintModule;

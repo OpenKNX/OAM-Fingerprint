@@ -195,7 +195,7 @@ public:
   uint8_t getModel(void);
   uint8_t get_template_buffer(int bufsize,uint8_t ref_buf[]); // new addiiton,for getting template data from sensor
   uint8_t downloadModel(uint8_t buffer_no); //new addiiton,for loading template data to buffer 
-  boolean write_template_to_sensor(int temp_Size, const uint8_t ref_buf[]) ; // new addition, for writing template data to sensor
+  uint8_t write_template_to_sensor(int temp_Size, const uint8_t ref_buf[]) ; // new addition, for writing template data to sensor
   uint8_t deleteModel(uint16_t id);
   uint8_t fingerFastSearch(void);
   uint8_t fingerSearch(uint8_t slot = 1);
@@ -225,7 +225,7 @@ public:
   uint16_t templateCount;
   /// The stored template indices in the sensor, set by getTemplateIndices(),
   /// filled up to templateCount
-  uint8_t templates[1024];
+  uint16_t templates[1500] = {0};
 
   uint16_t status_reg = 0x0; ///< The status register (set by getParameters)
   uint16_t system_id = 0x0;  ///< The system identifier (set by getParameters)
