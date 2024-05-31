@@ -33,10 +33,17 @@
   </op:define>
 
   <op:define prefix="FINACT"
+    prefixDoc="FIN"
     share="FingerAction.share.xml"
     template="FingerAction.templ.xml"
-    ModuleType="4"
-    NumChannels="200" />
+    ModuleType="2"
+    NumChannels="300" />
+
+  <op:define prefix="FINACTSER"
+    prefixDoc="FIN"
+    template="FingerActionSearch.templ.xml"
+    ModuleType="2"
+    NumChannels="7" />
 
   <op:define prefix="LOG"
             share="../lib/OFM-LogicModule/src/Logikmodul.share.xml"

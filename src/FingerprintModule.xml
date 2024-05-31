@@ -4,8 +4,8 @@
 
   <op:ETS OpenKnxId="0xA6"
     ApplicationNumber="0x01"
-    ApplicationVersion="3.8"
-    ReplacesVersions="3.7 3.6 3.5 3.4 3.3 3.2 3.1"
+    ApplicationVersion="4.3"
+    ReplacesVersions="4.2 4.1 4.0"
     ApplicationRevision="0"
     ProductName="Fingerabdruckleser"
     ApplicationName="AB-Finger-Logic-Button"
@@ -35,14 +35,14 @@
     prefixDoc="FIN"
     share="FingerAction.share.xml"
     template="FingerAction.templ.xml"
-    ModuleType="4"
+    ModuleType="2"
     NumChannels="99" />
 
     <op:define prefix="FINACTSER"
     prefixDoc="FIN"
     template="FingerActionSearch.templ.xml"
-    ModuleType="4"
-    NumChannels="9" />
+    ModuleType="2"
+    NumChannels="7" />
 
   <op:define prefix="LOG"
     share="../lib/OFM-LogicModule/src/Logikmodul.share.xml"

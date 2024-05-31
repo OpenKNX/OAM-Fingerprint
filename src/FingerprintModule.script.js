@@ -202,7 +202,9 @@ function FIN_searchFingerId(device, online, progress, context) {
     online.disconnect();
 
     var numRes = (resp.length - 3) / 31;
-    progress.setText("Fingerprint: " + numRes + " Finger ID(s) zu Person " + parPersonName.value + " (" + parPersonFinger.value + ") gefunden.");
+    var totalMatches = resp[1] << 8 | resp[2];
+    // info("totalMatches " + totalMatches);
+    progress.setText("Fingerprint: " + totalMatches + " Finger ID(s) zu Person " + parPersonName.value + " (" + parPersonFinger.value + ") gefunden.");
 
     // var fingerId = resp[1] << 8 | resp[2];
     // var personFinger = resp[3];
@@ -218,8 +220,6 @@ function FIN_searchFingerId(device, online, progress, context) {
     // parPersonFinger.value = personFinger;
     // parFingerId.value = fingerId;
 
-    var totalMatches = resp[1] << 8 | resp[2];
-    // info("totalMatches " + totalMatches);
 
     // following up to 10 results in total
     // always 2 bytes fingerId, 1 byte personFinger and 28 bytes personName

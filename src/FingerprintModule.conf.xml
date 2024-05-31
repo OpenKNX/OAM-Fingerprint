@@ -10,5 +10,5 @@
   <op:config name="%BASE_VerifyVersion%" value="1.1" />
 
   <op:config name="%ApplicationVersion%" value="0.2" />
-  <op:config name="%ReplacesVersions%" value="0.1" />
+  <op:config name="%ReplacesVersions%" value="0.0" />
 </KNX>

@@ -1028,6 +1028,7 @@ void FingerprintModule::handleFunctionPropertySearchFingerIdByPerson(uint8_t *da
         }
     }
     logDebugP("searchPersonName: %s (length: %u)", searchPersonName, searchPersonNameLength);
+    logDebugP("resultLength: %u", resultLength);
 
     uint16_t* fingerIds = finger.getLocations();
     uint16_t templateCount = finger.getTemplateCount();
@@ -1049,15 +1050,15 @@ void FingerprintModule::handleFunctionPropertySearchFingerIdByPerson(uint8_t *da
         _fingerprintStorage.read(storageOffset + 1, personName, 28);
         if (strcasestr((char *)personName, searchPersonName) != nullptr)
         {
-            logDebugP("Found:");
-            logIndentUp();
-            logDebugP("fingerId: %d", fingerId);
-            logDebugP("personFinger: %d", personFinger);
-            logDebugP("personName: %s", personName);
-            logIndentDown();
+            // logDebugP("Found:");
+            // logIndentUp();
+            // logDebugP("fingerId: %d", fingerId);
+            // logDebugP("personFinger: %d", personFinger);
+            // logDebugP("personName: %s", personName);
+            // logIndentDown();
 
             // we return max. 10 results
-            if (foundCount <= 10)
+            if (foundCount < 7)
             {
                 resultData[3 + foundCount * 31] = fingerId >> 8;
                 resultData[3 + foundCount * 31 + 1] = fingerId;
@@ -1077,6 +1078,7 @@ void FingerprintModule::handleFunctionPropertySearchFingerIdByPerson(uint8_t *da
     resultLength = 3 + foundCount * 31;
 
     logDebugP("foundTotalCount: %u", foundTotalCount);
+    logDebugP("returned resultLength: %u", resultLength);
     logIndentDown();
 }
 
