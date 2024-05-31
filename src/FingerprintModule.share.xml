@@ -373,12 +373,18 @@
                   <when test="1">
                     <ComObjectRefRef RefId="%AID%_O-%T%000021_R-%T%00002101" />
                     <ComObjectRefRef RefId="%AID%_O-%T%000022_R-%T%00002201" />
-                    <ComObjectRefRef RefId="%AID%_O-%T%000023_R-%T%00002301" />
                     <ComObjectRefRef RefId="%AID%_O-%T%000031_R-%T%00003101" />
-                    <ComObjectRefRef RefId="%AID%_O-%T%000032_R-%T%00003201" />
                     <ComObjectRefRef RefId="%AID%_O-%T%000041_R-%T%00004101" />
                     <ComObjectRefRef RefId="%AID%_O-%T%000042_R-%T%00004201" />
                     <ComObjectRefRef RefId="%AID%_O-%T%000043_R-%T%00004301" />
+
+                    <!-- access data -->
+                    <choose ParamRefId="%AID%_UP-%T%000014_R-%T%00001401">
+                      <when test="1">
+                        <ComObjectRefRef RefId="%AID%_O-%T%000023_R-%T%00002301" />
+                        <ComObjectRefRef RefId="%AID%_O-%T%000032_R-%T%00003201" />
+                      </when>
+                    </choose>
                   </when>
                 </choose>
 
