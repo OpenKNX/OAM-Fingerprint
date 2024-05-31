@@ -1,6 +1,7 @@
 
 function FIN_clearSearchResults(input, output, context) {
     output.SearchResults = 0;
+    output.SearchResultsDisplay = 0;
 }
 
 function FIN_dummy(input, output, context) { }
@@ -170,8 +171,10 @@ function FIN_searchFingerId(device, online, progress, context) {
     var parFingerId = device.getParameterByName("FINACT_FingerId");
     var parNumberSearchResults = device.getParameterByName("FINACT_NumberSearchResults");
     var parNumberSearchResultsText = device.getParameterByName("FINACT_NumberSearchResultsText");
+    var parNumberSearchResultsToDisplay = device.getParameterByName("FINACT_NumberSearchResultsToDisplay");
 
     parNumberSearchResults.value = 0;
+    parNumberSearchResultsToDisplay.value = 0;
 
     progress.setText("Fingerprint: Finger ID zu Person " + parPersonName.value + " (" + parPersonFinger.value + ") suchen...");
     online.connect();
@@ -224,8 +227,12 @@ function FIN_searchFingerId(device, online, progress, context) {
     // following up to 10 results in total
     // always 2 bytes fingerId, 1 byte personFinger and 28 bytes personName
     // info("Bevor: " + parNumberSearchResults.value);
-    parNumberSearchResults.value = totalMatches;
     parNumberSearchResultsText.value = totalMatches;
+    parNumberSearchResultsToDisplay.value = numRes;
+    if (totalMatches > numRes) {
+        parNumberSearchResults.value = 1;
+    }
+
     // info("Danach: " + parNumberSearchResults.value);
     for (var row = 1; row <= numRes; row++) {
         // info("FINACT_Person" + row + "Name");

@@ -301,8 +301,8 @@
                   </Rows>
                   <Columns>
                     <Column Id="%AID%_PB-nnn_C-1" Width="45%" />
-                    <Column Id="%AID%_PB-nnn_C-2" Width="25%" />
-                    <Column Id="%AID%_PB-nnn_C-3" Width="25%" />
+                    <Column Id="%AID%_PB-nnn_C-2" Width="27%" />
+                    <Column Id="%AID%_PB-nnn_C-3" Width="27%" />
                   </Columns>
                   <Button Id="%AID%_B-%T%000001" Text="Anlernen" Cell="1,2" Name="enrollFinger" EventHandler="FIN_enrollFinger" EventHandlerOnline="ConnectionOriented" />
                   <Button Id="%AID%_B-%T%000002" Text="Ändern" Cell="1,3" Name="changeFinger" EventHandler="FIN_changeFinger" EventHandlerOnline="ConnectionOriented" />
@@ -321,7 +321,16 @@
                     <ParameterRefRef RefId="%AID%_P-%T%000018_R-%T%00001801" IndentLevel="1" HelpContext="%DOC%" />
                   </when>
                 </choose>
-                <Button Id="%AID%_B-%T%000003" Text="Löschen" Name="deleteFinger" EventHandler="FIN_deleteFinger" EventHandlerOnline="ConnectionOriented" />
+                  <ParameterBlock Id="%AID%_PB-nnn" Inline="true" Layout="Grid">
+                  <Rows>
+                    <Row Id="%AID%_PB-nnn_R-1" />
+                  </Rows>
+                  <Columns>
+                    <Column Id="%AID%_PB-nnn_C-1" Width="45%" />
+                    <Column Id="%AID%_PB-nnn_C-2" Width="27%" />
+                  </Columns>
+                  <Button Id="%AID%_B-%T%000003" Text="Löschen" Name="deleteFinger" Cell="1,2" EventHandler="FIN_deleteFinger" EventHandlerOnline="ConnectionOriented" />
+                </ParameterBlock>
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
 
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="Zusatzfunktionen" UIHint="Headline" />
