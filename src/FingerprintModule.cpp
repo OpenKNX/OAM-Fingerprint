@@ -130,7 +130,7 @@ void FingerprintModule::loop()
                     finger.setLed(Fingerprint::ScanNoMatch);
 
                     logInfoP("Finger not found");
-                    KoFIN_ScanSuccess.value(true, DPT_Switch);
+                    KoFIN_ScanSuccess.value(false, DPT_Switch);
 
                     KoFIN_ScanSuccessData.valueNoSend((uint32_t)0, Dpt(15, 1, 0)); // access identification code (unknown)
                     KoFIN_ScanSuccessData.valueNoSend(true, Dpt(15, 1, 1));        // detection error
