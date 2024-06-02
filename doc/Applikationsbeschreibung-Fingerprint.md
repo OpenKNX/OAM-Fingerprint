@@ -18,6 +18,16 @@ Es gibt eine kleinere Applikationsversion mit bis zu 200 Aktionen/Fingerzuordnun
 
 Im folgenden werden Änderungen an dem Dokument erfasst, damit man nicht immer das Gesamtdokument lesen muss, um Neuerungen zu erfahren.
 
+02.06.2024: Firmware 0.2.1, Applikation 0.2
+
+* KO "Scan: Erfolg" liefert nun eine "0", wenn ein Finger nicht erkannt wurde.
+
+01.06.2024: Firmware 0.2.0, Applikation 0.2
+
+* Es gibt nun eine Personensuche, mit der man nach den zugewiesenen Fingern und Namen suchen kann.
+* Die Synchronisation zwischen mehreren Fingerabdrucklesern ist nun vollständig implementiert. Ist diese aktiviert, erfolgt die Synchronisation automatisch, nachdem ein neuer Finger angelernt wurde. Über die ETS ist es aber auch möglich die Synchronisation einzelner Finger manuell anzustoßen. Auch das Löschen eines Fingers wird synchronisiert.
+* Die Funktion und Farbe des Fingerprint LED-Rings kann nun über Rohdaten-KOs auch extern gesteuert werden.
+
 18.05.2024: Firmware 0.1.0, Applikation 0.1
 
 * Initiales Release als OpenKNX Fingerprint
