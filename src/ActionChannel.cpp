@@ -13,7 +13,7 @@ const std::string ActionChannel::name()
 
 void ActionChannel::loop()
 {
-    if (_actionCallResetTime > 0 && delayCheck(_actionCallResetTime, ACTION_CALL_TIMEOUT))
+    if (_actionCallResetTime > 0 && delayCheck(_actionCallResetTime, ParamFIN_AuthDelayTimeMS))
     {
         KoFIN_ActionCall.value(false, DPT_Switch);
         _finger.setLed(Fingerprint::State::None);

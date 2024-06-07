@@ -1,8 +1,6 @@
 #include "OpenKNX.h"
 #include "Fingerprint.h"
 
-#define ACTION_CALL_TIMEOUT 3000
-
 class ActionChannel : public OpenKNX::Channel
 {
     private:
