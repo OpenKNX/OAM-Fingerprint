@@ -27,6 +27,7 @@
 #define ENROLL_REQUEST_DELAY 100
 #define CAPTURE_RETRIES_TOUCH_TIMEOUT 500
 #define CAPTURE_RETRIES_LOCK_TIMEOUT 3000
+#define CHECK_SENSOR_DELAY 1000
 
 #define MAX_FINGERS 1500
 
@@ -96,6 +97,7 @@ class FingerprintModule : public OpenKNX::Module
     uint32_t resetLedsTimer = 0;
     uint32_t enrollRequestedTimer = 0;
     uint16_t enrollRequestedLocation = 0;
+    uint32_t checkSensorTimer = 0;
     inline static bool delayCallbackActive = false;
 
     inline volatile static bool touched = false;

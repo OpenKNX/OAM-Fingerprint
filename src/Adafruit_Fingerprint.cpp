@@ -467,6 +467,16 @@ uint8_t Adafruit_Fingerprint::fingerFastSearch(void) {
 
 /**************************************************************************/
 /*!
+    @brief   Check whether the sensor is normal
+    @returns <code>FINGERPRINT_OK</code> if state is normal
+    @returns <code>FINGERPRINT_ABNORMAL</code> if state is abnormal
+*/
+uint8_t Adafruit_Fingerprint::checkSensor(void) {
+  SEND_CMD_PACKET(FINGERPRINT_CHECKSENSOR);
+}
+
+/**************************************************************************/
+/*!
     @brief   Control the built in LED
     @param on True if you want LED on, False to turn LED off
     @returns <code>FINGERPRINT_OK</code> on success

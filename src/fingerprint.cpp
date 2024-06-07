@@ -591,6 +591,14 @@ bool Fingerprint::emptyDatabase(void)
     return success;
 }
 
+bool Fingerprint::checkSensor(void)
+{
+    if (!scannerReady)
+        return false;
+
+    return _finger.checkSensor() == FINGERPRINT_OK;
+}
+
 #ifdef CALC_TEMPLATE_CHECKUM
 Fingerprint::GetNotepadPageIndexResult Fingerprint::_getNotepadPageIndex(u_int16_t templateLocation)
 {

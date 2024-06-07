@@ -47,6 +47,7 @@
 #define FINGERPRINT_PASSVERIFY 0x21 //!< Verify the fingerprint passed
 #define FINGERPRINT_STARTCODE                                                  \
   0xEF01 //!< Fixed falue of EF01H; High byte transferred first
+#define FINGERPRINT_ABNORMAL 0x29 //!< Sensor check result abnormal
 
 #define FINGERPRINT_COMMANDPACKET 0x1 //!< Command packet
 #define FINGERPRINT_DATAPACKET                                                 \
@@ -74,6 +75,7 @@
 #define FINGERPRINT_HISPEEDSEARCH                                              \
   0x1B //!< Asks the sensor to search for a matching fingerprint template to the
        //!< last model generated
+#define FINGERPRINT_CHECKSENSOR 0x36   //!< Checks sensor
 #define FINGERPRINT_TEMPLATECOUNT 0x1D //!< Read finger template numbers
 #define FINGERPRINT_TEMPLATEREAD 0x1F  //!< Read finger templates
 #define FINGERPRINT_WRITENOTEPAD 0x18  //!< Write notepad
@@ -204,6 +206,7 @@ public:
   uint8_t writeNotepad(uint8_t page, uint8_t content[]);
   uint8_t readNotepad(uint8_t page, uint8_t content[]);
   uint8_t setPassword(uint32_t password);
+  uint8_t checkSensor(void);
   uint8_t LEDcontrol(bool on);
   uint8_t LEDcontrol(uint8_t control, uint8_t speed, uint8_t coloridx,
                      uint8_t count = 0);

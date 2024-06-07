@@ -71,6 +71,7 @@ class Fingerprint
     bool deleteTemplate(uint16_t location);
     bool setPassword(uint32_t newPasswort);
     bool emptyDatabase(void);
+    bool checkSensor(void);
 
   private:
     struct GetNotepadPageIndexResult

@@ -37,7 +37,8 @@ void FingerprintModule::setup()
     attachInterrupt(digitalPinToInterrupt(TOUCH_RIGHT_PIN), FingerprintModule::interruptTouchRight, CHANGE);
 
     logInfoP("Fingerprint start");
-    finger.start();
+    bool success = finger.start();
+    KoFIN_ScannerStatus.value(success, DPT_Switch);
 
     digitalWrite(LED_RED_PIN, LOW);
     digitalWrite(LED_GREEN_PIN, HIGH);
@@ -48,6 +49,7 @@ void FingerprintModule::setup()
     KoFIN_LedRingSpeed.valueNoSend((uint8_t)0, Dpt(5, 10));
     KoFIN_LedRingCount.valueNoSend((uint8_t)0, Dpt(5, 10));
 
+    checkSensorTimer = delayTimerInit();
     initResetTimer = delayTimerInit();
     logInfoP("Fingerprint module ready.");
     logIndentDown();
@@ -159,6 +161,16 @@ void FingerprintModule::loop()
 
         enrollRequestedTimer = 0;
         enrollRequestedLocation = 0;
+    }
+
+    if (checkSensorTimer > 0 && delayCheck(checkSensorTimer, CHECK_SENSOR_DELAY))
+    {
+        bool currentStatus = KoFIN_ScannerStatus.value(DPT_Switch);
+        bool success = finger.checkSensor();
+        if (currentStatus != success)
+            KoFIN_ScannerStatus.value(success, DPT_Switch);
+
+        checkSensorTimer = delayTimerInit();
     }
 
     if (initResetTimer > 0 && delayCheck(initResetTimer, INIT_RESET_TIMEOUT))
