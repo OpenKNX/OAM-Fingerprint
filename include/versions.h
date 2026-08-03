@@ -1,13 +1,13 @@
 #pragma once
 
-#define MAIN_Version "7e35def"
+#define MAIN_Version "30ff6c7"
 #define KNX_Version "2.3.1+7124a64"
-#define MODULE_AccessControl_Version "0.14.0+3d54484"
+#define MODULE_AccessControl_Version "0.14.0+1c5ffd5"
 #define MODULE_AccessControl_Version_Major 0
 #define MODULE_AccessControl_Version_Minor 14
 #define MODULE_AccessControl_Version_Revision 0
 #define MODULE_AccessControl_ETS 14
-#define MODULE_Feedback_Version "0.3.3+6ae9d36"
+#define MODULE_Feedback_Version "0.3.3+2319e36"
 #define MODULE_Feedback_Version_Major 0
 #define MODULE_Feedback_Version_Minor 3
 #define MODULE_Feedback_Version_Revision 3
@@ -32,11 +32,11 @@
 #define MODULE_BinaryInput_Version_Minor 3
 #define MODULE_BinaryInput_Version_Revision 1
 #define MODULE_BinaryInput_ETS 3
-#define MODULE_SwitchActuator_Version "0.1.0+7d4ec51"
+#define MODULE_SwitchActuator_Version "0.3.0+628478e"
 #define MODULE_SwitchActuator_Version_Major 0
-#define MODULE_SwitchActuator_Version_Minor 1
+#define MODULE_SwitchActuator_Version_Minor 3
 #define MODULE_SwitchActuator_Version_Revision 0
-#define MODULE_SwitchActuator_ETS 1
+#define MODULE_SwitchActuator_ETS 3
 #define MODULE_VirtualButton_Version "0.6.0+9ea99b5"
 #define MODULE_VirtualButton_Version_Major 0
 #define MODULE_VirtualButton_Version_Minor 6

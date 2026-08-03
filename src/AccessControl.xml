@@ -95,7 +95,7 @@
     template="../lib/OFM-SwitchActuator/src/SwitchActuatorModule.templ.xml"
     NumChannels="1"
     KoSingleOffset="90"
-    KoOffset="91"
+    KoOffset="93"
     ModuleType="4">
     <op:verify File="../lib/OFM-SwitchActuator/library.json" ModuleVersion="%SWA_VerifyVersion%" />
     </op:define>
@@ -104,7 +104,7 @@
     share="../lib/OFM-LogicModule/src/Logikmodul.share.xml"
     template="../lib/OFM-LogicModule/src/Logikmodul.templ.xml"
     NumChannels="3"
-    KoOffset="100"
+    KoOffset="102"
     ModuleType="1">
     <op:verify File="../lib/OFM-LogicModule/library.json" ModuleVersion="%LOG_VerifyVersion%" />
     </op:define>
